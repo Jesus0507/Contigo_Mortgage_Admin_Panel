@@ -1,0 +1,142 @@
+body {
+  font-family: "Arial", sans-serif;
+}
+
+.container-tasks {
+  display: flex;
+  /* gap: 0.5rem; */
+  overflow-x: auto;
+  width: 100%;
+}
+
+.task-column {
+  border: 1px solid #cccccc;
+  border-radius: 5px;
+  margin: 10px;
+  padding: 10px;
+  width: 270px;
+  min-width: 270px;
+  margin-bottom: 50px;
+  /* flex: 1; */
+
+  .ticket-options {
+    display: none;
+  }
+
+
+  .task-title {
+    font-weight: bold;
+    color: rgb(2, 26, 105);
+    text-transform: uppercase;
+    font-size: 14px;
+    margin-bottom: 10px;
+
+    .task_cant {
+      background: rgb(115, 130, 180);
+      color: white;
+      padding: 2px 5px;
+      border-radius: 5px;
+      margin-left: 10px;
+    }
+  }
+}
+
+.task-column:hover {
+  .ticket-options {
+    display: block;
+  }
+
+}
+
+.tasks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  list-style: none;
+  width: 100% !important;
+  padding: 0;
+  /* margin-top: -100px; */
+  padding-bottom: 40px;
+}
+
+.task-column h2 {
+  text-align: center;
+}
+
+.task {
+  background-color: #f9f9f9;
+  border: 1px solid #eeeeee;
+  border-radius: 3px;
+  padding: 8px;
+  cursor: grab;
+}
+
+.task:active {
+  cursor: grabbing;
+}
+
+@media (width < 600px) {
+  .container-tasks {
+    flex-direction: column;
+  }
+}
+
+
+.ticket-options {
+  font-size: 22px;
+  margin-top: -5px;
+  cursor: pointer;
+  padding: 0 3px;
+  border-radius: 5px;
+  height: 22px;
+
+  span{
+    position: relative;
+    bottom: 11px;
+  }
+
+}
+
+.ticket-options:hover {
+  background: rgb(115, 130, 180);
+  color: white;
+}
+
+.ticket-options-container{
+  width: 85%;
+  margin-left: 20%;
+  height: 100px;
+  border-radius: 10px;
+  background: #dbe1ff;
+  position: relative;
+  z-index: 100;
+  box-shadow: -3px 10px 10px 0px rgba(0,0,0,0.39);
+  padding: 5px;
+
+
+  .opt-item{
+    font-size: 14px;
+    height: 22px;
+    cursor: pointer;
+    width: 100%;
+    padding: 0 3px;
+    border-radius: 1px;
+    border-bottom: 1px solid rgb(86, 99, 141);
+
+  }
+
+  .opt-item:hover{
+    background: rgb(115, 130, 180);
+    color: white;
+  }
+}
+
+.add-column-div{
+  min-width: 270px;
+  padding: 10px;
+  border: 1px solid rgb(86, 99, 141);
+  background: rgb(130, 147, 204);
+  height: fit-content;
+  border-radius: 5px;
+  margin-top: 10px;
+}

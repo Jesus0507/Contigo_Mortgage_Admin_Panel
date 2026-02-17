@@ -1,0 +1,33 @@
+.iconTrash{
+  color:#950202;
+  cursor:pointer;
+}
+
+.iconTrash:hover{
+  color:#EC4141;
+}
+
+.iconEye{
+  color:#0C822B;
+  cursor:pointer;
+}
+
+.iconEye:hover{
+  color:#2BE35C;
+}
+
+
+.iconEdit{
+  color:#012D86;
+  cursor:pointer;
+}
+
+.iconEdit:hover{
+  color:#2B68E3;
+}
+
+.bigSwal{
+	width:80% !important;
+	margin-left: -35% !important;
+}
+
