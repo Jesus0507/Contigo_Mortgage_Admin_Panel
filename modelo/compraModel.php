@@ -109,7 +109,7 @@ class compra_model
 
     public function get_gestion_info($id_compra)
     {
-        $query = "SELECT co.*, c.* FROM compras co, clients c WHERE co.id_compra = $id_compra AND co.client_id = c.client_id";
+        $query = "SELECT co.*, c.*,  u.name as user_name, u.last_name as user_last_name FROM compras co, clients c, users u WHERE co.id_compra = $id_compra AND co.client_id = c.client_id AND co.user_id = u.user_id";
         try {
             $users = [];
             $resultado = $this->conexion->prepare($query);

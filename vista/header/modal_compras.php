@@ -12,9 +12,12 @@
         </div>
     </div>
     <div class="custom-modal-options mt-2 mb-2">
-        <div class="d-flex flex-row gestion-options">
-            <div class="w-50 text-center active" id="gestion_tab">Gestión</div>
-            <div class="w-50 text-center" id="seguimiento_tab">Seguimiento</div>
+        <div class="d-flex flex-row justify-content-between w-100">
+            <div class="d-flex flex-row gestion-options">
+                <div class="w-50 text-center active" id="gestion_tab">Gestión</div>
+                <div class="w-50 text-center" id="seguimiento_tab">Seguimiento</div>
+            </div>
+            <div style="font-weight: bold" id="asesor_name">Asesor: Pepito</div>
         </div>
     </div>
     <div class="custom-modal-body">

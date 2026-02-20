@@ -1,4 +1,4 @@
- columns = document.querySelectorAll(".task-column");
+columns = document.querySelectorAll(".task-column");
 const tasks = document.querySelectorAll(".task");
 var all_options_btn = document.querySelectorAll(".ticket-options");
 var add_column = document.getElementById("add_column");
@@ -212,12 +212,14 @@ function load_compras_modal_info(ev) {
             "id_compra": ev.target.querySelector("span").innerHTML
         }
     }).done(function (result) {
+        console.log(result);
         var resParsed = JSON.parse(result);
         var resultado = resParsed["gestion_info"][0];
         var notas = resParsed['notas'];
         var historial = resParsed['historial'];
 
         document.getElementById("modal_id_gestion").innerHTML = resultado['id_compra'];
+        document.getElementById("asesor_name").innerHTML = "Asesor: " + resultado['user_name'] + " " + resultado['user_last_name'];
 
         // Procesar el tiempo de pago (Separar "12 meses" en ["12", "meses"])
         var tiempoArray = resultado['tiempo_pago_electronico'] ? resultado['tiempo_pago_electronico'].split(" ") : ["", "meses"];
@@ -303,6 +305,8 @@ function load_gestion_modal_info(ev) {
         var deudas = JSON.parse(result)['deudas']
         var historial = JSON.parse(result)['historial'];
         document.getElementById("modal_id_gestion").innerHTML = resultado['id_gestion'];
+
+        document.getElementById("asesor_name").innerHTML = "Asesor: " + resultado['user_name'] + " " + resultado['user_last_name'];
 
         deudas.forEach((deuda) => {
             new_deuda_item(deuda);
@@ -450,8 +454,86 @@ columns_options.forEach((opt) => {
         if (opt_selected == 'eliminar columna') {
             delete_column(column, opt_selected);
         }
+
+        if (opt_selected == 'cambiar nombre de columna') {
+            change_column_name(ev.target.parentElement.parentElement.querySelector(".task-title-text"), opt_selected, column);
+        }
     }
 })
+
+
+function change_column_name(column, opt, oldname) {
+
+    column.parentElement.parentElement.querySelector(".points_clickeable").click();
+    column.parentElement.parentElement.querySelector(".points_clickeable").style.visibility = "hidden";
+    column.innerHTML = "";
+    column.parentElement.querySelector(".task_cant").classList.add("d-none");
+    var input = document.createElement("input");
+    var btn = document.createElement("button");
+    btn.className = "btn btn-primary";
+    btn.innerHTML = "<i class='fas fa-check'></i>";
+    var btn_deny = document.createElement("button");
+    btn_deny.className = "btn btn-danger";
+    btn_deny.innerHTML = "<i class='fas fa-times'></i>";
+    input.clasName = "form-control";
+    input.style.width = "150px";
+    input.placeholder = "Nuevo nombre";
+    column.classList.add("d-flex");
+    column.classList.add("flex-row");
+    column.appendChild(input);
+    column.appendChild(btn);
+    column.appendChild(btn_deny);
+    input.focus();
+
+    btn_deny.onclick = function () {
+        column.parentElement.parentElement.querySelector(".points_clickeable").style.visibility = "visible";
+        column.removeChild(input);
+        column.removeChild(btn);
+        column.removeChild(btn_deny);
+        column.innerHTML = oldname;
+        column.parentElement.querySelector(".task_cant").classList.remove("d-none");
+    }
+
+
+    btn.onclick = function () {
+        var input_name = input.value;
+        if (input_name == "") {
+            input.style.border = "red solid 2px";
+        }
+        else {
+            column.parentElement.parentElement.querySelector(".points_clickeable").style.visibility = "visible";
+            column.removeChild(input);
+            column.removeChild(btn);
+            column.removeChild(btn_deny);
+            column.innerHTML = input_name;
+            column.parentElement.querySelector(".task_cant").classList.remove("d-none");
+            $.ajax({
+                type: "POST",
+                url: "index.php?c=boards&a=change_board_order",
+                data: {
+                    "id_board": document.getElementById("board_id").innerHTML,
+                    "column": oldname,
+                    "opt": opt,
+                    "new_name": input_name
+                }
+            }).done(function (result) {
+                if (result) {
+                    location.reload();
+                }
+                else {
+                    console.log(result);
+                }
+            });
+
+
+
+
+
+        }
+    }
+
+
+}
 
 
 function delete_column(column, opt) {
