@@ -135,18 +135,22 @@ function fields_validation() {
             return false;
         }
     });
-    client_phone.maxLength = 16;
+    client_phone.maxLength = 14; // (000) 000-0000 tiene 14 caracteres
+    client_phone.addEventListener('input', function (e) {
+        // 1. Eliminar todo lo que no sea número
+        let x = e.target.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,4})/);
+
+        // 2. Construir el formato dinámicamente
+        // x[1] es el área, x[2] el prefijo, x[3] el número
+        e.target.value = !x[2]
+            ? x[1]
+            : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
+    });
+    // Bloquear teclas que no sean números (opcional, por seguridad extra)
     client_phone.addEventListener('keypress', function (event) {
-        const key = event.key;
-        const currentLength = this.value.length;
-        if (/[0-9]/.test(key)) {
-            return true;
+        if (!/[0-9]/.test(event.key)) {
+            event.preventDefault();
         }
-        if (key === '+' && currentLength === 0) {
-            return true;
-        }
-        event.preventDefault();
-        return false;
     });
 
     disponible_comprar.addEventListener('keypress', function (event) {
@@ -339,16 +343,16 @@ function fields_validation() {
         setTimeout(() => {
             get_down_payment();
         }, 0);
-    });-+
- 
-    // Evitar que peguen texto o decimales con el click derecho
-    tiempo_pago.addEventListener('paste', function (event) {
-        let paste = (event.clipboardData || window.clipboardData).getData('text');
-        if (!/^\d+$/.test(paste)) {
-            event.preventDefault();
-        }
-        get_down_payment();
-    });
+    }); -+
+
+        // Evitar que peguen texto o decimales con el click derecho
+        tiempo_pago.addEventListener('paste', function (event) {
+            let paste = (event.clipboardData || window.clipboardData).getData('text');
+            if (!/^\d+$/.test(paste)) {
+                event.preventDefault();
+            }
+            get_down_payment();
+        });
 
     estatus_legal.onchange = function () {
         get_down_payment();
@@ -410,7 +414,10 @@ close_btn.onclick = function () {
     document.querySelector(".historial-container").innerHTML = "";
     document.getElementById("modal_gestion_title").innerHTML = "Nueva compra";
     gastos_cierre.value = 8;
-    setTimeout(() => { document.getElementById("layoutSidenav").classList.remove("opacity-body"); }, 600)
+    setTimeout(() => {
+        document.getElementById("layoutSidenav").classList.remove("opacity-body");
+        document.getElementById("asesor_name").innerHTML = "Asesor: " + document.querySelector(".sb-sidenav-footer").innerHTML;
+    }, 600)
 }
 
 
@@ -462,7 +469,7 @@ function info_validation() {
     // Función auxiliar para saber si un elemento está oculto por Bootstrap (d-none)
     // o por sus padres.
     const isVisible = (el) => {
-        return !el.closest('.d-none'); 
+        return !el.closest('.d-none');
     };
 
     // Validar Nombre
@@ -482,7 +489,7 @@ function info_validation() {
     client_last_name_label.style.color = "black";
 
     // Validar Teléfono
-    if (client_phone.value === "" || client_phone.value == null) {
+    if (client_phone.value.length < 14) {
         client_phone.focus();
         client_phone_label.style.color = "red";
         return false;
@@ -529,6 +536,7 @@ function info_validation() {
     // Si llegó hasta aquí, todo lo visible es válido
     return true;
 }
+
 
 const editor = document.getElementById('editor');
 const linkMenu = document.getElementById('link-menu');

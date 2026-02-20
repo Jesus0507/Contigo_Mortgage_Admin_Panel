@@ -12,9 +12,12 @@
         </div>
     </div>
     <div class="custom-modal-options mt-2 mb-2">
-        <div class="d-flex flex-row gestion-options">
-            <div class="w-50 text-center active" id="gestion_tab">Gestión</div>
-            <div class="w-50 text-center" id="seguimiento_tab">Seguimiento</div>
+        <div class="d-flex flex-row justify-content-between w-100">
+            <div class="d-flex flex-row gestion-options">
+                <div class="w-50 text-center active" id="gestion_tab">Gestión</div>
+                <div class="w-50 text-center" id="seguimiento_tab">Seguimiento</div>
+            </div>
+            <div style="font-weight: bold" id="asesor_name">Asesor: Pepito</div>
         </div>
     </div>
     <button class="d-none" id="hidden_calcs"></button>
@@ -52,7 +55,7 @@
                 <div class="w-100 d-flex flex-row justify-content-between mb-2">
                     <div style="width:45%">
                         <label for="address mb-2" id="property_value_label">Valor de propiedad:</label>
-                        <input class="form-control" id="property_value" placeholder="Valor $ ej: 24500.60">
+                        <input class="form-control monto-input" id="property_value" placeholder="Valor $ ej: 24.500,60">
                     </div>
                     <div style="width: 45%">
                         <label for="address" id="interes_actual_label">Interés actual:</label>
@@ -64,11 +67,12 @@
 
                     <div style="width: 45%">
                         <label for="mortgage" id="mortgage_label">Mortgage actual:</label>
-                        <input class="form-control" id="mortgage" placeholder="Mortgage">
+                        <input class="form-control monto-input" id="mortgage" placeholder="Mortgage">
                     </div>
                     <div style="width:45%">
                         <label for="gastos_cierre mb-2" id="occupancy_label">Occupancy:</label>
                         <select id="occupancy" class="form-select">
+                            <option value="">Seleccionar</option>
                             <option value="primary_residence">Primary residence</option>
                             <option value="investment_property">Invesment property</option>
                         </select>
@@ -98,35 +102,36 @@
                     <div style="font-size: 13px; font-weight: bold">ESTIMACIONES</div>
                     <div class="form-check form-switch">
                         <label class="form-check-label" for="max_ltv_switch">Max LTV</label>
-                        <input class="form-check-input" type="checkbox" checked role="switch" id="max_ltv_switch" <?php if($_SESSION['user_role'] != "admin") { ?> disabled <?php } ?>>
+                        <input class="form-check-input" type="checkbox" checked role="switch" id="max_ltv_switch" <?php if ($_SESSION['user_role'] != "admin") { ?> disabled <?php } ?>>
                     </div>
                 </div>
                 <hr class="m-2">
                 <div class="w-100 d-flex flex-row justify-content-between mb-2">
                     <div style="width: 45%">
                         <label for="address" id="ltv_label">LTV:</label>
-                        <input class="form-control" id="ltv_value" placeholder="LTV % max 75" <?php if($_SESSION['user_role'] != "admin") { ?> disabled <?php } ?>>
+                        <input class="form-control" id="ltv_value" placeholder="LTV % max 75" <?php if ($_SESSION['user_role'] != "admin") { ?> disabled <?php } ?>>
                     </div>
-                     <div style="width: 45%">
+                    <div style="width: 45%">
                         <label for="address" id="interes_estimado_label">Interés estimado:</label>
-                        <input class="form-control" id="interes_estimado" placeholder="Interés estimado % max 100" <?php if($_SESSION['user_role'] != "admin") { ?> disabled <?php } ?>>
+                        <input class="form-control" id="interes_estimado" placeholder="Interés estimado % max 100" <?php if ($_SESSION['user_role'] != "admin") { ?> disabled <?php } ?>>
                     </div>
                 </div>
                 <div class="w-100 d-flex flex-row justify-content-between mb-2">
                     <div style="width:45%">
                         <label for="address" id="prepayment_penalty_label">Prepayment penalty:</label>
-                        <input class="form-control" id="prepayment_penalty" placeholder="Prepayment penalty" <?php if($_SESSION['user_role'] != "admin") { ?> disabled <?php } ?>>
+                        <input class="form-control" id="prepayment_penalty" placeholder="Prepayment penalty" <?php if ($_SESSION['user_role'] != "admin") { ?> disabled <?php } ?>>
                     </div>
-                     <div style="width:45%">
+                    <div style="width:45%">
                         <label for="gastos_cierre mb-2" id="gastos_cierre_label">Gastos de cierre (%):</label>
-                        <input class="form-control" id="gastos_cierre" placeholder="Gastos de cierre" <?php if($_SESSION['user_role'] != "admin") { ?> disabled <?php } ?>>
+                        <input class="form-control" id="gastos_cierre" placeholder="Gastos de cierre" <?php if ($_SESSION['user_role'] != "admin") { ?> disabled <?php } ?>>
                     </div>
                 </div>
                 <div class="w-100 d-flex flex-row justify-content-between mb-2">
-                   
+
                     <div class="w-100">
                         <label for="gastos_cierre mb-2" id="tipo_prestamo_label">Tipo de préstamo:</label>
-                        <select id="tipo_prestamo" class="form-select" <?php if($_SESSION['user_role'] != "admin") { ?> disabled <?php } ?>>
+                        <select id="tipo_prestamo" class="form-select" <?php if ($_SESSION['user_role'] != "admin") { ?> disabled <?php } ?>>
+                            <option value="">Seleccionar</option>
                             <option value="fha">Fha</option>
                             <option value="conventional">Conventional</option>
                             <option value="non_qm">Non qm</option>
@@ -137,16 +142,16 @@
                 </div>
                 <div class="mb-2">
                     <label for="aditional_conditions" id="aditional_conditions_label">Condiciones adicionales:</label>
-                    <textarea class="form-control" id="aditional_conditions" placeholder="Describa las condiciones adicionales..." rows="2" <?php if($_SESSION['user_role'] != "admin") { ?> disabled <?php } ?>></textarea>
+                    <textarea class="form-control" id="aditional_conditions" placeholder="Describa las condiciones adicionales..." rows="2" <?php if ($_SESSION['user_role'] != "admin") { ?> disabled <?php } ?>></textarea>
                 </div>
                 <div class="w-100 d-flex flex-row justify-content-between">
                     <div style="width: 45%">
                         <label for="address" id="loan_amount_label">Loan Amount:</label>
-                        <input class="form-control" id="loan_amount" placeholder="Loan Amount" <?php if($_SESSION['user_role'] != "admin") { ?> disabled <?php } ?>>
+                        <input class="form-control" id="loan_amount" placeholder="Loan Amount" <?php if ($_SESSION['user_role'] != "admin") { ?> disabled <?php } ?>>
                     </div>
                     <div style="width: 45%">
                         <label for="mortgage" id="cashout_label">Cash out:</label>
-                        <input class="form-control" id="cashout" placeholder="Cash out" <?php if($_SESSION['user_role'] != "admin") { ?> disabled <?php } ?>>
+                        <input class="form-control" id="cashout" placeholder="Cash out" <?php if ($_SESSION['user_role'] != "admin") { ?> disabled <?php } ?>>
                     </div>
 
                 </div>

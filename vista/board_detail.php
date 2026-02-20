@@ -15,11 +15,11 @@
         <div id="layoutSidenav_content" style="background: white">
             <main>
                 <div class="container-fluid px-4">
-                    <span class="d-none" id="hidden_board_type"><?php echo $board_info[0]['board_type']?></span>
+                    <span class="d-none" id="hidden_board_type"><?php echo $board_info[0]['board_type'] ?></span>
                     <h1 class="mt-4" id="board_name_title"><?php echo $board_info[0]['name'] ?></h1>
                     <h4><?php if ($board_info[0]['board_type'] == "gestion_clientes") echo "Gestión de clientes" ?>
                         <?php if ($board_info[0]['board_type'] == "compras") echo "Compras" ?>
-                </h4>
+                    </h4>
                     <span id="board_id" class="d-none"><?php echo $_GET['info']; ?></span>
                     <div class="w-100 d-flex flex-row justify-content-between">
                         <div class="d-flex flex-row">
@@ -51,10 +51,11 @@
                                     <div><span class="task_cant"><?php echo $cant; ?></span></div>
 
                                 </div>
-                                <?php if ($ticket != $all_tickets[count($all_tickets) - 1]) { ?> <div class="ticket-options opt-clickeable"><span class="opt-clickeable">...</span></div><?php } ?>
+                                <?php if ($ticket != $all_tickets[count($all_tickets) - 1]) { ?> <div class="ticket-options opt-clickeable points_clickeable"><span class="opt-clickeable">...</span></div><?php } ?>
                             </div>
                             <?php if ($ticket != $all_tickets[count($all_tickets) - 1]) { ?>
                                 <div class="ticket-options-container d-none opt-clickeable">
+                                    <div class="opt-item opt-clickeable">Cambiar nombre de columna</div>
                                     <?php if ($ticket != $all_tickets[0]) { ?>
                                         <div class="opt-item opt-clickeable">Mover columna a la izquierda</div>
                                     <?php } ?>

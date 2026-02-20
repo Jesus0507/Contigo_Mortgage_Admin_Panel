@@ -293,6 +293,10 @@ class boardsController
                         $etapas[$i + 1] = $etapa;
                         $etapas[$i] = $aux;
                         break;
+                    case 'cambiar nombre de columna':
+                        $new_name_column = $_POST['new_name'];
+                        $etapas[$i] = $new_name_column;
+                        break;
                     default:
                         if ($i != 0) {
                             $new_etapa = $etapas[$i - 1];
