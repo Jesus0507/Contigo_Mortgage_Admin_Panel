@@ -17,7 +17,7 @@
                 <div class="w-50 text-center active" id="gestion_tab">Gestión</div>
                 <div class="w-50 text-center" id="seguimiento_tab">Seguimiento</div>
             </div>
-            <div style="font-weight: bold" id="asesor_name">Asesor: Pepito</div>
+            <div style="font-weight: bold" id="asesor_name">Asesor: </div>
         </div>
     </div>
     <button class="d-none" id="hidden_calcs"></button>
@@ -109,7 +109,14 @@
                 <div class="w-100 d-flex flex-row justify-content-between mb-2">
                     <div style="width: 45%">
                         <label for="address" id="ltv_label">LTV:</label>
-                        <input class="form-control" id="ltv_value" placeholder="LTV % max 75" <?php if ($_SESSION['user_role'] != "admin") { ?> disabled <?php } ?>>
+                        <div class="d-flex flex-row w-100">
+                            <div>
+                                <input class="form-control" id="ltv_value" placeholder="LTV % max 75" style="width:40%" <?php if ($_SESSION['user_role'] != "admin") { ?> disabled <?php } ?>>
+                            </div>
+                            <div>
+                                <span id="ltv_percent_value"> 0,00</span>
+                            </div>
+                        </div>
                     </div>
                     <div style="width: 45%">
                         <label for="address" id="interes_estimado_label">Interés estimado:</label>
@@ -123,7 +130,14 @@
                     </div>
                     <div style="width:45%">
                         <label for="gastos_cierre mb-2" id="gastos_cierre_label">Gastos de cierre (%):</label>
-                        <input class="form-control" id="gastos_cierre" placeholder="Gastos de cierre" <?php if ($_SESSION['user_role'] != "admin") { ?> disabled <?php } ?>>
+                        <div class="w-100 d-flex flex-row">
+                            <div>
+                                <input class="form-control" style="width:40%" id="gastos_cierre" placeholder="Gastos de cierre" <?php if ($_SESSION['user_role'] != "admin") { ?> disabled <?php } ?>>
+                            </div>
+                            <div>
+                                <span id="gastos_cierre_percent_value"> 0,00</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="w-100 d-flex flex-row justify-content-between mb-2">

@@ -48,16 +48,18 @@
                 <div style="font-size: 13px; font-weight: bold">DATOS ADICIONALES</div>
                 <hr class="m-2">
                 <div class="mb-2 d-flex flex-row w-100 justify-content-between">
-                    <div class="w-100">
+                    <div style='width:45%'>
                         <label for="address mb-2" id="process_type_label">Tipo de proceso:</label>
                         <select class="form-select" id="process_type">
+                            <option value="">Seleccionar</option>
                             <option value="income_check">Income check</option>
                             <option value="non_qm">Non qm</option>
                         </select>
                     </div>
-                    <div class="d-none">
+                    <div  style='width:45%'>
                         <label for="address mb-2" id="estatus_legal_label">Estatus legal:</label>
                         <select class="form-select" id="estatus_legal">
+                            <option value="">Seleccionar</option>
                             <option value="ciudadano">Ciudadano</option>
                             <option value="residente">Residente</option>
                             <option value="permiso_trabajo">Permiso de trabajo</option>
@@ -69,6 +71,7 @@
                     <div class="w-100">
                         <label for="address mb-2" id="primer_comprador_label">¿Es primer comprador?:</label>
                         <select class="form-select" id="primer_comprador">
+                            <option value="">Seleccionar</option>
                             <option value="si">Sí</option>
                             <option value="no">No</option>
                         </select>
@@ -78,6 +81,7 @@
                     <div style="width:45%">
                         <label for="address mb-2" id="forma_pago_label">Forma de pago:</label>
                         <select class="form-select" id="forma_pago">
+                            <option value="">Seleccionar</option>
                             <option value="medio_electronico">Medio electrónico</option>
                             <option value="cash">Cash</option>
                         </select>

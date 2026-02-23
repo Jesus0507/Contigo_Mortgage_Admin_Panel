@@ -107,6 +107,7 @@ function run_calculations() {
     let deudas_base = calc_all_deudas();
     let prop_val = parseMoney(property_value.value);
     let tax_perc = parseMoney(gastos_cierre.value) / 100;
+    document.getElementById("gastos_cierre_percent_value").innerHTML = money_format(tax_perc * prop_val);
 
     // Seleccionamos los botones
     const botonesAccion = [
@@ -121,6 +122,7 @@ function run_calculations() {
         let total_cashout = total_loan - deudas_base - gastos_total;
 
         loan_amount.value = money_format(total_loan);
+        document.getElementById("ltv_percent_value").innerHTML = money_format(total_loan);
         cashout.value = total_cashout < 0 ? "0,00" : money_format(total_cashout);
 
         // HABILITACIÓN TOTAL
@@ -139,6 +141,7 @@ function run_calculations() {
         let desired_cashout = parseMoney(cashout.value);
         let needed_loan = (deudas_base + desired_cashout) / (1 - tax_perc);
         loan_amount.value = money_format(needed_loan);
+        document.getElementById("ltv_percent_value").innerHTML = money_format(needed_loan);
 
         if (prop_val > 0) {
             let ltv_calculado = (needed_loan / prop_val) * 100;
@@ -199,6 +202,14 @@ max_ltv_switch.onchange = function () {
     run_calculations();
 };
 
+if (document.getElementById("property_update")) {
+    document.getElementById("property_update").onclick = function () {
+        if (!info_validation()) return;
+        
+        updateInfo(true);
+    }
+}
+
 close_btn.onclick = function () {
     property_register_btn.classList.remove("d-none");
     if (document.getElementById("property_update")) {
@@ -213,6 +224,7 @@ close_btn.onclick = function () {
     });
     document.getElementById("deudas_data").innerHTML = "";
     document.getElementById("editor").innerHTML = "";
+    document.getElementById("gastos_cierre_percent_value").innerHTML = document.getElementById("ltv_percent_value").innerHTML = "0,00"
     ltv_value.value = 75;
     gastos_cierre.value = 8;
 };

@@ -323,9 +323,12 @@ function load_gestion_modal_info(ev) {
         var all_inputs = Array.from(document.querySelector(".custom-modal").querySelectorAll("input"));
         var i = 0;
         all_inputs.forEach((input) => {
-            input.value = i == 0 ? resultado['name'].replace(/\b\w/g, l => l.toUpperCase()) : i == 1 ? resultado['last_name'].replace(/\b\w/g, l => l.toUpperCase()) : i == 2 ? resultado['phone'] : i == 3 ? resultado['property_address'] : i == 4 ? resultado['property_value'] : i == 5 ? resultado['interes_actual'] : i == 6 ? resultado['mortgage'] : i == 8 ? resultado['ltv'] : i == 9 ? resultado['interes_estimado'] : i == 10 ? resultado['prepayment_penalty'] : i == 11 ? resultado['gastos_cierre'] : i == 12 ? resultado['loan_amount'] : resultado['cash_out'];
+            input.value = i == 0 ? resultado['name'].replace(/\b\w/g, l => l.toUpperCase()) : i == 1 ? resultado['last_name'].replace(/\b\w/g, l => l.toUpperCase()) : i == 2 ? resultado['phone'] : i == 3 ? resultado['property_address'] : i == 4 ? money_format(resultado['property_value']) : i == 5 ? resultado['interes_actual'] : i == 6 ? money_format(resultado['mortgage']) : i == 8 ? resultado['ltv'] : i == 9 ? resultado['interes_estimado'] : i == 10 ? resultado['prepayment_penalty'] : i == 11 ? resultado['gastos_cierre'] : i == 12 ? money_format(resultado['loan_amount']) : money_format(resultado['cash_out']);
             i++;
         })
+
+        document.getElementById("ltv_percent_value").innerHTML = money_format(resultado['loan_amount']) ;
+        document.getElementById("gastos_cierre_percent_value").innerHTML = money_format(parseFloat(resultado['property_value']) * parseFloat(resultado["gastos_cierre"]) / 100);
         document.getElementById("call_detail").value = resultado['detalle_llamada'];
         document.getElementById("occupancy").value = resultado['occupancy'] ?? "primary_residence";
         document.getElementById("tipo_prestamo").value = resultado['tipo_prestamo'] ?? "fha";
@@ -533,6 +536,26 @@ function change_column_name(column, opt, oldname) {
     }
 
 
+}
+
+function parseMoney(value) {
+    if (!value) return 0;
+    if (typeof value === 'number') return value;
+    let cleanValue = value.toString().replace(/\./g, '').replace(',');
+    cleanValue = value.toString().replace(/\./g, ',').replace('.');
+    let parsed = parseFloat(cleanValue);
+    return isNaN(parsed) ? 0 : parsed;
+}
+
+function money_format(num) {
+    console.log(num);
+    num = parseMoney(num);
+    console.log(num);
+    if (isNaN(num)) num = 0;
+    return num.toLocaleString('de-DE', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
 }
 
 
