@@ -292,16 +292,16 @@ function fields_validation() {
 
 
     tipo_proceso.onchange = function () {
-        if (tipo_proceso.value == "non_qm") {
-            estatus_legal.parentElement.classList.remove("d-none");
-            tipo_proceso.parentElement.classList.remove("w-100");
-            tipo_proceso.parentElement.style.width = "45%";
-            estatus_legal.parentElement.style.width = "45%";
-        }
-        else {
-            estatus_legal.parentElement.classList.add("d-none");
-            tipo_proceso.parentElement.style.width = "100%";
-        }
+        // if (tipo_proceso.value == "non_qm") {
+        //     estatus_legal.parentElement.classList.remove("d-none");
+        //     tipo_proceso.parentElement.classList.remove("w-100");
+        //     tipo_proceso.parentElement.style.width = "45%";
+        //     estatus_legal.parentElement.style.width = "45%";
+        // }
+        // else {
+        //     estatus_legal.parentElement.classList.add("d-none");
+        //     tipo_proceso.parentElement.style.width = "100%";
+        // }
         get_down_payment();
     }
 
