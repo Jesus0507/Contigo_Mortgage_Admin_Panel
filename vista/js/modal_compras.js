@@ -35,6 +35,8 @@ var monto_max_label = document.getElementById("monto_max_label");
 var conditions_label = document.getElementById("conditions_label");
 
 var property_register_btn = document.getElementById("property_register");
+var primer_comprador_field = document.querySelector(".primer-comprador-field");
+var forma_pago_container = document.querySelector(".forma-pago-container");
 
 
 
@@ -43,6 +45,25 @@ var unsaved_comments = [];
 var save_comment_btn = document.getElementById("btn_save_comment");
 
 fields_validation();
+
+
+tabs_options.forEach((opt) => {
+    opt.onclick = function () {
+        if (opt == tabs_options[0]) {
+            tabs_options[1].classList.remove("selected-div");
+            tabs_options[0].classList.add("selected-div");
+            document.querySelector(".notes-container").classList.remove("d-none");
+            document.querySelector(".historial-container").classList.add("d-none");
+
+        }
+        else {
+            tabs_options[0].classList.remove("selected-div");
+            tabs_options[1].classList.add("selected-div");
+            document.querySelector(".notes-container").classList.add("d-none");
+            document.querySelector(".historial-container").classList.remove("d-none");
+        }
+    }
+})
 
 
 document.getElementById("gestion_tab").onclick = function () {
@@ -258,6 +279,14 @@ function fields_validation() {
 
     });
 
+
+    tipo_proceso.onchange = checkFlowVisibility;
+    primer_comprador.onchange = checkFlowVisibility;
+    forma_pago.onchange = checkFlowVisibility;
+
+    // Ejecución inicial por si vienen datos de BD
+    checkFlowVisibility();
+
     interes_ofrecido.addEventListener('keypress', function (event) {
         const key = event.key;
         const currentValue = this.value;
@@ -290,44 +319,6 @@ function fields_validation() {
         get_down_payment();
     }
 
-
-    tipo_proceso.onchange = function () {
-        // if (tipo_proceso.value == "non_qm") {
-        //     estatus_legal.parentElement.classList.remove("d-none");
-        //     tipo_proceso.parentElement.classList.remove("w-100");
-        //     tipo_proceso.parentElement.style.width = "45%";
-        //     estatus_legal.parentElement.style.width = "45%";
-        // }
-        // else {
-        //     estatus_legal.parentElement.classList.add("d-none");
-        //     tipo_proceso.parentElement.style.width = "100%";
-        // }
-        get_down_payment();
-    }
-
-
-
-    forma_pago.onchange = function () {
-        // Apuntamos al parentElement del parentElement para ocultar el div contenedor con el label
-        if (forma_pago.value != "medio_electronico") {
-            tiempo_pago.parentElement.parentElement.parentElement.classList.add("d-none");
-            forma_pago.parentElement.style.width = "100%";
-        }
-        else {
-            tiempo_pago.parentElement.parentElement.parentElement.classList.remove("d-none");
-            forma_pago.parentElement.style.width = "45%";
-        }
-        get_down_payment();
-    }
-
-    primer_comprador.onchange = function () {
-        if (primer_comprador.value == "no") {
-            forma_pago.parentElement.parentElement.classList.add("d-none");
-        }
-        else {
-            forma_pago.parentElement.parentElement.classList.remove("d-none");
-        }
-    }
 
     // Impedir que se escriban puntos, comas o signos en el campo de cantidad
     tiempo_pago.addEventListener('keypress', function (event) {
@@ -363,6 +354,51 @@ function fields_validation() {
 property_register_btn.onclick = function () {
     if (!info_validation()) return;
     registerInfo();
+}
+
+function checkFlowVisibility() {
+    const proceso = tipo_proceso.value;
+    const esPrimerComprador = primer_comprador.value === "si";
+    const metodoPago = forma_pago.value;
+
+    // 1. Lógica para Campo Primer Comprador
+    // Según tu diagrama: siempre visible si hay un proceso seleccionado
+    if (proceso !== "") {
+        primer_comprador_field.classList.remove("d-none");
+    } else {
+        primer_comprador_field.classList.add("d-none");
+        resetField(primer_comprador); // Limpia valor si se oculta
+    }
+
+    // 2. Lógica para Forma de Pago
+    // Según diagrama: No visible si es "income check". 
+    // Visible solo si NO es "income check" Y es "primer comprador"
+    if (proceso !== "" && proceso !== "income_check" && esPrimerComprador) {
+        forma_pago_container.classList.remove("d-none");
+    } else {
+        forma_pago_container.classList.add("d-none");
+        resetField(forma_pago);
+    }
+
+    // 3. Lógica para Tiempo Pagando
+    // Según diagrama: Visible solo si forma de pago es "medio electrónico"
+    const tiempoPagoContainer = tiempo_pago.parentElement.parentElement.parentElement;
+
+    if (!forma_pago_container.classList.contains("d-none") && metodoPago === "medio_electronico") {
+        tiempoPagoContainer.classList.remove("d-none");
+        forma_pago.parentElement.style.width = "45%";
+    } else {
+        tiempoPagoContainer.classList.add("d-none");
+        forma_pago.parentElement.style.width = "100%";
+        resetField(tiempo_pago);
+    }
+
+    // Ejecutar lógica de negocio adicional
+    get_down_payment();
+}
+
+function resetField(element) {
+    if (element) element.value = "";
 }
 
 
@@ -466,74 +502,106 @@ function updateInfo(reload) {
 
 
 function info_validation() {
-    // Función auxiliar para saber si un elemento está oculto por Bootstrap (d-none)
-    // o por sus padres.
+    // Función auxiliar para saber si un elemento está oculto
     const isVisible = (el) => {
-        return !el.closest('.d-none');
+        return el && !el.closest('.d-none');
     };
 
-    // Validar Nombre
-    if (client_name.value === "" || client_name.value == null) {
+    // --- RESET DE ESTILOS ---
+    // Limpiamos todos los labels a negro antes de empezar la nueva validación
+    const labels = [
+        client_name_label, client_last_name_label, client_phone_label,
+        detalle_llamada_label, tipo_proceso_label, estatus_legal_label,
+        primer_comprador_label, forma_pago_label, tiempo_pago_electronico_label,
+        disponible_comprar_label, credito_cliente_label
+    ];
+    labels.forEach(label => { if (label) label.style.color = "black"; });
+
+    // --- COLUMNA IZQUIERDA (CLIENTE) ---
+
+    if (client_name.value.trim() === "") {
         client_name.focus();
         client_name_label.style.color = "red";
         return false;
     }
-    client_name_label.style.color = "black";
 
-    // Validar Apellido
-    if (client_last_name.value === "" || client_last_name.value == null) {
+    if (client_last_name.value.trim() === "") {
         client_last_name.focus();
         client_last_name_label.style.color = "red";
         return false;
     }
-    client_last_name_label.style.color = "black";
 
-    // Validar Teléfono
     if (client_phone.value.length < 14) {
         client_phone.focus();
         client_phone_label.style.color = "red";
         return false;
     }
-    client_phone_label.style.color = "black";
 
-    // Validar Detalle de llamada
-    if (detalle_llamada.value === "" || detalle_llamada.value == null) {
+    if (detalle_llamada.value.trim() === "") {
         detalle_llamada.focus();
         detalle_llamada_label.style.color = "red";
         return false;
     }
-    detalle_llamada_label.style.color = "black";
 
-    // --- VALIDACIÓN CONDICIONAL: Estatus Legal ---
-    // Solo valida si el contenedor de estatus_legal NO tiene la clase d-none
+    // --- COLUMNA DERECHA (DATOS ADICIONALES) ---
+
+    // 1. Tipo de proceso (Siempre visible según imagen)
+    if (tipo_proceso.value === "") {
+        tipo_proceso.focus();
+        tipo_proceso_label.style.color = "red";
+        return false;
+    }
+
+    // 2. Estatus Legal (Condicional)
     if (isVisible(estatus_legal)) {
-        if (estatus_legal.value === "" || estatus_legal.value == null) {
+        if (estatus_legal.value === "") {
             estatus_legal.focus();
             estatus_legal_label.style.color = "red";
             return false;
         }
     }
-    if (estatus_legal_label) estatus_legal_label.style.color = "black";
 
-    // --- VALIDACIÓN CONDICIONAL: Tiempo de Pago ---
+    // 3. ¿Es primer comprador? (Visible si hay tipo de proceso)
+    if (isVisible(primer_comprador)) {
+        if (primer_comprador.value === "") {
+            primer_comprador.focus();
+            primer_comprador_label.style.color = "red";
+            return false;
+        }
+    }
+
+    // 4. Forma de pago (Condicional según diagrama)
+    if (isVisible(forma_pago)) {
+        if (forma_pago.value === "") {
+            forma_pago.focus();
+            forma_pago_label.style.color = "red";
+            return false;
+        }
+    }
+
+    // 5. Tiempo de Pago (Condicional: Medio Electrónico)
     if (isVisible(tiempo_pago)) {
-        if (tiempo_pago.value === "" || tiempo_pago.value == null) {
+        if (tiempo_pago.value === "") {
             tiempo_pago.focus();
             tiempo_pago_electronico_label.style.color = "red";
             return false;
         }
     }
-    tiempo_pago_electronico_label.style.color = "black";
 
-    // Validar Disponibilidad
-    if (disponible_comprar.value === "" || disponible_comprar.value == null) {
+    // 6. Disponibilidad para comprar
+    if (disponible_comprar.value.trim() === "") {
         disponible_comprar.focus();
         disponible_comprar_label.style.color = "red";
         return false;
     }
-    disponible_comprar_label.style.color = "black";
 
-    // Si llegó hasta aquí, todo lo visible es válido
+    // 7. Crédito cliente (Último campo de la imagen)
+    if (credito_cliente.value.trim() === "") {
+        credito_cliente.focus();
+        credito_cliente_label.style.color = "red";
+        return false;
+    }
+
     return true;
 }
 
