@@ -67,7 +67,7 @@
                         </select>
                     </div>
                 </div>
-                <div class="w-100 d-flex flex-row justify-content-between mb-2">
+                <div class="w-100 d-flex flex-row justify-content-between mb-2 d-none primer-comprador-field">
                     <div class="w-100">
                         <label for="address mb-2" id="primer_comprador_label">¿Es primer comprador?:</label>
                         <select class="form-select" id="primer_comprador">
@@ -77,7 +77,7 @@
                         </select>
                     </div>
                 </div>
-                <div class="mb-2 d-flex flex-row w-100 justify-content-between">
+                <div class="mb-2 d-flex flex-row w-100 justify-content-between forma-pago-container d-none">
                     <div style="width:45%">
                         <label for="address mb-2" id="forma_pago_label">Forma de pago:</label>
                         <select class="form-select" id="forma_pago">

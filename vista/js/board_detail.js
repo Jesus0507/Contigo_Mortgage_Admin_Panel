@@ -299,11 +299,12 @@ function load_gestion_modal_info(ev) {
             "id_gestion": ev.target.querySelector("span").innerHTML
         }
     }).done(function (result) {
-        console.log(JSON.parse(result));
         var resultado = JSON.parse(result)["gestion_info"][0];
         var notas = JSON.parse(result)['notas'];
         var deudas = JSON.parse(result)['deudas']
         var historial = JSON.parse(result)['historial'];
+        document.getElementById("old_info_gestion").innerHTML = JSON.stringify(JSON.parse(result)["gestion_info"][0]);
+  
         document.getElementById("modal_id_gestion").innerHTML = resultado['id_gestion'];
 
         document.getElementById("asesor_name").innerHTML = "Asesor: " + resultado['user_name'] + " " + resultado['user_last_name'];
@@ -327,8 +328,9 @@ function load_gestion_modal_info(ev) {
             i++;
         })
 
-        document.getElementById("ltv_percent_value").innerHTML = money_format(resultado['loan_amount']) ;
+        document.getElementById("ltv_percent_value").innerHTML = money_format(resultado['loan_amount']);
         document.getElementById("gastos_cierre_percent_value").innerHTML = money_format(parseFloat(resultado['property_value']) * parseFloat(resultado["gastos_cierre"]) / 100);
+        document.getElementById("prepayment_penalty_percent_value").innerHTML = money_format((parseFloat(resultado['mortgage']) * parseFloat(resultado['prepayment_penalty'])) / 100);
         document.getElementById("call_detail").value = resultado['detalle_llamada'];
         document.getElementById("occupancy").value = resultado['occupancy'] ?? "primary_residence";
         document.getElementById("tipo_prestamo").value = resultado['tipo_prestamo'] ?? "fha";
@@ -351,7 +353,6 @@ function new_note_item(note) {
 }
 
 function add_historial(h) {
-    console.log(h);
     var iniciales = h['name'][0].toUpperCase() + h['last_name'][0].toUpperCase();
     var new_historial_div = document.createElement("div");
     new_historial_div.className = "d-flex flex-row w-100 px-3 my-4";
@@ -548,9 +549,7 @@ function parseMoney(value) {
 }
 
 function money_format(num) {
-    console.log(num);
     num = parseMoney(num);
-    console.log(num);
     if (isNaN(num)) num = 0;
     return num.toLocaleString('de-DE', {
         minimumFractionDigits: 2,

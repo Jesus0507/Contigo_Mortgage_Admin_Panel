@@ -24,7 +24,10 @@ var add_new_deuda = document.getElementById("add_new_deuda");
 var save_comment_btn = document.getElementById("btn_save_comment");
 var close_btn = document.getElementById("close_modal_btn");
 var property_register_btn = document.getElementById("property_register");
+var condiciones_adicionales = document.getElementById("aditional_conditions");
 
+
+var tabs_options = Array.from(document.querySelector(".tabs-options").querySelectorAll("div"));
 var unsaved_comments = [];
 
 // Configuración inicial de UI
@@ -37,13 +40,25 @@ if (cashout) cashout.disabled = true;
    FUNCIONES DE UTILIDAD, FORMATO Y TIEMPO
    ========================================================================== */
 
-function parseMoney(value) {
+function parseMoneyGestion(value) {
     if (!value) return 0;
     if (typeof value === 'number') return value;
     let cleanValue = value.toString().replace(/\./g, '').replace(',', '.');
     let parsed = parseFloat(cleanValue);
     return isNaN(parsed) ? 0 : parsed;
 }
+
+// function parseMoneyGestion(value) {
+//     console.log(value);
+//     if (!value) return 0;
+//     if (typeof value === 'number') return value;
+//     let cleanValue = value.toString().replace(/\./g, '').replace(',');
+//    // cleanValue = value.toString().replace(/\./g, ',').replace('.');
+//     console.log(cleanValue);
+//     let parsed = parseFloat(cleanValue);
+//     console.log(parsed);
+//     return isNaN(parsed) ? 0 : parsed;
+// }
 
 function money_format(num) {
     if (isNaN(num)) num = 0;
@@ -88,15 +103,16 @@ function tiempoRelativo(fechaString) {
    ========================================================================== */
 
 function calc_all_deudas() {
-    let mortgage_total = parseMoney(mortgage.value);
-    let penalty_perc = parseMoney(prepayment_penalty.value) / 100;
+    let mortgage_total = parseMoneyGestion(mortgage.value);
+    let penalty_perc = parseMoneyGestion(prepayment_penalty.value) / 100;
     let penalty_total = mortgage_total * penalty_perc;
+    document.getElementById("prepayment_penalty_percent_value").innerHTML = money_format(penalty_total);
 
     let deudas_adicionales_total = 0;
     document.querySelectorAll(".deudas-info-data").forEach((item) => {
         let span = item.querySelectorAll("span")[1];
         if (span) {
-            deudas_adicionales_total += parseMoney(span.innerHTML);
+            deudas_adicionales_total += parseMoneyGestion(span.innerHTML);
         }
     });
 
@@ -105,8 +121,8 @@ function calc_all_deudas() {
 
 function run_calculations() {
     let deudas_base = calc_all_deudas();
-    let prop_val = parseMoney(property_value.value);
-    let tax_perc = parseMoney(gastos_cierre.value) / 100;
+    let prop_val = parseMoneyGestion(property_value.value);
+    let tax_perc = parseMoneyGestion(gastos_cierre.value) / 100;
     document.getElementById("gastos_cierre_percent_value").innerHTML = money_format(tax_perc * prop_val);
 
     // Seleccionamos los botones
@@ -116,11 +132,11 @@ function run_calculations() {
     ];
 
     if (max_ltv_switch.checked) {
-        let ltv_perc = parseMoney(ltv_value.value) / 100;
+        let ltv_perc = parseFloat(ltv_value.value) / 100;
         let total_loan = prop_val * ltv_perc;
         let gastos_total = total_loan * tax_perc;
         let total_cashout = total_loan - deudas_base - gastos_total;
-
+        console.log(total_loan, prop_val, ltv_perc, property_value.value );
         loan_amount.value = money_format(total_loan);
         document.getElementById("ltv_percent_value").innerHTML = money_format(total_loan);
         cashout.value = total_cashout < 0 ? "0,00" : money_format(total_cashout);
@@ -138,7 +154,7 @@ function run_calculations() {
         ltv_value.style.fontWeight = "normal";
 
     } else {
-        let desired_cashout = parseMoney(cashout.value);
+        let desired_cashout = parseMoneyGestion(cashout.value);
         let needed_loan = (deudas_base + desired_cashout) / (1 - tax_perc);
         loan_amount.value = money_format(needed_loan);
         document.getElementById("ltv_percent_value").innerHTML = money_format(needed_loan);
@@ -189,11 +205,32 @@ document.getElementById("gestion_tab").onclick = function () {
 };
 
 document.getElementById("seguimiento_tab").onclick = function () {
+    console.log("cambiando a seguimiento");
     this.classList.add("active");
     document.getElementById("gestion_tab").classList.remove("active");
     document.getElementById("seguimiento_container").classList.remove("d-none");
     document.getElementById("gestion_container").classList.add("d-none");
 };
+
+
+
+tabs_options.forEach((opt) => {
+    opt.onclick = function () {
+        if (opt == tabs_options[0]) {
+            tabs_options[1].classList.remove("selected-div");
+            tabs_options[0].classList.add("selected-div");
+            document.querySelector(".notes-container").classList.remove("d-none");
+            document.querySelector(".historial-container").classList.add("d-none");
+
+        }
+        else {
+            tabs_options[0].classList.remove("selected-div");
+            tabs_options[1].classList.add("selected-div");
+            document.querySelector(".notes-container").classList.add("d-none");
+            document.querySelector(".historial-container").classList.remove("d-none");
+        }
+    }
+})
 
 max_ltv_switch.onchange = function () {
     cashout.disabled = this.checked;
@@ -204,31 +241,117 @@ max_ltv_switch.onchange = function () {
 
 if (document.getElementById("property_update")) {
     document.getElementById("property_update").onclick = function () {
-        if (!info_validation()) return;
-        
+        let fields = [client_name, client_last_name, client_phone, detalle_llamada, property_address, property_value, occupancy];
+        let isValid = true;
+        fields.forEach(f => {
+            if (!f.value) { isValid = false; f.style.border = "1px solid red"; }
+            else { f.style.border = "1px solid #ced4da"; }
+        });
+
+        if (!isValid) return;
+
         updateInfo(true);
     }
 }
 
 close_btn.onclick = function () {
-    property_register_btn.classList.remove("d-none");
-    if (document.getElementById("property_update")) {
-        document.getElementById("property_update").classList.add("d-none");
+    const isEditing = !document.getElementById("property_update").classList.contains("d-none");
+    const isVisible = (el) => el && !el.closest('.d-none');
+
+    // 1. OBTENER TODOS LOS CAMPOS VISIBLES ACTUALMENTE
+    const camposVisibles = Array.from(document.querySelectorAll(".modal-gestion input, .modal-gestion select, .modal-gestion textarea"))
+        .filter(el => isVisible(el));
+
+    let tieneCambios = false;
+
+    if (isEditing) {
+        // --- LÓGICA DE EDICIÓN (Comparar contra old_info) ---
+        const old_info_raw = document.getElementById("old_info_gestion").innerHTML;
+        if (old_info_raw.trim() !== "") {
+            const old = JSON.parse(old_info_raw);
+            const hasChanged = (current, original) => {
+                let curr = (current || "").toString().trim().toLowerCase();
+                let orig = (original || "").toString().trim().toLowerCase();
+                return curr !== orig;
+            };
+
+            tieneCambios =
+                hasChanged(client_name.value, old.name) ||
+                hasChanged(client_last_name.value, old.last_name) ||
+                hasChanged(client_phone.value, old.phone) ||
+                hasChanged(detalle_llamada.value, old.detalle_llamada) ||
+                hasChanged(property_address.value, old.property_address) ||
+                hasChanged(property_value.value, old.property_value) ||
+                hasChanged(mortgage.value, old.mortgage) ||
+                hasChanged(ltv_value.value, old.ltv) ||
+                hasChanged(occupancy.value, old.occupancy) ||
+                hasChanged(tipo_prestamo.value, old.tipo_prestamo) ||
+                hasChanged(condiciones_adicionales.value, old.condiciones_adicionales);
+        }
+    } else {
+        // --- LÓGICA DE REGISTRO NUEVO ---
+        // Verificamos si alguno de los campos visibles tiene información
+        // Excluimos LTV y Gastos de cierre porque suelen tener valores por defecto (75 y 8)
+        tieneCambios = camposVisibles.some(el => {
+            if (el === ltv_value || el === gastos_cierre) return false;
+            return el.value.trim() !== "" && el.value !== "Seleccionar";
+        });
+
+        // También verificamos si hay deudas agregadas en el listado visual
+        if (document.querySelectorAll(".deudas-info-data").length > 0) tieneCambios = true;
     }
-    $(".modal-gestion").fadeOut();
-    document.getElementById("layoutSidenav").classList.remove("opacity-body");
-    document.querySelectorAll(".modal-gestion input").forEach(input => {
-        input.value = "";
-        input.readOnly = false;
-        input.classList.remove("readOnlied");
-    });
-    document.getElementById("deudas_data").innerHTML = "";
-    document.getElementById("editor").innerHTML = "";
-    document.getElementById("gastos_cierre_percent_value").innerHTML = document.getElementById("ltv_percent_value").innerHTML = "0,00"
-    ltv_value.value = 75;
-    gastos_cierre.value = 8;
+
+    // 2. SI HAY CAMBIOS O DATOS, PEDIR CONFIRMACIÓN
+    if (tieneCambios) {
+        Swal.fire({
+            title: '¿Cerrar sin guardar?',
+            text: "Si realizó cambios y cierra sin guardar estos no serán almacenados en la base de datos.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sí, salir y borrar',
+            cancelButtonText: 'Continuar aquí'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                finalizeClose();
+            }
+        });
+    } else {
+        // Si todo está vacío, cerramos directamente
+        finalizeClose();
+    }
 };
 
+/**
+ * Función auxiliar para limpiar la UI y cerrar el modal
+ */
+function finalizeClose() {
+    property_register_btn.classList.remove("d-none");
+    document.getElementById("property_update").classList.add("d-none");
+
+    $(".modal-gestion").fadeOut();
+    document.getElementById("layoutSidenav").classList.remove("opacity-body");
+
+    // Reset total de campos
+    document.querySelectorAll(".modal-gestion input, .modal-gestion select, .modal-gestion textarea").forEach(el => {
+        el.value = "";
+        el.readOnly = false;
+        el.classList.remove("readOnlied");
+        el.style.border = "1px solid #ced4da";
+    });
+
+    // Reset de deudas y estimaciones
+    document.getElementById("deudas_data").innerHTML = "";
+    document.getElementById("editor").innerHTML = "";
+    document.getElementById("gastos_cierre_percent_value").innerHTML = "0,00";
+    document.getElementById("ltv_percent_value").innerHTML = "0,00";
+    document.getElementById("prepayment_penalty_percent_value").innerHTML = "0,00";
+
+    // Valores por defecto
+    ltv_value.value = 75;
+    gastos_cierre.value = 8;
+}
 /* ==========================================================================
    GESTIÓN DE DEUDAS ADICIONALES
    ========================================================================== */
@@ -415,7 +538,7 @@ function fields_validation() {
 
 property_register_btn.onclick = function () {
     // Validación rápida de campos requeridos
-    let fields = [client_name, client_last_name, client_phone, detalle_llamada, property_address, property_value];
+    let fields = [client_name, client_last_name, client_phone, detalle_llamada, property_address, property_value, occupancy];
     let isValid = true;
     fields.forEach(f => {
         if (!f.value) { isValid = false; f.style.border = "1px solid red"; }
@@ -427,8 +550,11 @@ property_register_btn.onclick = function () {
     let deudas_lista = [];
     document.querySelectorAll(".deudas-info-data").forEach(item => {
         let spans = item.querySelectorAll("span");
-        deudas_lista.push({ desc: spans[0].innerText, amount: spans[1].innerText });
+        deudas_lista.push({ descripcion: spans[0].innerText, monto: spans[1].innerText });
     });
+
+    console.log(deudas_lista);
+
 
     $.ajax({
         type: "POST",
@@ -437,19 +563,65 @@ property_register_btn.onclick = function () {
             "client_name": client_name.value,
             "client_last_name": client_last_name.value,
             "client_phone": client_phone.value,
-            "property_value": parseMoney(property_value.value),
-            "mortgage": parseMoney(mortgage.value),
-            "loan_amount": parseMoney(loan_amount.value),
-            "cashout": parseMoney(cashout.value),
+            "property_address": property_address.value,
+            "occupancy": occupancy.value,
+            "interes_actual": interes_actual.value,
+            "gastos_cierre": gastos_cierre.value,
+            "interes_estimado": interes_estimado.value,
+            "tipo_prestamo": tipo_prestamo.value,
+            "condiciones_adicionales": condiciones_adicionales.value,
+            "call_detail": detalle_llamada.value,
+            "property_value": parseMoneyGestion(property_value.value),
+            "mortgage": parseMoneyGestion(mortgage.value),
+            "loan_amount": parseMoneyGestion(loan_amount.value),
+            "cashout": parseMoneyGestion(cashout.value),
+            "prepayment_penalty": prepayment_penalty.value,
             "ltv": ltv_value.value,
             "deudas_adicionales": deudas_lista,
             "comments": unsaved_comments,
             "board": document.getElementById("board_id").innerHTML
         }
     }).done(function () {
-        location.reload();
+            location.reload();
     });
 };
+
+
+
+function updateInfo(reload) {
+    console.log("modificando info")
+    $.ajax({
+        type: "POST",
+        url: "index.php?c=boards&a=update_gestion_info",
+        data: {
+            "client_name": client_name.value,
+            "client_last_name": client_last_name.value,
+            "client_phone": client_phone.value,
+            "call_detail": detalle_llamada.value,
+            "property_address": property_address.value,
+            "property_value": parseMoneyGestion(property_value.value),
+            "interes_actual": interes_actual.value,
+            "mortgage": parseMoneyGestion(mortgage.value),
+            "occupancy": occupancy.value,
+            "board": document.getElementById("board_id").innerHTML,
+            "ltv": ltv_value.value,
+            "interes_estimado": interes_estimado.value,
+            "prepayment_penalty": prepayment_penalty.value,
+            "gastos_cierre": gastos_cierre.value,
+            "tipo_prestamo": tipo_prestamo.value,
+            "condiciones_adicionales": condiciones_adicionales.value,
+            "loan_amount":  parseMoneyGestion(loan_amount.value),
+            "cashout": parseMoneyGestion(cashout.value),
+            "gestion_id": document.getElementById("modal_id_gestion").innerHTML
+        }
+    }).done(function (result) {
+
+        console.log(result);
+        if (!reload) return;
+        location.href = "index.php?c=boards&a=detail&info=" + document.getElementById("board_id").innerHTML;
+    })
+}
+
 
 /* ==========================================================================
    INICIALIZACIÓN FINAL

@@ -1,5 +1,6 @@
 <div class="custom-modal modal-gestion">
     <span class="d-none" id="hidden_user_name"><?php echo $_SESSION['username'] ?></span>
+    <div id="old_info_gestion" class="d-none"></div>
     <div class="custom-modal-header d-flex flex-row justify-content-between">
         <div id="modal_gestion_title">Nuevo registro</div>
         <span id="modal_id_gestion" class="d-none"></span>
@@ -125,8 +126,15 @@
                 </div>
                 <div class="w-100 d-flex flex-row justify-content-between mb-2">
                     <div style="width:45%">
-                        <label for="address" id="prepayment_penalty_label">Prepayment penalty:</label>
-                        <input class="form-control" id="prepayment_penalty" placeholder="Prepayment penalty" <?php if ($_SESSION['user_role'] != "admin") { ?> disabled <?php } ?>>
+                        <div class="d-flex flex-row w-100">
+                            <div >
+                                <label for="address" id="prepayment_penalty_label">Prepayment penalty:</label>
+                                <input style="width:40%" class="form-control" id="prepayment_penalty" placeholder="Prepayment penalty" <?php if ($_SESSION['user_role'] != "admin") { ?> disabled <?php } ?>>
+                            </div>
+                            <div class="mt-4">
+                                <span id="prepayment_penalty_percent_value">0,00</span>
+                            </div>
+                        </div>
                     </div>
                     <div style="width:45%">
                         <label for="gastos_cierre mb-2" id="gastos_cierre_label">Gastos de cierre (%):</label>
