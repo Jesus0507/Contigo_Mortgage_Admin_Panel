@@ -82,6 +82,21 @@ document.getElementById("seguimiento_tab").onclick = function () {
 
 }
 
+function money_format(num) {
+    if (isNaN(num)) num = 0;
+    return num.toLocaleString('de-DE', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+}
+
+function applyInputMask(inputElement) {
+    let value = inputElement.value.replace(/\D/g, "");
+    if (value === "") return;
+    let num = parseFloat(value) / 100;
+    inputElement.value = money_format(num);
+}
+
 
 
 save_comment_btn.onclick = function () {
@@ -174,96 +189,101 @@ function fields_validation() {
         }
     });
 
-    disponible_comprar.addEventListener('keypress', function (event) {
-        const regex = /^[0-9.]+$/;
-        let key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
+    // disponible_comprar.addEventListener('keypress', function (event) {
+    //     const regex = /^[0-9.]+$/;
+    //     let key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
 
-        if (!regex.test(key)) {
-            event.preventDefault();
-            return false;
-        }
-        if (key === '.' && this.value.includes('.')) {
-            event.preventDefault();
-            return false;
+    //     if (!regex.test(key)) {
+    //         event.preventDefault();
+    //         return false;
+    //     }
+    //     if (key === '.' && this.value.includes('.')) {
+    //         event.preventDefault();
+    //         return false;
+    //     }
+
+    //     get_tiempo_requerido();
+    // });
+
+    // monto_max.addEventListener('keypress', function (event) {
+    //     const regex = /^[0-9.]+$/;
+    //     let key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
+
+    //     if (!regex.test(key)) {
+    //         event.preventDefault();
+    //         return false;
+    //     }
+    //     if (key === '.' && this.value.includes('.')) {
+    //         event.preventDefault();
+    //         return false;
+    //     }
+
+    //     // El truco del almendruco:
+    //     setTimeout(() => {
+    //         get_tiempo_requerido();
+    //     }, 0);
+    // });
+
+    /* 1. Declarar el timer fuera de los eventos (solo una vez) */
+    let typingTimer;
+    const doneTypingInterval = 500; // Medio segundo de espera
+
+    /* ==========================================================================
+       VALIDACIÓN Y CÁLCULO PARA DOWN PAYMENT
+       ========================================================================== */
+    down_payment.addEventListener('input', function () {
+        let value = this.value;
+
+        // A. Validación: Solo números y un punto decimal
+        // Si el usuario pega algo inválido, esto lo limpia
+        value = value.replace(/[^0-9.]/g, '');
+
+        // Evitar múltiples puntos decimales
+        const parts = value.split('.');
+        if (parts.length > 2) value = parts[0] + '.' + parts.slice(1).join('');
+
+        // B. Validación: Límite de 100
+        if (parseFloat(value) > 100) {
+            value = "100";
         }
 
-        get_tiempo_requerido();
+        // Actualizamos el campo con el valor limpio
+        this.value = value;
+
+        // C. Temporizador para el cálculo
+        clearTimeout(typingTimer);
+        typingTimer = setTimeout(function () {
+            calc_monto_max();
+        }, doneTypingInterval);
     });
 
-    monto_max.addEventListener('keypress', function (event) {
-        const regex = /^[0-9.]+$/;
-        let key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
+    /* ==========================================================================
+       VALIDACIÓN Y CÁLCULO PARA GASTOS DE CIERRE
+       ========================================================================== */
+    gastos_cierre.addEventListener('input', function () {
+        let value = this.value;
 
-        if (!regex.test(key)) {
-            event.preventDefault();
-            return false;
-        }
-        if (key === '.' && this.value.includes('.')) {
-            event.preventDefault();
-            return false;
+        // A. Limpieza de caracteres no permitidos
+        value = value.replace(/[^0-9.]/g, '');
+
+        // B. Evitar múltiples puntos
+        const parts = value.split('.');
+        if (parts.length > 2) value = parts[0] + '.' + parts.slice(1).join('');
+
+        // C. Límite de 100
+        if (parseFloat(value) > 100) {
+            value = "100";
         }
 
-        // El truco del almendruco:
-        setTimeout(() => {
-            get_tiempo_requerido();
-        }, 0);
+        this.value = value;
+
+        // D. Temporizador (usamos el mismo para no solapar cálculos)
+        clearTimeout(typingTimer);
+        typingTimer = setTimeout(function () {
+            calc_monto_max();
+        }, doneTypingInterval);
     });
 
-    down_payment.addEventListener('keypress', function (event) {
-        const key = event.key;
-        const currentValue = this.value;
-
-        // 1. Construir cómo quedaría el texto si permitimos la tecla
-        // Obtenemos la posición del cursor para insertar la tecla correctamente
-        const selectionStart = this.selectionStart;
-        const selectionEnd = this.selectionEnd;
-        const futureValue = currentValue.slice(0, selectionStart) + key + currentValue.slice(selectionEnd);
-
-        // 2. Permitir números y un solo punto decimal
-        if (/[0-9]/.test(key) || (key === '.' && !currentValue.includes('.'))) {
-
-            // 3. Validar el límite de 100
-            // Si el valor futuro es un número válido, comprobamos que no exceda 100
-            if (!isNaN(futureValue) && parseFloat(futureValue) > 100) {
-                event.preventDefault();
-                return false;
-            }
-            get_tiempo_requerido()
-            return true;
-        }
-
-        // Bloquear cualquier otra tecla (letras, símbolos, etc.)
-        event.preventDefault();
-        return false;
-    });
-
-    gastos_cierre.addEventListener('keypress', function (event) {
-        const key = event.key;
-        const currentValue = this.value;
-
-        // 1. Construir cómo quedaría el texto si permitimos la tecla
-        // Obtenemos la posición del cursor para insertar la tecla correctamente
-        const selectionStart = this.selectionStart;
-        const selectionEnd = this.selectionEnd;
-        const futureValue = currentValue.slice(0, selectionStart) + key + currentValue.slice(selectionEnd);
-
-        // 2. Permitir números y un solo punto decimal
-        if (/[0-9]/.test(key) || (key === '.' && !currentValue.includes('.'))) {
-
-            // 3. Validar el límite de 100
-            // Si el valor futuro es un número válido, comprobamos que no exceda 100
-            if (!isNaN(futureValue) && parseFloat(futureValue) > 100) {
-                event.preventDefault();
-                return false;
-            }
-            get_tiempo_requerido();
-            return true;
-        }
-
-        // Bloquear cualquier otra tecla (letras, símbolos, etc.)
-        event.preventDefault();
-        return false;
-    });
     credito_cliente.addEventListener('keypress', function (event) {
         const regex = /^[0-9.]+$/;
         let key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
@@ -348,6 +368,64 @@ function fields_validation() {
     estatus_legal.onchange = function () {
         get_down_payment();
     }
+
+    var fields = [disponible_comprar, monto_max, total_requerido];
+    fields.forEach(el => {
+        if (!el) return;
+        el.addEventListener('input', function () {
+            applyInputMask(this);
+            if (el == disponible_comprar || el == monto_max) {
+                calc_monto_max()
+            }
+
+            //       run_calculations();
+        });
+    });
+}
+
+function calc_monto_max() {
+    // 1. Obtener valores base
+    var disp_value = parseMoneyCompras(disponible_comprar.value);
+    var dp_perc = down_payment.value !== "" ? parseFloat(down_payment.value) : 0;
+    var gastos_perc = gastos_cierre.value !== "" ? parseFloat(gastos_cierre.value) : 0;
+
+    // 2. Cálculo Proactivo del Monto Máximo
+    // Sumamos los porcentajes (ej: 20 + 8 = 28%)
+    var suma_porcentajes = dp_perc + gastos_perc;
+    var nuevo_monto_max = 0;
+
+    if (suma_porcentajes > 0) {
+        // Despeje: Si el 'disp_value' es el 28%, el 100% es (disp * 100 / 28)
+        nuevo_monto_max = (disp_value * 100) / suma_porcentajes;
+    }
+
+    // 3. Aplicar el Monto Máximo calculado
+    monto_max.value = money_format(nuevo_monto_max);
+
+    // 4. Calcular el Total Requerido para verificar
+    // (Debería dar igual a disp_value, pero restamos 0.01 para seguridad visual)
+    var check_total = (nuevo_monto_max * dp_perc / 100) + (nuevo_monto_max * gastos_perc / 100);
+    
+    // Mostramos el total requerido (que ahora siempre encajará con la disponibilidad)
+    total_requerido.value = money_format(check_total);
+
+    // 5. Validación visual de seguridad
+    const btn = document.getElementById("property_register");
+    if (check_total > disp_value + 1) { // Margen de error por decimales
+        total_requerido.style.color = "red";
+        if(btn) btn.disabled = true;
+    } else {
+        total_requerido.style.color = "black";
+        if(btn) btn.disabled = false;
+    }
+}
+
+function parseMoneyCompras(value) {
+    if (!value) return 0;
+    if (typeof value === 'number') return value;
+    let cleanValue = value.toString().replace(/\./g, '').replace(',', '.');
+    let parsed = parseFloat(cleanValue);
+    return isNaN(parsed) ? 0 : parsed;
 }
 
 
@@ -767,6 +845,12 @@ function tiempoRelativo(fechaString) {
     return `Hace ${r.meses} meses`;
 }
 
+function calc_percent(type) {
+    if (type == "dp") {
+
+    }
+}
+
 
 
 function get_down_payment() {
@@ -778,7 +862,7 @@ function get_down_payment() {
     else {
         down_payment.value = "";
     }
-    get_tiempo_requerido()
+    //  get_tiempo_requerido()
 }
 
 function get_tiempo_requerido() {
