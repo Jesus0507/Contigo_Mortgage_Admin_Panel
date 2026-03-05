@@ -56,7 +56,7 @@
                             <option value="non_qm">Non qm</option>
                         </select>
                     </div>
-                    <div  style='width:45%'>
+                    <div style='width:45%'>
                         <label for="address mb-2" id="estatus_legal_label">Estatus legal:</label>
                         <select class="form-select" id="estatus_legal">
                             <option value="">Seleccionar</option>
@@ -134,11 +134,25 @@
                 <div class="w-100 d-flex flex-row justify-content-between mb-2">
                     <div style="width:45%">
                         <label for="address" id="down_payment_label">Down payment (%):</label>
-                        <input class="form-control" id="down_payment" placeholder="Down payment" <?php if ($_SESSION['user_role'] != "admin") { ?> disabled <?php } ?>>
+                        <div class="w-100 d-flex flex-row">
+                            <div>
+                                <input class="form-control" style="width: 40%" id="down_payment" placeholder="Down payment" <?php if ($_SESSION['user_role'] != "admin") { ?> disabled <?php } ?>>
+                            </div>
+                            <div class="mt-2">
+                                <span id="down_payment_label_percent">0,00</span>
+                            </div>
+                        </div>
                     </div>
                     <div style="width: 45%">
                         <label for="address" id="gastos_cierre_label">Gastos de cierre (%):</label>
-                        <input class="form-control" id="gastos_cierre" placeholder="Gastos de cierre" <?php if ($_SESSION['user_role'] != "admin") { ?> disabled <?php } ?>>
+                        <div class="w-100 d-flex flex-row">
+                            <div>
+                                 <input style="width:40%" class="form-control" id="gastos_cierre" placeholder="Gastos de cierre" <?php if ($_SESSION['user_role'] != "admin") { ?> disabled <?php } ?>>
+                            </div>
+                            <div class="mt-2">
+                                <span id="gastos_cierre_percent_label">0,00</span>
+                            </div>
+                        </div>
                     </div>
 
                 </div>
