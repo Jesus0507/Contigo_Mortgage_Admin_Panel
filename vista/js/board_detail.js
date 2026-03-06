@@ -264,14 +264,16 @@ function load_compras_modal_info(ev) {
         document.getElementById("estatus_legal").value = (resultado['estatus_legal'] == "" || resultado['estatus_legal'] == null) ? "ciudadano" : resultado['estatus_legal'];
         document.getElementById("forma_pago").value = resultado['forma_pago'] ?? "medio_electronico";
 
-        // Lógica de visibilidad (Ajustada para los nuevos IDs)
-        if (document.getElementById("process_type").value == "non_qm") {
-            document.getElementById("estatus_legal").parentElement.classList.remove("d-none");
-        } else {
-            document.getElementById("estatus_legal").parentElement.classList.add("d-none");
-        }
+        // // Lógica de visibilidad (Ajustada para los nuevos IDs)
+        // if (document.getElementById("process_type").value == "non_qm") {
+        //     document.getElementById("estatus_legal").parentElement.classList.remove("d-none");
+        // } else {
+        //     document.getElementById("estatus_legal").parentElement.classList.add("d-none");
+        // }
 
-        if (document.getElementById("primer_comprador").value == "si") {
+        document.querySelector(".primer-comprador-field").classList.remove("d-none");
+
+        if (document.getElementById("primer_comprador").value == "si" && document.getElementById("process_type").value == "non_qm") {
             document.getElementById("forma_pago").parentElement.parentElement.classList.remove("d-none");
         } else {
             document.getElementById("forma_pago").parentElement.parentElement.classList.add("d-none");
@@ -304,7 +306,7 @@ function load_gestion_modal_info(ev) {
         var deudas = JSON.parse(result)['deudas']
         var historial = JSON.parse(result)['historial'];
         document.getElementById("old_info_gestion").innerHTML = JSON.stringify(JSON.parse(result)["gestion_info"][0]);
-  
+
         document.getElementById("modal_id_gestion").innerHTML = resultado['id_gestion'];
 
         document.getElementById("asesor_name").innerHTML = "Asesor: " + resultado['user_name'] + " " + resultado['user_last_name'];

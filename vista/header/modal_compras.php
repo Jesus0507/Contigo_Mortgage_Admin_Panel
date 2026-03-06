@@ -22,7 +22,7 @@
     </div>
     <div class="custom-modal-body">
         <div class="d-flex flex-row w-100" id="gestion_container" style="height:100%;">
-            <div style="overflow-y: auto; width: 33%">
+            <div style="overflow-y: auto; width: 30%">
                 <div style="font-size: 13px; font-weight: bold">CLIENTE</div>
                 <hr class="m-2">
                 <div class="mb-2 mt-2">
@@ -44,7 +44,7 @@
 
             </div>
             <div class="modal-divider mx-2"></div>
-            <div style="overflow-y: auto; width: 33%">
+            <div style="overflow-y: auto; width: 36%">
                 <div style="font-size: 13px; font-weight: bold">DATOS ADICIONALES</div>
                 <hr class="m-2">
                 <div class="mb-2 d-flex flex-row w-100 justify-content-between">
@@ -114,9 +114,19 @@
                         <input id="credito_cliente" class="form-control" placeholder="Crédito del cliente">
                     </div>
                 </div>
+                <div class="w-100 mt-3 d-none" id="tabla_income_info">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div style="font-size: 13px; font-weight: bold">DETALLE DE INGRESOS</div>
+                        <button type="button" class="btn btn-sm btn-primary" onclick="agregarTarjetaCliente()">
+                            <i class="fas fa-user-plus"></i> Añadir Cliente/Co-Prestatario
+                        </button>
+                    </div>
+                    <div id="income_cards_container" style="max-height: 500px; overflow-y: auto; border: 1px solid #ddd; border-radius: 10px; padding: 10px; background: #fdfdfd;">
+                    </div>
+                </div>
             </div>
             <div class="modal-divider mx-2"></div>
-            <div style="overflow-y: auto; width: 33%">
+            <div style="overflow-y: auto; width: 30%">
                 <div class="d-flex flex-row w-100 justify-content-between px-2">
                     <div style="font-size: 13px; font-weight: bold">ESTIMACIONES</div>
                 </div>
@@ -147,7 +157,7 @@
                         <label for="address" id="gastos_cierre_label">Gastos de cierre (%):</label>
                         <div class="w-100 d-flex flex-row">
                             <div>
-                                 <input style="width:40%" class="form-control" id="gastos_cierre" placeholder="Gastos de cierre" <?php if ($_SESSION['user_role'] != "admin") { ?> disabled <?php } ?>>
+                                <input style="width:40%" class="form-control" id="gastos_cierre" placeholder="Gastos de cierre" <?php if ($_SESSION['user_role'] != "admin") { ?> disabled <?php } ?>>
                             </div>
                             <div class="mt-2">
                                 <span id="gastos_cierre_percent_label">0,00</span>
@@ -159,6 +169,23 @@
                 <div class="w-100 mb-2">
                     <label>Total requerido:</label>
                     <input class="form-control" id="total_requerido" disabled placeholder="Total requerido">
+                </div>
+                <div class="mb-2 d-flex flex-row w-100 justify-content-between programa_container d-none">
+                    <div style='width:45%'>
+                        <label for="address mb-2" id="programa_aplica_label">Programa al que aplica:</label>
+                        <select class="form-select" id="programa_aplica">
+                            <option value="">Seleccionar</option>
+                            <option value="fha">Fha</option>
+                            <option value="conventional">Conventional</option>
+                            <option value="usda">Usda</option>
+                            <option value="va_loan">Va Loan</option>
+                            <option value="fnba">Fnba</option>
+                        </select>
+                    </div>
+                    <div style='width:45%'>
+                        <label for="address mb-2" id="loan_amount_compra_label">Loan Amount:</label>
+                        <input class="form-control" placeholder="Loan amount" id="loan_amount_compra">
+                    </div>
                 </div>
                 <div class="mb-2">
                     <label for="aditional_conditions" id="conditions_label">Condiciones o notas importantes:</label>

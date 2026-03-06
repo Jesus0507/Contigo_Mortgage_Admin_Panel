@@ -401,11 +401,13 @@ function calc_monto_max() {
 
     // 3. Aplicar el Monto Máximo calculado
     monto_max.value = money_format(nuevo_monto_max);
+    document.getElementById("down_payment_label_percent").innerHTML = money_format((nuevo_monto_max * dp_perc) / 100);
+    document.getElementById("gastos_cierre_percent_label").innerHTML = money_format((gastos_perc * nuevo_monto_max) / 100);
 
     // 4. Calcular el Total Requerido para verificar
     // (Debería dar igual a disp_value, pero restamos 0.01 para seguridad visual)
     var check_total = (nuevo_monto_max * dp_perc / 100) + (nuevo_monto_max * gastos_perc / 100);
-    
+
     // Mostramos el total requerido (que ahora siempre encajará con la disponibilidad)
     total_requerido.value = money_format(check_total);
 
@@ -413,10 +415,10 @@ function calc_monto_max() {
     const btn = document.getElementById("property_register");
     if (check_total > disp_value + 1) { // Margen de error por decimales
         total_requerido.style.color = "red";
-        if(btn) btn.disabled = true;
+        if (btn) btn.disabled = true;
     } else {
         total_requerido.style.color = "black";
-        if(btn) btn.disabled = false;
+        if (btn) btn.disabled = false;
     }
 }
 
@@ -430,8 +432,8 @@ function parseMoneyCompras(value) {
 
 
 property_register_btn.onclick = function () {
-    if (!info_validation()) return;
-    registerInfo();
+    // if (!info_validation()) return;
+    // registerInfo();
 }
 
 function checkFlowVisibility() {
@@ -456,6 +458,21 @@ function checkFlowVisibility() {
     } else {
         forma_pago_container.classList.add("d-none");
         resetField(forma_pago);
+    }
+
+    if (proceso == "income_check") {
+        monto_max_label.innerHTML = "Purchase price:";
+        monto_max.placeholder = "Purchase price";
+        total_requerido.parentElement.classList.add("d-none");
+        document.querySelector(".programa_container").classList.remove("d-none");
+        document.getElementById("tabla_income_info").classList.remove("d-none")
+    }
+    else {
+        total_requerido.parentElement.classList.remove("d-none");
+        monto_max_label.innerHTML = "Monto max:";
+        monto_max.placeholder = "Monto max aplicado";
+        document.querySelector(".programa_container").classList.add("d-none");
+        document.getElementById("tabla_income_info").classList.add("d-none")
     }
 
     // 3. Lógica para Tiempo Pagando
@@ -526,7 +543,15 @@ close_btn.onclick = function () {
     document.getElementById("call_detail").value = "";
     document.querySelector(".comments-area").innerHTML = "";
     document.querySelector(".historial-container").innerHTML = "";
+    document.getElementById("down_payment_label_percent").innerHTML = "0,00";
+    document.getElementById("gastos_cierre_percent_label").innerHTML = "0,00";
     document.getElementById("modal_gestion_title").innerHTML = "Nueva compra";
+    tipo_proceso.value = "";
+    estatus_legal.value = "";
+    forma_pago.value = "";
+    tiempo_pago_formato.value = "dias";
+    primer_comprador_field.classList.add("d-none");
+    forma_pago_container.classList.add("d-none");
     gastos_cierre.value = 8;
     setTimeout(() => {
         document.getElementById("layoutSidenav").classList.remove("opacity-body");
@@ -883,3 +908,270 @@ function get_tiempo_requerido() {
     };
     document.getElementById("total_requerido").value = total_requerido_val;
 }
+
+
+function agregarTarjetaCliente() {
+    const idCliente = Date.now();
+    const cardHtml = `
+        <div class="card mb-2 shadow-sm cliente-card" id="cliente_${idCliente}">
+            <div class="card-header p-2 bg-light d-flex justify-content-between align-items-center">
+                <div class="d-flex gap-2 align-items-center w-75" onclick="toggleCollapse('body_${idCliente}')" style="cursor:pointer">
+                    <i class="fas fa-chevron-down small" id="icon_${idCliente}"></i>
+                    <span class="fw-bold small" id="header_name_${idCliente}">Nuevo Cliente / Co-Prestatario</span>
+                </div>
+                <button class="btn btn-xs text-danger border-0" onclick="document.getElementById('cliente_${idCliente}').remove()">×</button>
+            </div>
+            <div class="card-body p-2" id="body_${idCliente}">
+                <div class="d-flex justify-content-between mb-2 gap-2">
+                    <input class="form-control form-control-sm" placeholder="Nombre" oninput="updateHeader(${idCliente})">
+                    <input class="form-control form-control-sm" placeholder="Apellido" oninput="updateHeader(${idCliente})">
+                </div>
+                <div id="trabajos_container_${idCliente}"></div>
+                <div class="mt-2 d-flex gap-2 border-top pt-2">
+                    <button class="btn btn-xs btn-outline-info text-dark py-0" onclick="agregarTrabajo(${idCliente}, 'W2')">+ W2</button>
+                    <button class="btn btn-xs btn-outline-secondary text-dark py-0" onclick="agregarTrabajo(${idCliente}, '1099')">+ 1099</button>
+                </div>
+            </div>
+        </div>`;
+    document.getElementById('income_cards_container').insertAdjacentHTML('beforeend', cardHtml);
+}
+
+// --- NIVEL 2: TRABAJO (W2 o 1099) ---
+function agregarTrabajo(idCliente, tipo) {
+    const idTrabajo = Date.now();
+    const contenedor = document.getElementById(`trabajos_container_${idCliente}`);
+
+    let html = `
+        <div class="border rounded mb-2 bg-white shadow-xs job-item" id="job_${idTrabajo}">
+            <div class="d-flex justify-content-between align-items-center p-2 bg-light-subtle border-bottom">
+                <div class="d-flex align-items-center gap-2 w-100" onclick="toggleCollapse('job_body_${idTrabajo}')" style="cursor:pointer">
+                    <i class="fas fa-chevron-down small-icon" id="icon_job_${idTrabajo}"></i>
+                    <span class="badge ${tipo === 'W2' ? 'bg-info' : 'bg-secondary'}">${tipo}</span>
+                    <span class="small text-muted" id="job_label_${idTrabajo}">${tipo === 'W2' ? 'Nueva Empresa' : 'Ingreso 1099'}</span>
+                </div>
+                
+                <div class="d-flex align-items-center">
+                    ${tipo === 'W2' ? `
+                    <div class="form-check form-switch me-4" style="font-size: 11px; min-width: 90px;">
+                        <input class="form-check-input" type="checkbox" onchange="toggleW2Mode(this, ${idTrabajo})"> 
+                        <span class="ms-1">Paystubs</span>
+                    </div>` : ''}
+                    <button type="button" class="btn btn-xs text-danger border-0" onclick="eliminarTrabajo(${idTrabajo})">×</button>
+                </div>
+            </div>
+
+            <div class="p-2" id="job_body_${idTrabajo}">
+                ${tipo === 'W2' ? `
+                    <input class="form-control form-control-sm mb-2" placeholder="Nombre Empresa" oninput="document.getElementById('job_label_${idTrabajo}').innerText = this.value || 'Nueva Empresa'">
+                    <div id="area_dinamica_${idTrabajo}">${renderFormW2(idTrabajo)}</div>
+                ` : `
+                    <div id="area_dinamica_${idTrabajo}">${renderForm1099(idTrabajo)}</div>
+                `}
+            </div>
+        </div>`;
+
+    contenedor.insertAdjacentHTML('beforeend', html);
+    actualizarDiccionario();
+}
+
+function eliminarTrabajo(id) {
+    document.getElementById(`job_${id}`).remove();
+    actualizarDiccionario();
+}
+
+function toggleCollapse(id) {
+    const el = document.getElementById(id);
+    const iconId = id.startsWith('job_body') ? 'icon_job_' + id.split('_')[2] : 'icon_' + id.split('_')[1];
+    const icon = document.getElementById(iconId);
+
+    if (el.style.display === "none") {
+        el.style.display = "block";
+        icon.classList.replace('fa-chevron-right', 'fa-chevron-down');
+    } else {
+        el.style.display = "none";
+        icon.classList.replace('fa-chevron-down', 'fa-chevron-right');
+    }
+}
+
+function updateHeader(id) {
+    const inputs = document.querySelectorAll(`#cliente_${id} input`);
+    const name = inputs[0].value || "";
+    const lastName = inputs[1].value || "";
+    const header = document.getElementById(`header_name_${id}`);
+    header.innerText = (name || lastName) ? `${name} ${lastName}` : "Nuevo Cliente / Co-Prestatario";
+}
+
+// --- NIVEL 3: AÑOS DE IMPUESTOS (DINÁMICOS) ---
+function agregarAnioImpuesto(idTrabajo) {
+    const contenedor = document.getElementById(`tax_list_${idTrabajo}`);
+    const idTax = Date.now();
+    const html = `
+        <div class="d-flex gap-1 mb-1 align-items-center" id="tax_row_${idTax}">
+            <input class="form-control form-control-sm w-50" placeholder="Año (ej. 2024)">
+            <input class="form-control form-control-sm w-50 tax-value-${idTrabajo}" placeholder="Monto $" oninput="calcularAverage(${idTrabajo})">
+            <button class="btn btn-xs text-danger p-0" onclick="eliminarAnio(${idTax}, ${idTrabajo})">×</button>
+        </div>`;
+    contenedor.insertAdjacentHTML('beforeend', html);
+}
+
+function eliminarAnio(idTax, idTrabajo) {
+    document.getElementById(`tax_row_${idTax}`).remove();
+    calcularAverage(idTrabajo);
+}
+
+// --- CÁLCULOS ---
+function calcularAverage(idTrabajo) {
+    const inputs = document.querySelectorAll(`.tax-value-${idTrabajo}`);
+    let total = 0;
+    let count = 0;
+    inputs.forEach(input => {
+        const val = parseFloat(input.value) || 0;
+        if (val > 0) { total += val; count++; }
+    });
+    const avg = count > 0 ? (total / count) : 0;
+    document.getElementById(`avg_display_${idTrabajo}`).innerText = avg.toLocaleString('en-US', { minimumFractionDigits: 2 });
+}
+
+// --- HELPERS DE RENDER ---
+// Render para W2 (Requiere Empresa y tiene Switch de Paystubs)
+function renderFormW2(id) {
+    return `
+        <div id="taxes_w2_${id}">
+            <div id="tax_list_${id}"></div>
+            <button type="button" class="btn btn-xs btn-outline-primary w-100 mb-1" style="font-size:10px" onclick="agregarAnioImpuesto(${id})">+ Añadir Año Tax</button>
+            <div class="small bg-light p-1 text-center border rounded">Average: <b>$ <span id="avg_display_${id}">0.00</span></b></div>
+        </div>
+        <div id="paystubs_w2_${id}" class="d-none mt-2">
+            <div class="row g-1 text-center">
+                <div class="col-4">
+                    <label style="font-size:9px">$/Hora</label>
+                    <input type="number" class="form-control form-control-sm text-center" placeholder="0" oninput="calcPS(${id})">
+                </div>
+                <div class="col-4">
+                    <label style="font-size:9px">Horas</label>
+                    <input type="number" class="form-control form-control-sm text-center" placeholder="0" oninput="calcPS(${id})">
+                </div>
+                <div class="col-4">
+                    <label style="font-size:9px">Freq (Sems)</label>
+                    <input type="number" class="form-control form-control-sm text-center" placeholder="52" oninput="calcPS(${id})">
+                </div>
+                <div class="col-12 mt-1 small bg-success-subtle p-1 border rounded">
+                    Income Mensual: <b>$ <span id="ps_res_${id}">0.00</span></b>
+                </div>
+            </div>
+        </div>`;
+}
+
+// Render para 1099 (Estatus Legales Específicos)
+function renderForm1099(id) {
+    return `
+        <div id="tax_list_${id}"></div>
+        <button type="button" class="btn btn-xs btn-outline-primary w-100 mb-1" style="font-size:10px" onclick="agregarAnioImpuesto(${id})">+ Añadir Año Tax</button>
+        <div class="row g-1 mb-1 mt-2">
+            <div class="col-6 small bg-light p-1 text-center border rounded">AVG: <b>$<span id="avg_display_${id}">0.00</span></b></div>
+            <div class="col-6"><input class="form-control form-control-sm" placeholder="FICO" oninput="actualizarDiccionario()"></div>
+            <div class="col-6"><input class="form-control form-control-sm" placeholder="Deuda" oninput="actualizarDiccionario()"></div>
+            <div class="col-6">
+                <select class="form-select form-select-sm" onchange="actualizarDiccionario()">
+                    <option value="">Estatus legal</option>
+                    <option value="ciudadano">Ciudadano</option>
+                    <option value="residente">Residente</option>
+                    <option value="permiso_trabajo">Permiso de trabajo</option>
+                    <option value="tax_id">Tax id</option>
+                </select>
+            </div>
+        </div>`;
+}
+
+function toggleW2Mode(cb, id) {
+    document.getElementById(`taxes_w2_${id}`).classList.toggle('d-none', cb.checked);
+    document.getElementById(`paystubs_w2_${id}`).classList.toggle('d-none', !cb.checked);
+}
+
+function calcPS(id) {
+    const area = document.getElementById(`paystubs_w2_${id}`);
+    const inputs = area.querySelectorAll('input');
+    const valorHora = parseFloat(inputs[0].value) || 0;
+    const horas = parseFloat(inputs[1].value) || 0;
+    const frecuencia = parseFloat(inputs[2].value) || 0;
+
+    const mensual = (valorHora * horas * frecuencia) / 12;
+    document.getElementById(`ps_res_${id}`).innerText = mensual.toLocaleString('en-US', { minimumFractionDigits: 2 });
+    actualizarDiccionario();
+}
+
+let diccionarioIngresos = []; // Variable global donde vivirá tu data
+
+function actualizarDiccionario() {
+    let dataFinal = [];
+
+    // 1. Escanear cada tarjeta de Cliente
+    document.querySelectorAll('.cliente-card').forEach(card => {
+        let idCliente = card.id.split('_')[1];
+        let cliente = {
+            nombre: card.querySelector('input[placeholder="Nombre"]').value,
+            apellido: card.querySelector('input[placeholder="Apellido"]').value,
+            trabajos: []
+        };
+
+        // 2. Escanear cada Trabajo (W2 o 1099) dentro de ese cliente
+        card.querySelectorAll('.job-item').forEach(jobEl => {
+            let idJob = jobEl.id.split('_')[1];
+            let tipo = jobEl.querySelector('.badge').innerText; // W2 o 1099
+            let trabajo = { tipo: tipo };
+
+            if (tipo === 'W2') {
+                trabajo.empresa = jobEl.querySelector('input[placeholder="Nombre Empresa"]')?.value || "";
+                let isPaystub = jobEl.querySelector('.form-check-input').checked;
+                trabajo.modo = isPaystub ? 'paystubs' : 'taxes';
+
+                if (isPaystub) {
+                    let psArea = jobEl.querySelector(`#paystubs_w2_${idJob}`);
+                    let inputs = psArea.querySelectorAll('input');
+                    trabajo.paystub_data = {
+                        valorHora: parseFloat(inputs[0].value) || 0,
+                        horas: parseFloat(inputs[1].value) || 0,
+                        frecuencia: parseFloat(inputs[2].value) || 0, // Frecuencia manual
+                        total_mensual: parseFloat(document.getElementById(`ps_res_${idJob}`).innerText.replace(/,/g, '')) || 0
+                    };
+                }
+            }
+
+            // 3. Escanear Impuestos (si existen para ese trabajo)
+            let taxList = jobEl.querySelector(`#tax_list_${idJob}`);
+            if (taxList) {
+                trabajo.impuestos = [];
+                taxList.querySelectorAll('[id^="tax_row_"]').forEach(row => {
+                    let inputs = row.querySelectorAll('input');
+                    trabajo.impuestos.push({
+                        anio: inputs[0].value,
+                        monto: parseFloat(inputs[1].value) || 0
+                    });
+                });
+                trabajo.average = parseFloat(document.getElementById(`avg_display_${idJob}`).innerText.replace(/,/g, '')) || 0;
+            }
+
+            // 4. Campos extra exclusivos de 1099
+            if (tipo === '1099') {
+                trabajo.fico = jobEl.querySelector('input[placeholder="FICO"]')?.value || "";
+                trabajo.deuda = jobEl.querySelector('input[placeholder="Deuda"]')?.value || "";
+                trabajo.estatus_legal = jobEl.querySelector('select').value; // Ciudadano, Residente, etc.
+            }
+
+            cliente.trabajos.push(trabajo);
+        });
+
+        dataFinal.push(cliente);
+    });
+
+    diccionarioIngresos = dataFinal;
+    console.log("Diccionario actualizado en tiempo real:", diccionarioIngresos);
+}
+
+// Detecta cambios en cualquier input, select o al hacer clic en botones de eliminar
+$(document).on('input change click', '#income_cards_container', function (e) {
+    // Pequeño delay para asegurar que el DOM se actualizó si se eliminó un elemento
+    setTimeout(() => {
+        actualizarDiccionario();
+    }, 100);
+});
