@@ -43,6 +43,7 @@ var forma_pago_container = document.querySelector(".forma-pago-container");
 var tabs_options = Array.from(document.querySelector(".tabs-options").querySelectorAll("div"));
 var unsaved_comments = [];
 var save_comment_btn = document.getElementById("btn_save_comment");
+let diccionarioIngresos = []; // Variable global
 
 fields_validation();
 
@@ -80,14 +81,6 @@ document.getElementById("seguimiento_tab").onclick = function () {
     document.getElementById("seguimiento_container").classList.remove("d-none");
     document.getElementById("gestion_container").classList.add("d-none");
 
-}
-
-function money_format(num) {
-    if (isNaN(num)) num = 0;
-    return num.toLocaleString('de-DE', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    });
 }
 
 function applyInputMask(inputElement) {
@@ -432,8 +425,8 @@ function parseMoneyCompras(value) {
 
 
 property_register_btn.onclick = function () {
-    // if (!info_validation()) return;
-    // registerInfo();
+    if (!info_validation()) return;
+    registerInfo();
 }
 
 function checkFlowVisibility() {
@@ -466,6 +459,9 @@ function checkFlowVisibility() {
         total_requerido.parentElement.classList.add("d-none");
         document.querySelector(".programa_container").classList.remove("d-none");
         document.getElementById("tabla_income_info").classList.remove("d-none")
+        if (document.querySelectorAll(".cliente-card").length === 0) {
+            agregarTarjetaCliente();
+        }
     }
     else {
         total_requerido.parentElement.classList.remove("d-none");
@@ -473,6 +469,8 @@ function checkFlowVisibility() {
         monto_max.placeholder = "Monto max aplicado";
         document.querySelector(".programa_container").classList.add("d-none");
         document.getElementById("tabla_income_info").classList.add("d-none")
+        resetIncomeSection(); // <--- Limpieza aquí
+
     }
 
     // 3. Lógica para Tiempo Pagando
@@ -499,6 +497,13 @@ function resetField(element) {
 
 
 function registerInfo() {
+    // Validamos primero que la información básica sea correcta
+    if (!info_validation()) return;
+
+    // Extraemos los totales del resumen global para guardarlos en la tabla principal de compras si es necesario
+    const totalIncomeGlobal = parseMoneyCompras(document.getElementById('resumen_global_ingresos').querySelector('.text-success').innerText);
+    const totalDeudaGlobal = parseMoneyCompras(document.getElementById('resumen_global_ingresos').querySelector('.text-danger').innerText);
+
     $.ajax({
         type: "POST",
         url: "index.php?c=boards&a=add_compra",
@@ -521,13 +526,20 @@ function registerInfo() {
             "condiciones": conditions.value,
             "total_requerido": document.getElementById("total_requerido").value,
             "comments": unsaved_comments,
-            "board": document.getElementById("board_id").innerHTML
+            "board": document.getElementById("board_id").innerHTML,
+            
+            // --- NUEVOS CAMPOS DE INCOME ---
+            // Enviamos el array completo de objetos convertido a JSON string
+            "detalle_ingresos": JSON.stringify(diccionarioIngresos)
         }
     }).done(function (result) {
-
-        console.log(result);
+        console.log("Respuesta del servidor:", result);
+        // Redirección tras éxito
         location.href = "index.php?c=boards&a=detail&info=" + document.getElementById("board_id").innerHTML;
-    })
+    }).fail(function (jqXHR, textStatus, errorThrown) {
+        console.error("Error al guardar:", textStatus, errorThrown);
+        alert("Hubo un error al guardar la información. Por favor, intente de nuevo.");
+    });
 }
 
 
@@ -556,6 +568,8 @@ close_btn.onclick = function () {
     setTimeout(() => {
         document.getElementById("layoutSidenav").classList.remove("opacity-body");
         document.getElementById("asesor_name").innerHTML = "Asesor: " + document.querySelector(".sb-sidenav-footer").innerHTML;
+        resetIncomeSection();
+        document.getElementById("tabla_income_info").classList.add("d-none");
     }, 600)
 }
 
@@ -909,33 +923,62 @@ function get_tiempo_requerido() {
     document.getElementById("total_requerido").value = total_requerido_val;
 }
 
-
 function agregarTarjetaCliente() {
+    // 1. Calculamos la cantidad de tarjetas actuales
+    var cant_cards = document.querySelectorAll(".cliente-card").length;
     const idCliente = Date.now();
+
+    // 2. Definimos variables para los valores iniciales
+    let nombreInicial = "";
+    let apellidoInicial = "";
+
+    // 3. Si es la primera tarjeta (cant < 1), tomamos los valores globales
+    if (cant_cards < 1) {
+        // Asumiendo que client_name y client_last_name son los elementos input globales
+        nombreInicial = typeof client_name !== 'undefined' ? client_name.value : "";
+        apellidoInicial = typeof client_last_name !== 'undefined' ? client_last_name.value : "";
+    }
+
     const cardHtml = `
         <div class="card mb-2 shadow-sm cliente-card" id="cliente_${idCliente}">
-            <div class="card-header p-2 bg-light d-flex justify-content-between align-items-center">
-                <div class="d-flex gap-2 align-items-center w-75" onclick="toggleCollapse('body_${idCliente}')" style="cursor:pointer">
-                    <i class="fas fa-chevron-down small" id="icon_${idCliente}"></i>
-                    <span class="fw-bold small" id="header_name_${idCliente}">Nuevo Cliente / Co-Prestatario</span>
+            <div class="card-header p-1 bg-light">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="d-flex flex-column w-100 ps-2" onclick="toggleCollapse('body_${idCliente}')" style="cursor:pointer">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fas fa-chevron-down mt-1" style="font-size: 10px;" id="icon_${idCliente}"></i>
+                            <span class="fw-bold" style="font-size: 13px; line-height: 1.2;" id="header_name_${idCliente}">Nuevo Cliente</span>
+                        </div>
+                        <div id="resumen_cliente_${idCliente}" style="font-size: 10px; margin-left: 18px; margin-top: 1px;">
+                            <span class="text-success me-2" title="Total Income"><i class="fas fa-hand-holding-usd"></i> $0,00</span>
+                            <span class="text-danger" title="Total Deudas"><i class="fas fa-credit-card"></i> $0,00</span>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-xs text-danger border-0 pe-2" onclick="document.getElementById('cliente_${idCliente}').remove(); actualizarDiccionario();">×</button>
                 </div>
-                <button class="btn btn-xs text-danger border-0" onclick="document.getElementById('cliente_${idCliente}').remove()">×</button>
             </div>
             <div class="card-body p-2" id="body_${idCliente}">
                 <div class="d-flex justify-content-between mb-2 gap-2">
-                    <input class="form-control form-control-sm" placeholder="Nombre" oninput="updateHeader(${idCliente})">
-                    <input class="form-control form-control-sm" placeholder="Apellido" oninput="updateHeader(${idCliente})">
+                    <input class="form-control form-control-sm" placeholder="Nombre" value="${nombreInicial}" oninput="updateHeader(${idCliente})">
+                    <input class="form-control form-control-sm" placeholder="Apellido" value="${apellidoInicial}" oninput="updateHeader(${idCliente})">
                 </div>
+                
                 <div id="trabajos_container_${idCliente}"></div>
+                
                 <div class="mt-2 d-flex gap-2 border-top pt-2">
                     <button class="btn btn-xs btn-outline-info text-dark py-0" onclick="agregarTrabajo(${idCliente}, 'W2')">+ W2</button>
                     <button class="btn btn-xs btn-outline-secondary text-dark py-0" onclick="agregarTrabajo(${idCliente}, '1099')">+ 1099</button>
                 </div>
             </div>
         </div>`;
-    document.getElementById('income_cards_container').insertAdjacentHTML('beforeend', cardHtml);
-}
 
+    document.getElementById('income_cards_container').insertAdjacentHTML('beforeend', cardHtml);
+
+    // 4. Si se asignaron valores automáticamente, disparamos el header y el diccionario
+    if (cant_cards < 1 && (nombreInicial !== "" || apellidoInicial !== "")) {
+        updateHeader(idCliente);
+        actualizarDiccionario();
+    }
+}
 // --- NIVEL 2: TRABAJO (W2 o 1099) ---
 function agregarTrabajo(idCliente, tipo) {
     const idTrabajo = Date.now();
@@ -998,7 +1041,7 @@ function updateHeader(id) {
     const name = inputs[0].value || "";
     const lastName = inputs[1].value || "";
     const header = document.getElementById(`header_name_${id}`);
-    header.innerText = (name || lastName) ? `${name} ${lastName}` : "Nuevo Cliente / Co-Prestatario";
+    header.innerText = (name || lastName) ? `${name} ${lastName}` : "Nuevo Cliente";
 }
 
 // --- NIVEL 3: AÑOS DE IMPUESTOS (DINÁMICOS) ---
@@ -1007,8 +1050,8 @@ function agregarAnioImpuesto(idTrabajo) {
     const idTax = Date.now();
     const html = `
         <div class="d-flex gap-1 mb-1 align-items-center" id="tax_row_${idTax}">
-            <input class="form-control form-control-sm w-50" placeholder="Año (ej. 2024)">
-            <input class="form-control form-control-sm w-50 tax-value-${idTrabajo}" placeholder="Monto $" oninput="calcularAverage(${idTrabajo})">
+            <input type="number" class="form-control form-control-sm w-50" placeholder="Año (ej. 2024)">  
+        <input type="text" class="form-control form-control-sm w-50 tax-value-${idTrabajo}"  placeholder="Monto $" onfocus="focusMoney(this)" onblur="blurMoney(this); calcularAverage(${idTrabajo})">
             <button class="btn btn-xs text-danger p-0" onclick="eliminarAnio(${idTax}, ${idTrabajo})">×</button>
         </div>`;
     contenedor.insertAdjacentHTML('beforeend', html);
@@ -1025,27 +1068,37 @@ function calcularAverage(idTrabajo) {
     let total = 0;
     let count = 0;
     inputs.forEach(input => {
-        const val = parseFloat(input.value) || 0;
+        // IMPORTANTE: Usar parseMoneyCompras porque el input ahora es tipo text con formato
+        const val = parseMoneyCompras(input.value);
         if (val > 0) { total += val; count++; }
     });
     const avg = count > 0 ? (total / count) : 0;
-    document.getElementById(`avg_display_${idTrabajo}`).innerText = avg.toLocaleString('en-US', { minimumFractionDigits: 2 });
+    document.getElementById(`avg_display_${idTrabajo}`).innerText = money_format(avg);
+    actualizarDiccionario();
 }
 
 // --- HELPERS DE RENDER ---
 // Render para W2 (Requiere Empresa y tiene Switch de Paystubs)
+// Render para W2 (Ahora incluye campo de Deuda)
 function renderFormW2(id) {
     return `
         <div id="taxes_w2_${id}">
             <div id="tax_list_${id}"></div>
             <button type="button" class="btn btn-xs btn-outline-primary w-100 mb-1" style="font-size:10px" onclick="agregarAnioImpuesto(${id})">+ Añadir Año Tax</button>
-            <div class="small bg-light p-1 text-center border rounded">Average: <b>$ <span id="avg_display_${id}">0.00</span></b></div>
+            <div class="row g-1 mb-2">
+                <div class="col-6 small bg-light p-1 text-center border rounded">Average: <b>$ <span id="avg_display_${id}">0.00</span></b></div>
+                <div class="col-6">
+                      <input type="text" class="form-control form-control-sm" placeholder="Deuda" 
+                onfocus="focusMoney(this)" onblur="blurMoney(this)">
+                </div>
+            </div>
         </div>
         <div id="paystubs_w2_${id}" class="d-none mt-2">
             <div class="row g-1 text-center">
                 <div class="col-4">
                     <label style="font-size:9px">$/Hora</label>
-                    <input type="number" class="form-control form-control-sm text-center" placeholder="0" oninput="calcPS(${id})">
+                    <input type="text" class="form-control form-control-sm text-center" placeholder="0" onfocus="focusMoney(this)" 
+       onblur="blurMoney(this)" oninput="calcPS(${id})">
                 </div>
                 <div class="col-4">
                     <label style="font-size:9px">Horas</label>
@@ -1054,6 +1107,9 @@ function renderFormW2(id) {
                 <div class="col-4">
                     <label style="font-size:9px">Freq (Sems)</label>
                     <input type="number" class="form-control form-control-sm text-center" placeholder="52" oninput="calcPS(${id})">
+                </div>
+                <input type="text" class="form-control form-control-sm" placeholder="Deuda" 
+                onfocus="focusMoney(this)" onblur="blurMoney(this)">
                 </div>
                 <div class="col-12 mt-1 small bg-success-subtle p-1 border rounded">
                     Income Mensual: <b>$ <span id="ps_res_${id}">0.00</span></b>
@@ -1070,7 +1126,8 @@ function renderForm1099(id) {
         <div class="row g-1 mb-1 mt-2">
             <div class="col-6 small bg-light p-1 text-center border rounded">AVG: <b>$<span id="avg_display_${id}">0.00</span></b></div>
             <div class="col-6"><input class="form-control form-control-sm" placeholder="FICO" oninput="actualizarDiccionario()"></div>
-            <div class="col-6"><input class="form-control form-control-sm" placeholder="Deuda" oninput="actualizarDiccionario()"></div>
+            <input type="text" class="form-control form-control-sm" placeholder="Deuda" 
+            onfocus="focusMoney(this)" onblur="blurMoney(this)">
             <div class="col-6">
                 <select class="form-select form-select-sm" onchange="actualizarDiccionario()">
                     <option value="">Estatus legal</option>
@@ -1091,83 +1148,116 @@ function toggleW2Mode(cb, id) {
 function calcPS(id) {
     const area = document.getElementById(`paystubs_w2_${id}`);
     const inputs = area.querySelectorAll('input');
-    const valorHora = parseFloat(inputs[0].value) || 0;
+    // Usar parseMoneyCompras para el valorHora por si tiene formato
+    const valorHora = parseMoneyCompras(inputs[0].value);
     const horas = parseFloat(inputs[1].value) || 0;
     const frecuencia = parseFloat(inputs[2].value) || 0;
 
     const mensual = (valorHora * horas * frecuencia) / 12;
-    document.getElementById(`ps_res_${id}`).innerText = mensual.toLocaleString('en-US', { minimumFractionDigits: 2 });
+    document.getElementById(`ps_res_${id}`).innerText = money_format(mensual);
     actualizarDiccionario();
 }
 
-let diccionarioIngresos = []; // Variable global donde vivirá tu data
-
 function actualizarDiccionario() {
     let dataFinal = [];
+    let granTotalIncome = 0;
+    let granTotalDeuda = 0;
 
-    // 1. Escanear cada tarjeta de Cliente
     document.querySelectorAll('.cliente-card').forEach(card => {
         let idCliente = card.id.split('_')[1];
+        let totalIncomeCliente = 0;
+        let totalDeudaCliente = 0;
+
         let cliente = {
-            nombre: card.querySelector('input[placeholder="Nombre"]').value,
-            apellido: card.querySelector('input[placeholder="Apellido"]').value,
+            nombre: card.querySelector('input[placeholder="Nombre"]')?.value || "",
+            apellido: card.querySelector('input[placeholder="Apellido"]')?.value || "",
             trabajos: []
         };
 
-        // 2. Escanear cada Trabajo (W2 o 1099) dentro de ese cliente
         card.querySelectorAll('.job-item').forEach(jobEl => {
             let idJob = jobEl.id.split('_')[1];
-            let tipo = jobEl.querySelector('.badge').innerText; // W2 o 1099
-            let trabajo = { tipo: tipo };
+            let tipo = jobEl.querySelector('.badge').innerText.trim();
+
+            // 1. Iniciamos el objeto trabajo con los campos base
+            let trabajo = {
+                tipo: tipo,
+                empresa: jobEl.querySelector('input[placeholder="Nombre Empresa"]')?.value || "Ingreso 1099",
+                detallesTaxes: [] // Aquí guardaremos los años y montos
+            };
+
+            // 2. Captura de los Años de Taxes (Común para W2-Taxes y 1099)
+            jobEl.querySelectorAll(`[id^="tax_row_"]`).forEach(row => {
+                let inputs = row.querySelectorAll('input');
+                trabajo.detallesTaxes.push({
+                    anio: inputs[0].value,
+                    monto: parseMoneyCompras(inputs[1].value)
+                });
+            });
 
             if (tipo === 'W2') {
-                trabajo.empresa = jobEl.querySelector('input[placeholder="Nombre Empresa"]')?.value || "";
                 let isPaystub = jobEl.querySelector('.form-check-input').checked;
                 trabajo.modo = isPaystub ? 'paystubs' : 'taxes';
 
+                let contenedorActivo = jobEl.querySelector(`#${trabajo.modo}_w2_${idJob}`);
+                let inputDeudaW2 = contenedorActivo?.querySelector('input[placeholder="Deuda"]');
+                trabajo.deuda = parseMoneyCompras(inputDeudaW2?.value);
+
                 if (isPaystub) {
-                    let psArea = jobEl.querySelector(`#paystubs_w2_${idJob}`);
-                    let inputs = psArea.querySelectorAll('input');
-                    trabajo.paystub_data = {
-                        valorHora: parseFloat(inputs[0].value) || 0,
-                        horas: parseFloat(inputs[1].value) || 0,
-                        frecuencia: parseFloat(inputs[2].value) || 0, // Frecuencia manual
-                        total_mensual: parseFloat(document.getElementById(`ps_res_${idJob}`).innerText.replace(/,/g, '')) || 0
+                    // Info específica de Paystubs
+                    let inputsPS = contenedorActivo.querySelectorAll('input');
+                    trabajo.paystubDetails = {
+                        valorHora: parseMoneyCompras(inputsPS[0].value),
+                        horas: parseFloat(inputsPS[1].value) || 0,
+                        frecuencia: parseFloat(inputsPS[2].value) || 0
                     };
+                    let psText = document.getElementById(`ps_res_${idJob}`)?.innerText || "0";
+                    trabajo.incomeCalculado = parseMoneyCompras(psText);
+                } else {
+                    let avgText = document.getElementById(`avg_display_${idJob}`)?.innerText || "0";
+                    trabajo.incomeCalculado = parseMoneyCompras(avgText);
                 }
-            }
-
-            // 3. Escanear Impuestos (si existen para ese trabajo)
-            let taxList = jobEl.querySelector(`#tax_list_${idJob}`);
-            if (taxList) {
-                trabajo.impuestos = [];
-                taxList.querySelectorAll('[id^="tax_row_"]').forEach(row => {
-                    let inputs = row.querySelectorAll('input');
-                    trabajo.impuestos.push({
-                        anio: inputs[0].value,
-                        monto: parseFloat(inputs[1].value) || 0
-                    });
-                });
-                trabajo.average = parseFloat(document.getElementById(`avg_display_${idJob}`).innerText.replace(/,/g, '')) || 0;
-            }
-
-            // 4. Campos extra exclusivos de 1099
-            if (tipo === '1099') {
+            } else if (tipo === '1099') {
+                // Info específica de 1099
                 trabajo.fico = jobEl.querySelector('input[placeholder="FICO"]')?.value || "";
-                trabajo.deuda = jobEl.querySelector('input[placeholder="Deuda"]')?.value || "";
-                trabajo.estatus_legal = jobEl.querySelector('select').value; // Ciudadano, Residente, etc.
+                trabajo.deuda = parseMoneyCompras(jobEl.querySelector('input[placeholder="Deuda"]')?.value);
+                trabajo.estatusLegal = jobEl.querySelector('select')?.value || "";
+
+                let avgText = document.getElementById(`avg_display_${idJob}`)?.innerText || "0";
+                trabajo.incomeCalculado = parseMoneyCompras(avgText);
             }
+
+            // Sumatorias para los labels
+            totalDeudaCliente += (trabajo.deuda || 0);
+            totalIncomeCliente += (trabajo.incomeCalculado || 0);
 
             cliente.trabajos.push(trabajo);
         });
 
+        granTotalIncome += totalIncomeCliente;
+        granTotalDeuda += totalDeudaCliente;
+
+        const resumenArea = card.querySelector(`#resumen_cliente_${idCliente}`);
+        if (resumenArea) {
+            resumenArea.innerHTML = `
+                <span class="text-success me-2"><i class="fas fa-hand-holding-usd"></i> $${money_format(totalIncomeCliente)}</span>
+                <span class="text-danger"><i class="fas fa-credit-card"></i> $${money_format(totalDeudaCliente)}</span>
+            `;
+        }
         dataFinal.push(cliente);
     });
 
-    diccionarioIngresos = dataFinal;
-    console.log("Diccionario actualizado en tiempo real:", diccionarioIngresos);
-}
+    // Actualización del Gran Total Global
+    const resumenGlobal = document.getElementById('resumen_global_ingresos');
+    if (resumenGlobal) {
+        resumenGlobal.innerHTML = `
+            <span class="text-success me-3" style="font-size: 14px;"><i class="fas fa-hand-holding-usd"></i> <b>$${money_format(granTotalIncome)}</b></span>
+            <span class="text-danger" style="font-size: 14px;"><i class="fas fa-credit-card"></i> <b>$${money_format(granTotalDeuda)}</b></span>
+        `;
+    }
 
+    diccionarioIngresos = dataFinal;
+    console.log("Diccionario Completo:", diccionarioIngresos);
+}
 // Detecta cambios en cualquier input, select o al hacer clic en botones de eliminar
 $(document).on('input change click', '#income_cards_container', function (e) {
     // Pequeño delay para asegurar que el DOM se actualizó si se eliminó un elemento
@@ -1175,3 +1265,46 @@ $(document).on('input change click', '#income_cards_container', function (e) {
         actualizarDiccionario();
     }, 100);
 });
+
+function money_format(num) {
+    if (isNaN(num)) num = 0;
+    return num.toLocaleString('de-DE', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+}
+
+// Al entrar al input: quitamos el formato para que sea un número limpio (1500.50)
+function focusMoney(input) {
+    let valor = parseMoneyCompras(input.value);
+    input.type = "number";
+    input.value = valor > 0 ? valor : "";
+}
+
+// Al salir del input: aplicamos el formato money_format (1.500,50)
+function blurMoney(input) {
+    let valor = parseFloat(input.value) || 0;
+    input.type = "text";
+    input.value = money_format(valor);
+    actualizarDiccionario(); // Aseguramos que se recalcule todo al salir
+}
+
+function resetIncomeSection() {
+    // 1. Limpiar el contenedor de tarjetas del DOM
+    const container = document.getElementById('income_cards_container');
+    if (container) container.innerHTML = "";
+
+    // 2. Resetear el diccionario global
+    diccionarioIngresos = [];
+
+    // 3. Limpiar los labels de resumen (Global e Individual)
+    const resumenGlobal = document.getElementById('resumen_global_ingresos');
+    if (resumenGlobal) {
+        resumenGlobal.innerHTML = `
+            <span class="text-success me-3" style="font-size: 14px;"><i class="fas fa-hand-holding-usd"></i> <b>$0,00</b></span>
+            <span class="text-danger" style="font-size: 14px;"><i class="fas fa-credit-card"></i> <b>$0,00</b></span>
+        `;
+    }
+
+    console.log("Sección de ingresos reseteada por completo.");
+}
