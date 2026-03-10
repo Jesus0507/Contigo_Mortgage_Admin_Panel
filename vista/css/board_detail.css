@@ -140,3 +140,26 @@ body {
   border-radius: 5px;
   margin-top: 10px;
 }
+
+/* Ajuste para que la cabecera no sea muy alta */
+.cliente-card .card-header {
+    min-height: 38px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Iconos de resumen más pequeños y sutiles */
+#income_cards_container i.fas {
+    opacity: 0.8;
+}
+
+/* Espaciado para el nombre que sube un poco */
+.cliente-card .fw-bold {
+    margin-bottom: -2px;
+}
+
+#income_cards_container .text-success, 
+#income_cards_container .text-danger {
+    font-weight: 500;
+}

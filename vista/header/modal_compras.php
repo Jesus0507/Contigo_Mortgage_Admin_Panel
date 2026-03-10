@@ -22,7 +22,7 @@
     </div>
     <div class="custom-modal-body">
         <div class="d-flex flex-row w-100" id="gestion_container" style="height:100%;">
-            <div style="overflow-y: auto; width: 30%">
+            <div style="overflow-y: auto; width: 25%">
                 <div style="font-size: 13px; font-weight: bold">CLIENTE</div>
                 <hr class="m-2">
                 <div class="mb-2 mt-2">
@@ -115,10 +115,16 @@
                     </div>
                 </div>
                 <div class="w-100 mt-3 d-none" id="tabla_income_info">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div style="font-size: 13px; font-weight: bold">DETALLE DE INGRESOS</div>
-                        <button type="button" class="btn btn-sm btn-primary" onclick="agregarTarjetaCliente()">
-                            <i class="fas fa-user-plus"></i> Añadir Cliente/Co-Prestatario
+                    <div class="d-flex justify-content-between align-items-center mb-2 border-bottom pb-1">
+                        <div class="d-flex flex-column">
+                            <h6 class="mb-0">DETALLE DE INGRESOS</h6>
+                            <div id="resumen_global_ingresos" class="mt-1">
+                                <span class="text-success me-3" style="font-size: 14px;"><i class="fas fa-hand-holding-usd"></i>$0.00</span>
+                                <span class="text-danger" style="font-size: 14px;"><i class="fas fa-credit-card"></i>$0.00</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary btn-sm" onclick="agregarTarjetaCliente()">
+                            <i class="fas fa-user-plus"></i> Añadir Cliente
                         </button>
                     </div>
                     <div id="income_cards_container" style="max-height: 500px; overflow-y: auto; border: 1px solid #ddd; border-radius: 10px; padding: 10px; background: #fdfdfd;">
@@ -126,7 +132,7 @@
                 </div>
             </div>
             <div class="modal-divider mx-2"></div>
-            <div style="overflow-y: auto; width: 30%">
+            <div style="overflow-y: auto; width: 35%">
                 <div class="d-flex flex-row w-100 justify-content-between px-2">
                     <div style="font-size: 13px; font-weight: bold">ESTIMACIONES</div>
                 </div>
