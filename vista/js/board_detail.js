@@ -259,6 +259,7 @@ function load_compras_modal_info(ev) {
         // Selects y visibilidad
         document.getElementById("call_detail").value = resultado['detalle_llamada'];
         document.getElementById("conditions").value = resultado['condiciones_notas'];
+        document.getElementById("programa_aplica").value = resultado['programa_aplica'];
         document.getElementById("process_type").value = resultado['tipo_proceso'] ?? "income_check";
         document.getElementById("primer_comprador").value = resultado['primer_comprador'] ?? "si";
         document.getElementById("estatus_legal").value = (resultado['estatus_legal'] == "" || resultado['estatus_legal'] == null) ? "ciudadano" : resultado['estatus_legal'];
@@ -279,6 +280,10 @@ function load_compras_modal_info(ev) {
             document.getElementById("forma_pago").parentElement.parentElement.classList.add("d-none");
         }
 
+        if (document.getElementById("process_type").value == "income_check") {
+            load_income_section(resultado);
+        }
+
         if (document.getElementById("forma_pago").value == "medio_electronico") {
             // Mostramos el contenedor padre del grupo de tiempo
             document.getElementById("tiempo_pago").parentElement.parentElement.parentElement.classList.remove("d-none");
@@ -292,6 +297,123 @@ function load_compras_modal_info(ev) {
         document.getElementById("modal_btn").click();
     });
 }
+
+
+function load_income_section(info) {
+    var detalle_ingresos = info['detalle_ingresos'];
+    var purchase_val = document.getElementById("monto_max").value != "" ? parseMoneyAux(document.getElementById("monto_max").value) : 0;
+    var perc_dp = document.getElementById("down_payment").value != "" ? parseFloat(document.getElementById("down_payment").value) : 0;
+    document.getElementById("total_requerido_label").parentElement.classList.add("d-none");
+    document.querySelector(".programa_container").classList.remove("d-none");
+    document.getElementById("monto_max_label").innerHTML = "Purchase price:";
+    console.log(purchase_val);
+    console.log(perc_dp);
+    document.getElementById("loan_amount_compra").value = money_format(purchase_val - ((purchase_val * perc_dp) / 100));
+
+    const containerClientes = document.getElementById("clientes_ingresos_container");
+    if (containerClientes) {
+        containerClientes.innerHTML = ""; // Limpiar modal para evitar duplicados
+
+        // Solo renderizamos si el proceso es "income_check"
+        if (info['tipo_proceso'] === "income_check") {
+            ingresosDetalle.forEach(cliente => {
+                renderizarTarjetaClienteFull(containerClientes, {
+                    nombre: cliente.client_name,
+                    apellido: cliente.client_last_name,
+                    trabajos: cliente.trabajos.map(t => ({
+                        tipo: t.tipo,
+                        monto: t.monto // El monto ya viene mapeado desde el modelo
+                    }))
+                });
+            });
+        }
+    }
+
+
+}
+
+
+function renderizarTarjetaClienteFull(container, datos) {
+    // Generamos un ID único para la tarjeta y así poder referenciarla al añadir trabajos
+    console.log("cargando clientes");
+    const cardId = 'cliente_' + Math.floor(Math.random() * 100000);
+    const card = document.createElement("div");
+    card.className = "cliente-card mb-3 p-3 border rounded bg-light position-relative";
+    card.id = cardId;
+
+    // Estructura de la tarjeta
+    card.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="m-0 text-primary"><i class="fas fa-user-tie"></i> Datos del Cliente</h6>
+            <button type="button" class="btn btn-sm btn-outline-danger border-0" 
+                    onclick="this.closest('.cliente-card').remove()" title="Eliminar cliente">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="row g-2 mb-2">
+            <div class="col-6">
+                <input type="text" class="form-control form-control-sm cl-nombre" 
+                       placeholder="Nombre" value="${datos.nombre || ''}">
+            </div>
+            <div class="col-6">
+                <input type="text" class="form-control form-control-sm cl-apellido" 
+                       placeholder="Apellido" value="${datos.apellido || ''}">
+            </div>
+        </div>
+        
+        <div class="trabajos-container"></div>
+        
+        <div class="mt-2 d-flex gap-2">
+            <button type="button" class="btn btn-xs btn-outline-primary" 
+                    onclick="agregarFilaTrabajo('${cardId}', 'w2')">
+                <i class="fas fa-plus"></i> W2
+            </button>
+            <button type="button" class="btn btn-xs btn-outline-success" 
+                    onclick="agregarFilaTrabajo('${cardId}', '1099')">
+                <i class="fas fa-plus"></i> 1099
+            </button>
+        </div>
+    `;
+
+    container.appendChild(card);
+
+    // Si el cliente ya trae trabajos (al cargar desde la DB), los renderizamos de una vez
+    const trabajosContainer = card.querySelector(".trabajos-container");
+    if (datos.trabajos && datos.trabajos.length > 0) {
+        datos.trabajos.forEach(trabajo => {
+            // Pasamos el monto que viene del modelo (income_calculado_mensual)
+            agregarFilaTrabajo(cardId, trabajo.tipo, trabajo.monto);
+        });
+    }
+}
+
+function agregarFilaTrabajo(cardId, tipo, monto = "") {
+    const container = document.querySelector(`#${cardId} .trabajos-container`);
+    if (!container) return;
+
+    const row = document.createElement("div");
+    // Aplicamos clases visuales distintas según el tipo para que sea fácil de distinguir
+    const isW2 = tipo.toLowerCase() === 'w2';
+    row.className = `d-flex align-items-center gap-2 mb-1 p-1 rounded ${isW2 ? 'bg-soft-blue' : 'bg-soft-green'}`;
+
+    row.innerHTML = `
+        <span class="badge ${isW2 ? 'bg-primary' : 'bg-success'}" style="width: 50px; font-size: 10px;">
+            ${tipo.toUpperCase()}
+        </span>
+        <div class="input-group input-group-sm">
+            <span class="input-group-text">$</span>
+            <input type="number" class="form-control monto-ingreso" 
+                   placeholder="Monto" value="${monto}" step="0.01">
+        </div>
+        <button type="button" class="btn btn-sm text-danger p-0" 
+                onclick="this.parentElement.remove()">
+            <i class="fas fa-minus-circle"></i>
+        </button>
+    `;
+
+    container.appendChild(row);
+}
+
 function load_gestion_modal_info(ev) {
 
     $.ajax({
@@ -546,6 +668,14 @@ function parseMoney(value) {
     if (typeof value === 'number') return value;
     let cleanValue = value.toString().replace(/\./g, '').replace(',');
     cleanValue = value.toString().replace(/\./g, ',').replace('.');
+    let parsed = parseFloat(cleanValue);
+    return isNaN(parsed) ? 0 : parsed;
+}
+
+function parseMoneyAux(value) {
+    if (!value) return 0;
+    if (typeof value === 'number') return value;
+    let cleanValue = value.toString().replace(/\./g, '').replace(',', '.');
     let parsed = parseFloat(cleanValue);
     return isNaN(parsed) ? 0 : parsed;
 }

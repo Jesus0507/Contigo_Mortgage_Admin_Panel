@@ -21,6 +21,7 @@ class compra_model
     private $monto_max_aplicado;
     private $condiciones_notas;
     private $total_requerido;
+    private $programa_aplica;
     private $conexion;
 
     public function __construct()
@@ -28,7 +29,7 @@ class compra_model
         $this->conexion = new base_datos();
     }
 
-    public function set_compra($id_board, $client_id, $user_id, $tipo_proceso, $primer_comprador, $forma_pago, $tiempo_pago_electronico, $disponible_comprar, $credito_cliente, $estatus_legal, $interes_ofrecido, $gastos_cierre, $down_payment, $monto_max_aplicado, $condiciones_notas,$detalle_llamada, $total_requerido)
+    public function set_compra($id_board, $client_id, $user_id, $tipo_proceso, $primer_comprador, $forma_pago, $tiempo_pago_electronico, $disponible_comprar, $credito_cliente, $estatus_legal, $interes_ofrecido, $gastos_cierre, $down_payment, $monto_max_aplicado, $condiciones_notas, $detalle_llamada, $total_requerido,$programa_aplica)
     {
         $this->id_board = $id_board;
         $this->client_id = $client_id;
@@ -47,20 +48,33 @@ class compra_model
         $this->condiciones_notas = $condiciones_notas;
         $this->detalle_llamada = $detalle_llamada;
         $this->total_requerido = $total_requerido;
+        $this->programa_aplica = $programa_aplica;
     }
 
 
-    public function registrar()
-    {
-        $query = "INSERT INTO compras (id_board,client_id,user_id,tipo_proceso,primer_comprador,forma_pago,tiempo_pago_electronico,disponible_comprar,credito_cliente,estatus_legal,interes_ofrecido,gastos_cierre,down_payment,monto_max_aplicado,condiciones_notas,detalle_llamada,total_requerido,etapa_actual) VALUES ($this->id_board, $this->client_id, $this->user_id, '$this->tipo_proceso', '$this->primer_comprador', '$this->forma_pago', '$this->tiempo_pago_electronico', '$this->disponible_comprar', '$this->credito_cliente', '$this->estatus_legal', '$this->interes_ofrecido', '$this->gastos_cierre', '$this->down_payment', '$this->monto_max_aplicado', '$this->condiciones_notas','$this->total_requerido','$this->detalle_llamada','prospecto')";
-        try {
-            $resultado = $this->conexion->prepare($query);
-            $resultado->execute();
-            return true;
-        } catch (PDOException $e) {
-            return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
-        }
+public function registrar()
+{
+    // He corregido el orden de las últimas 3 columnas para que coincidan con el VALUES
+    $query = "INSERT INTO compras (
+        id_board, client_id, user_id, tipo_proceso, primer_comprador, 
+        forma_pago, tiempo_pago_electronico, disponible_comprar, credito_cliente, 
+        estatus_legal, interes_ofrecido, gastos_cierre, down_payment, 
+        monto_max_aplicado, programa_aplica, condiciones_notas, total_requerido, detalle_llamada, etapa_actual
+    ) VALUES (
+        $this->id_board, $this->client_id, $this->user_id, '$this->tipo_proceso', '$this->primer_comprador', 
+        '$this->forma_pago', '$this->tiempo_pago_electronico', '$this->disponible_comprar', '$this->credito_cliente', 
+        '$this->estatus_legal', '$this->interes_ofrecido', '$this->gastos_cierre', '$this->down_payment', 
+        '$this->monto_max_aplicado', '$this->programa_aplica', '$this->condiciones_notas', '$this->total_requerido', '$this->detalle_llamada', 'prospecto'
+    )";
+    
+    try {
+        $resultado = $this->conexion->prepare($query);
+        $resultado->execute();
+        return true;
+    } catch (PDOException $e) {
+        return "Error: " . $e->getMessage();
     }
+}
 
     public function update_gestion($etapa, $id_compra)
     {
@@ -72,6 +86,51 @@ class compra_model
             return true;
         } catch (PDOException $e) {
             return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
+        }
+    }
+
+
+    public function get_full_gestion_info($id_compra)
+    {
+        // 1. Obtener información básica de la compra (tu query original mejorada)
+        $query = "SELECT co.*, c.*, u.name as user_name, u.last_name as user_last_name 
+                  FROM compras co 
+                  JOIN clients c ON co.client_id = c.client_id 
+                  JOIN users u ON co.user_id = u.user_id 
+                  WHERE co.id_compra = $id_compra";
+        
+        try {
+            $stmt = $this->conexion->prepare($query);
+            $stmt->execute();
+            $gestion = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$gestion) return null;
+
+            // 2. Obtener los Clientes de Ingresos asociados a esta compra
+            $query_ingresos = "SELECT id_cliente_income, client_name, client_last_name 
+                               FROM compra_clientes_income 
+                               WHERE id_compra = $id_compra";
+            $stmt_ing = $this->conexion->prepare($query_ingresos);
+            $stmt_ing->execute();
+            $clientes_income = $stmt_ing->fetchAll(PDO::FETCH_ASSOC);
+
+            // 3. Por cada cliente de ingreso, buscar sus trabajos detallados
+            foreach ($clientes_income as &$cliente) {
+                $id_cli = $cliente['id_cliente_income'];
+                $query_trabajos = "SELECT * FROM cliente_trabajos WHERE id_cliente_income = $id_cli";
+                $stmt_trab = $this->conexion->prepare($query_trabajos);
+                $stmt_trab->execute();
+                $cliente['trabajos'] = $stmt_trab->fetchAll(PDO::FETCH_ASSOC);
+            }
+
+            // Devolvemos todo en un solo paquete
+            return [
+                "base" => [$gestion], // Lo meto en array para no romper tu lógica de JS que usa [0]
+                "ingresos" => $clientes_income
+            ];
+
+        } catch (PDOException $e) {
+            return "Error: " . $e->getMessage();
         }
     }
 
@@ -185,6 +244,65 @@ class compra_model
             return true;
         } catch (PDOException $e) {
             return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
+        }
+    }
+
+    /**
+     * Registra un cliente asociado a la sección de ingresos de una compra.
+     */
+    public function add_cliente_income($id_compra, $name, $last_name)
+    {
+        $query = "INSERT INTO compra_clientes_income (id_compra, client_name, client_last_name) 
+              VALUES ($id_compra, '$name', '$last_name')";
+        try {
+            $resultado = $this->conexion->prepare($query);
+            $resultado->execute();
+            return $this->conexion->lastInsertId();
+        } catch (PDOException $e) {
+            return "Error en línea " . $e->getLine() . ": " . $e->getMessage();
+        }
+    }
+
+    /**
+     * Registra el detalle de un trabajo o fuente de ingreso para un cliente.
+     */
+    public function add_cliente_trabajo($id_cliente, $tipo, $empresa, $modo, $deuda, $fico, $estatus, $v_hora, $horas, $freq, $mensual)
+    {
+        // Manejo de valores nulos para la consulta SQL
+        $fico = $fico ? "'$fico'" : "NULL";
+        $estatus = $estatus ? "'$estatus'" : "NULL";
+        $v_hora = $v_hora ?: "NULL";
+        $horas = $horas ?: "NULL";
+        $freq = $freq ?: "NULL";
+
+        $query = "INSERT INTO cliente_trabajos (
+                id_cliente_income, tipo, empresa, modo, deuda, fico, 
+                estatus_legal, valor_hora, horas_semanales, frecuencia_anual, 
+                income_calculado_mensual
+            ) VALUES ($id_cliente, '$tipo', '$empresa', '$modo', $deuda, $fico, 
+                      $estatus, $v_hora, $horas, $freq, $mensual)";
+        try {
+            $resultado = $this->conexion->prepare($query);
+            $resultado->execute();
+            return $this->conexion->lastInsertId();
+        } catch (PDOException $e) {
+            return "Error en línea " . $e->getLine() . ": " . $e->getMessage();
+        }
+    }
+
+    /**
+     * Registra el histórico de taxes por año para un trabajo específico.
+     */
+    public function add_trabajo_tax_detalle($id_trabajo, $anio, $monto)
+    {
+        $query = "INSERT INTO trabajo_taxes_detalle (id_trabajo, anio, monto) 
+              VALUES ($id_trabajo, $anio, $monto)";
+        try {
+            $resultado = $this->conexion->prepare($query);
+            $resultado->execute();
+            return true;
+        } catch (PDOException $e) {
+            return "Error en línea " . $e->getLine() . ": " . $e->getMessage();
         }
     }
 

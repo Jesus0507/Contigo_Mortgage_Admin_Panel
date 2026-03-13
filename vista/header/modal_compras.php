@@ -173,7 +173,7 @@
 
                 </div>
                 <div class="w-100 mb-2">
-                    <label>Total requerido:</label>
+                    <label id="total_requerido_label">Total requerido:</label>
                     <input class="form-control" id="total_requerido" disabled placeholder="Total requerido">
                 </div>
                 <div class="mb-2 d-flex flex-row w-100 justify-content-between programa_container d-none">

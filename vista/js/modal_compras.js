@@ -37,6 +37,9 @@ var conditions_label = document.getElementById("conditions_label");
 var property_register_btn = document.getElementById("property_register");
 var primer_comprador_field = document.querySelector(".primer-comprador-field");
 var forma_pago_container = document.querySelector(".forma-pago-container");
+var loan_amount = document.getElementById("loan_amount_compra");
+
+loan_amount.disabled = true;
 
 
 
@@ -293,7 +296,11 @@ function fields_validation() {
     });
 
 
-    tipo_proceso.onchange = checkFlowVisibility;
+    tipo_proceso.onchange = function(){checkFlowVisibility();
+        calc_monto_max()
+        monto_max.value = "";
+        total_requerido.value = "";
+    };
     primer_comprador.onchange = checkFlowVisibility;
     forma_pago.onchange = checkFlowVisibility;
 
@@ -377,6 +384,10 @@ function fields_validation() {
 }
 
 function calc_monto_max() {
+    if (tipo_proceso.value == "income_check") {
+        calc_loan_amount();
+        return;
+    }
     // 1. Obtener valores base
     var disp_value = parseMoneyCompras(disponible_comprar.value);
     var dp_perc = down_payment.value !== "" ? parseFloat(down_payment.value) : 0;
@@ -525,6 +536,7 @@ function registerInfo() {
             "monto_max": monto_max.value,
             "condiciones": conditions.value,
             "total_requerido": document.getElementById("total_requerido").value,
+            "programa_aplica": document.getElementById("programa_aplica").value,
             "comments": unsaved_comments,
             "board": document.getElementById("board_id").innerHTML,
             
@@ -558,6 +570,9 @@ close_btn.onclick = function () {
     document.getElementById("down_payment_label_percent").innerHTML = "0,00";
     document.getElementById("gastos_cierre_percent_label").innerHTML = "0,00";
     document.getElementById("modal_gestion_title").innerHTML = "Nueva compra";
+    document.getElementById("programa_aplica").value = "";
+    document.querySelector(".programa_container").classList.add("d-none");
+    document.getElementById("total_requerido_label").parentElement.classList.remove("d-none");
     tipo_proceso.value = "";
     estatus_legal.value = "";
     forma_pago.value = "";
@@ -1307,4 +1322,11 @@ function resetIncomeSection() {
     }
 
     console.log("Sección de ingresos reseteada por completo.");
+}
+
+function calc_loan_amount(){
+    var purchase_price_val = parseMoneyCompras(monto_max.value);
+    var dp_perc = down_payment.value !== "" ? parseFloat(down_payment.value) : 0;
+    var loan_val = purchase_price_val - ((purchase_price_val * dp_perc) / 100);
+    loan_amount.value = money_format(loan_val);
 }
