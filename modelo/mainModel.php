@@ -37,7 +37,7 @@ class main_model
 
 public function get_stadistics()
 {
-    // Al no tener símbolos, el SUM funciona directamente
+
     $sql = "SELECT 
                 (SELECT SUM(loan_amount) FROM gestion) as total_gestion,
                 (SELECT SUM(monto_max_aplicado) FROM compras) as total_compras";
@@ -45,10 +45,10 @@ public function get_stadistics()
         $resultado = $this->conexion->prepare($sql);
         $resultado->execute();
         
-        // Usamos fetch para obtener la fila única de resultados
+
         $respuesta = $resultado->fetch(PDO::FETCH_ASSOC);
 
-        // Validamos que si no hay datos, devuelva 0 en lugar de null
+
         $total_g = isset($respuesta['total_gestion']) ? (float)$respuesta['total_gestion'] : 0;
         $total_c = isset($respuesta['total_compras']) ? (float)$respuesta['total_compras'] : 0;
 
@@ -61,7 +61,6 @@ public function get_stadistics()
     }
 }
 
-	// 5. Ranking de Agentes (Productividad)
 	public function get_ranking_agentes()
 	{
 		$sql = "SELECT 
@@ -72,7 +71,7 @@ public function get_stadistics()
     SUM(CASE WHEN universo.tipo = 'Compra' THEN 1 ELSE 0 END) as total_compra
 FROM users u 
 LEFT JOIN (
-    -- Etiquetamos cada registro según su tabla de origen
+
     SELECT user_id, 'Refinanciamiento' as tipo FROM gestion
     UNION ALL
     SELECT user_id, 'Compra' as tipo FROM compras
@@ -108,7 +107,6 @@ LIMIT 5;";
 		}
 	}
 
-	// 6. Embudo de Ventas (Fases del proceso)
 	public function get_embudo_ventas()
 	{
 		$sql = "SELECT etapa_actual, COUNT(*) as cantidad 
@@ -133,7 +131,7 @@ LIMIT 5;";
 		}
 	}
 
-	// 7. Velocidad de Cierre (Días promedio por mes)
+
 	public function get_velocidad_cierre()
 	{
 		$sql = "SELECT DATE_FORMAT(last_update, '%M') as mes, 
@@ -158,7 +156,7 @@ LIMIT 5;";
 		}
 	}
 
-	// 8. Carga de Trabajo por Board (¿Qué oficina/pizarra está más llena?)
+
 	public function get_carga_boards()
 	{
 		$sql = "SELECT 
@@ -189,14 +187,14 @@ LIMIT 5;";
 
 	public function get_comparativa_valores()
 	{
-		// Limpiamos ambos campos financieros y traemos la fecha para el eje X
+
 		$sql = "SELECT 
                 DATE_FORMAT(date_created, '%d/%m/%Y') as fecha,
                 CAST(REPLACE(REPLACE(REPLACE(property_value, '$', ''), ',', ''), ' ', '') AS DECIMAL(15,2)) as valor_propiedad,
                 CAST(REPLACE(REPLACE(REPLACE(loan_amount, '$', ''), ',', ''), ' ', '') AS DECIMAL(15,2)) as monto_prestamo
             FROM gestion 
             ORDER BY date_created ASC 
-            LIMIT 20"; // Limitamos a los últimos 20 para no saturar el gráfico
+            LIMIT 20"; 
 
 		try {
 			$resultado = $this->conexion->prepare($sql);
@@ -234,13 +232,13 @@ LIMIT 5;";
 			$resultado = $this->conexion->prepare($sql);
 			$resultado->execute();
 
-			// Obtenemos todos los registros
+
 			$respuesta_arreglo = $resultado->fetchAll(PDO::FETCH_ASSOC);
 
 			$labels = [];
 			$counts = [];
 
-			// Recorremos el arreglo para separar labels y cantidades
+
 			foreach ($respuesta_arreglo as $fila) {
 				$labels[] = $fila['tipo_prestamo'];
 				$counts[] = (int)$fila['cantidad'];
@@ -259,8 +257,7 @@ LIMIT 5;";
 
 	public function get_meta_cierre_mensual()
 	{
-		// Sumamos los gastos de cierre solo de los registros que están en etapa de cierre
-		// Ajusta 'Cerrado' al nombre exacto de tu etapa final
+
 		$sql = "SELECT SUM(CAST(REPLACE(REPLACE(REPLACE(gastos_cierre, '$', ''), ',', ''), ' ', '') AS DECIMAL(15,2))) as total_actual
             FROM gestion 
             WHERE etapa_actual = 'finalizado' 
@@ -273,7 +270,7 @@ LIMIT 5;";
 			$fila = $resultado->fetch(PDO::FETCH_ASSOC);
 
 			$total_actual = (float)($fila['total_actual'] ?? 0);
-			$meta_objetivo = 50000.00; // Define aquí tu meta mensual
+			$meta_objetivo = 50000.00; 
 
 			return json_encode([
 				'actual' => $total_actual,
@@ -311,7 +308,7 @@ LIMIT 5;";
 
 			foreach ($respuesta_arreglo as $row) {
 				$labels[] = $row['fecha_finalizacion'];
-				$puntos[] = round($row['promedio_dias'], 1); // Redondeamos a 1 decimal
+				$puntos[] = round($row['promedio_dias'], 1); 
 			}
 
 			$velocidad_data = [
@@ -328,7 +325,6 @@ LIMIT 5;";
 				]
 			];
 
-			// Lo pasas a la vista
 			$json_velocidad = json_encode($velocidad_data);
 			return $json_velocidad;
 		} catch (PDOException $e) {
@@ -360,7 +356,6 @@ LIMIT 5;";
 				$counts[] = (int)$row['total'];
 			}
 
-			// Estructura para Chart.js
 			$limbo_data = [
 				"labels" => $labels,
 				"datasets" => [

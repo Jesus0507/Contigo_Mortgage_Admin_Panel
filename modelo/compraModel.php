@@ -54,7 +54,7 @@ class compra_model
 
 public function registrar()
 {
-    // He corregido el orden de las últimas 3 columnas para que coincidan con el VALUES
+
     $query = "INSERT INTO compras (
         id_board, client_id, user_id, tipo_proceso, primer_comprador, 
         forma_pago, tiempo_pago_electronico, disponible_comprar, credito_cliente, 
@@ -90,49 +90,60 @@ public function registrar()
     }
 
 
-    public function get_full_gestion_info($id_compra)
-    {
-        // 1. Obtener información básica de la compra (tu query original mejorada)
-        $query = "SELECT co.*, c.*, u.name as user_name, u.last_name as user_last_name 
-                  FROM compras co 
-                  JOIN clients c ON co.client_id = c.client_id 
-                  JOIN users u ON co.user_id = u.user_id 
-                  WHERE co.id_compra = $id_compra";
-        
-        try {
-            $stmt = $this->conexion->prepare($query);
-            $stmt->execute();
-            $gestion = $stmt->fetch(PDO::FETCH_ASSOC);
+public function get_full_gestion_info($id_compra)
+{
+    $query = "SELECT co.*, c.*, u.name as user_name, u.last_name as user_last_name 
+              FROM compras co 
+              JOIN clients c ON co.client_id = c.client_id 
+              JOIN users u ON co.user_id = u.user_id 
+              WHERE co.id_compra = $id_compra";
+    
+    try {
+        $stmt = $this->conexion->prepare($query);
+        $stmt->execute();
+        $gestion = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            if (!$gestion) return null;
+        if (!$gestion) return null;
 
-            // 2. Obtener los Clientes de Ingresos asociados a esta compra
-            $query_ingresos = "SELECT id_cliente_income, client_name, client_last_name 
-                               FROM compra_clientes_income 
-                               WHERE id_compra = $id_compra";
-            $stmt_ing = $this->conexion->prepare($query_ingresos);
-            $stmt_ing->execute();
-            $clientes_income = $stmt_ing->fetchAll(PDO::FETCH_ASSOC);
+        $query_ingresos = "SELECT id_cliente_income, client_name, client_last_name 
+                           FROM compra_clientes_income 
+                           WHERE id_compra = $id_compra";
+        $stmt_ing = $this->conexion->prepare($query_ingresos);
+        $stmt_ing->execute();
+        $clientes_income = $stmt_ing->fetchAll(PDO::FETCH_ASSOC);
 
-            // 3. Por cada cliente de ingreso, buscar sus trabajos detallados
-            foreach ($clientes_income as &$cliente) {
-                $id_cli = $cliente['id_cliente_income'];
-                $query_trabajos = "SELECT * FROM cliente_trabajos WHERE id_cliente_income = $id_cli";
-                $stmt_trab = $this->conexion->prepare($query_trabajos);
-                $stmt_trab->execute();
-                $cliente['trabajos'] = $stmt_trab->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($clientes_income as &$cliente) {
+            $id_cli = $cliente['id_cliente_income'];
+            $query_trabajos = "SELECT * FROM cliente_trabajos WHERE id_cliente_income = $id_cli";
+            $stmt_trab = $this->conexion->prepare($query_trabajos);
+            $stmt_trab->execute();
+            $trabajos = $stmt_trab->fetchAll(PDO::FETCH_ASSOC);
+
+
+            foreach ($trabajos as &$trabajo) {
+                $id_trab = $trabajo['id_trabajo'];
+                $query_taxes = "SELECT id_tax_detalle, anio, monto 
+                                FROM trabajo_taxes_detalle 
+                                WHERE id_trabajo = $id_trab 
+                                ORDER BY anio DESC";
+                $stmt_tax = $this->conexion->prepare($query_taxes);
+                $stmt_tax->execute();
+                $trabajo['taxes'] = $stmt_tax->fetchAll(PDO::FETCH_ASSOC);
             }
-
-            // Devolvemos todo en un solo paquete
-            return [
-                "base" => [$gestion], // Lo meto en array para no romper tu lógica de JS que usa [0]
-                "ingresos" => $clientes_income
-            ];
-
-        } catch (PDOException $e) {
-            return "Error: " . $e->getMessage();
+            
+            $cliente['trabajos'] = $trabajos;
         }
+
+        return [
+            "base" => [$gestion],
+            "ingresos" => $clientes_income
+        ];
+
+    } catch (PDOException $e) {
+        return "Error: " . $e->getMessage();
     }
+}
 
     public function update_compra_info($id_compra)
     {
@@ -201,22 +212,6 @@ public function registrar()
     }
 
 
-    // public function get_gestion_deudas($id_gestion)
-    // {
-    //     $query = "SELECT * FROM deudas_adicionales WHERE id_gestion= $id_gestion";
-    //     try {
-    //         $users = [];
-    //         $resultado = $this->conexion->prepare($query);
-    //         $resultado->execute();
-    //         $resultado->setFetchMode(PDO::FETCH_ASSOC);
-    //         foreach ($resultado->fetchAll(PDO::FETCH_ASSOC) as $v) {
-    //             $users[] = $v;
-    //         }
-    //         return $users;
-    //     } catch (PDOException $e) {
-    //         return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
-    //     }
-    // }
 
     public function get_last_compra()
     {
@@ -247,9 +242,7 @@ public function registrar()
         }
     }
 
-    /**
-     * Registra un cliente asociado a la sección de ingresos de una compra.
-     */
+
     public function add_cliente_income($id_compra, $name, $last_name)
     {
         $query = "INSERT INTO compra_clientes_income (id_compra, client_name, client_last_name) 
@@ -263,12 +256,8 @@ public function registrar()
         }
     }
 
-    /**
-     * Registra el detalle de un trabajo o fuente de ingreso para un cliente.
-     */
     public function add_cliente_trabajo($id_cliente, $tipo, $empresa, $modo, $deuda, $fico, $estatus, $v_hora, $horas, $freq, $mensual)
     {
-        // Manejo de valores nulos para la consulta SQL
         $fico = $fico ? "'$fico'" : "NULL";
         $estatus = $estatus ? "'$estatus'" : "NULL";
         $v_hora = $v_hora ?: "NULL";
@@ -290,9 +279,20 @@ public function registrar()
         }
     }
 
-    /**
-     * Registra el histórico de taxes por año para un trabajo específico.
-     */
+
+    
+    public function delete_cliente_comra($id_compra)
+    {
+        $query = "DELETE FROM compra_clientes_income WHERE id_compra = $id_compra";
+        try {
+            $resultado = $this->conexion->prepare($query);
+            $resultado->execute();
+            return true;
+        } catch (PDOException $e) {
+            return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
+        }
+    }
+
     public function add_trabajo_tax_detalle($id_trabajo, $anio, $monto)
     {
         $query = "INSERT INTO trabajo_taxes_detalle (id_trabajo, anio, monto) 
@@ -306,45 +306,5 @@ public function registrar()
         }
     }
 
-    // public function add_deuda($id_gestion, $descripcion, $monto)
-    // {
-    //     $query = "INSERT INTO deudas_adicionales (id_gestion, description, amount) VALUES ($id_gestion, '$descripcion', '$monto')";
-    //     try {
-    //         $resultado = $this->conexion->prepare($query);
-    //         $resultado->execute();
-    //         return true;
-    //     } catch (PDOException $e) {
-    //         return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
-    //     }
-    // }
 
-    // public function get_last_deuda()
-    // {
-    //     $query = "SELECT * FROM deudas_adicionales  ORDER BY id_deuda DESC LIMIT 1";
-    //     try {
-    //         $users = [];
-    //         $resultado = $this->conexion->prepare($query);
-    //         $resultado->execute();
-    //         $resultado->setFetchMode(PDO::FETCH_ASSOC);
-    //         foreach ($resultado->fetchAll(PDO::FETCH_ASSOC) as $v) {
-    //             $users[] = $v;
-    //         }
-    //         return $users;
-    //     } catch (PDOException $e) {
-    //         return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
-    //     }
-    // }
-
-
-    // public function delete_deuda($id_deuda)
-    // {
-    //     $query = "DELETE FROM deudas_adicionales WHERE id_deuda = $id_deuda";
-    //     try {
-    //         $resultado = $this->conexion->prepare($query);
-    //         $resultado->execute();
-    //         return true;
-    //     } catch (PDOException $e) {
-    //         return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
-    //     }
-    // }
 }
