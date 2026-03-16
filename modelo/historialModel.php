@@ -17,10 +17,6 @@ class historial_model
         $this->conexion = new base_datos();
     }
 
-    // public function set_inicio($cedula_usuario,$inicio_sesion){
-    // 	$this->cedula_usuario=$cedula_usuario;
-    // 	$this->inicio_sesion=$inicio_sesion;
-    // }
     public function set_historial($id_gestion, $user_id, $accion, $tipo_accion, $tipo_gestion)
     {
         $this->id_gestion = $id_gestion;
@@ -29,22 +25,6 @@ class historial_model
         $this->tipo_accion = $tipo_accion;
         $this->tipo_gestion = $tipo_gestion;
     }
-
-
-
-    // public function get_bitacora()
-    // {
-    //     $bitacora_result = [
-    //         'codigo' => $this->codigo,
-    //         'fecha' => $this->fecha,
-    //         'cedula_usuario' => $this->cedula_usuario,
-    //         'inicio_sesion' => $this->inicio_sesion,
-    //         'acciones' => $this->acciones,
-    //         'final_sesion' => $this->final_sesion
-
-    //     ];
-    //     return $bitacora_result;
-    // }
 
     public function registrar()
     {
@@ -75,35 +55,4 @@ class historial_model
             return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
         }
     }
-
-    // public function get_bitacora_bd(){
-    // 	$query="SELECT * FROM bitacora";
-    // 	try {
-    // 		$marcas=[];
-    // 		$resultado = $this->conexion->prepare($query);
-    // 		$resultado->execute();
-    // 		$resultado->setFetchMode(PDO::FETCH_ASSOC);
-    // 		foreach($resultado->fetchAll(PDO::FETCH_ASSOC) as $v){
-    // 		 $marca=new brands_model();
-    // 		 $marca->set_marca($v['nombre_marca_producto']);
-    // 		 $marcas[]=$marca;
-    // 		}
-    // 		return $marcas;
-    // 	} catch (PDOException $e) {
-    // 		return "Ha ocurrido un error en la línea ".$e->getLine()." <br> Error: ".$e->getMessage();
-    // 	}
-    // }
-
-
-    // public function editar($acciones, $codigo)
-    // {
-    //     $query = "UPDATE bitacora SET acciones='$this->acciones' WHERE codigo='$codigo'";
-    //     try {
-    //         $resultado = $this->conexion->prepare($query);
-    //         $resultado->execute();
-    //         return true;
-    //     } catch (PDOException $e) {
-    //         return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
-    //     }
-    // }
 }

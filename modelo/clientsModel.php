@@ -47,32 +47,6 @@ class clients_model
 	}
 
 
-	// public function get_bitacora(){
-	// 	$bitacora_result=[
-	// 		'codigo'=>$this->codigo,
-	// 		'fecha'=>$this->fecha,
-	// 		'cedula_usuario'=>$this->cedula_usuario,
-	// 		'inicio_sesion'=>$this->inicio_sesion,
-	// 		'acciones'=>$this->acciones,
-	// 		'final_sesion'=>$this->final_sesion
-
-	// 	];
-	// 	return $bitacora_result;
-	// }
-
-	// public function registrar()
-	// {
-	// 	$clave = $this->conexion->encoding($this->psw);
-	// 	$query = "INSERT INTO users (name,last_name, role, email, psw, is_active) VALUES ('$this->name','$this->last_name', '$this->role','$this->email','$clave', '$this->is_active')";
-	// 	try {
-	// 		$resultado = $this->conexion->prepare($query);
-	// 		$resultado->execute();
-	// 		return true;
-	// 	} catch (PDOException $e) {
-	// 		return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
-	// 	}
-	// }
-
 	public function get_clients()
 	{
 		$query = "SELECT * FROM clients";

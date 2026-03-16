@@ -49,7 +49,6 @@ class mainController
 			$cantClients = count($modeloClients->get_clients());
 			$cantBoards = count($modeloBoards->get_boards());
 			$cantMyBoards = count($modeloBoards->get_my_boards($_SESSION['user_id']));
-			// $estadisticas = $modelo->get_stadistics();
 			require_once "vista/main.php";
 		}
 	}

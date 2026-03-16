@@ -29,18 +29,7 @@ class users_model
 	}
 
 
-	// public function get_bitacora(){
-	// 	$bitacora_result=[
-	// 		'codigo'=>$this->codigo,
-	// 		'fecha'=>$this->fecha,
-	// 		'cedula_usuario'=>$this->cedula_usuario,
-	// 		'inicio_sesion'=>$this->inicio_sesion,
-	// 		'acciones'=>$this->acciones,
-	// 		'final_sesion'=>$this->final_sesion
 
-	// 	];
-	// 	return $bitacora_result;
-	// }
 
 	public function registrar()
 	{
@@ -110,19 +99,6 @@ class users_model
 			return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
 		}
 	}
-
-
-
-	// public function editar($acciones,$codigo){
-	// 	$query="UPDATE bitacora SET acciones='$this->acciones' WHERE codigo='$codigo'";
-	// 	try {
-	// 		$resultado = $this->conexion->prepare($query);
-	// 		$resultado->execute();
-	// 		return true;
-	// 	} catch (PDOException $e) {
-	// 		return "Ha ocurrido un error en la línea ".$e->getLine()." <br> Error: ".$e->getMessage();
-	// 	}
-	// }
 
 
 }

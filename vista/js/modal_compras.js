@@ -296,7 +296,8 @@ function fields_validation() {
     });
 
 
-    tipo_proceso.onchange = function(){checkFlowVisibility();
+    tipo_proceso.onchange = function () {
+        checkFlowVisibility();
         calc_monto_max()
         monto_max.value = "";
         total_requerido.value = "";
@@ -539,7 +540,7 @@ function registerInfo() {
             "programa_aplica": document.getElementById("programa_aplica").value,
             "comments": unsaved_comments,
             "board": document.getElementById("board_id").innerHTML,
-            
+
             // --- NUEVOS CAMPOS DE INCOME ---
             // Enviamos el array completo de objetos convertido a JSON string
             "detalle_ingresos": JSON.stringify(diccionarioIngresos)
@@ -554,40 +555,65 @@ function registerInfo() {
     });
 }
 
-
 close_btn.onclick = function () {
-    document.getElementById("property_register").classList.remove("d-none");
-    if (document.getElementById("property_update")) document.getElementById("property_update").classList.add("d-none");
-    $(".modal-gestion").fadeOut();
-    var all_inputs = document.querySelector(".modal-gestion").querySelectorAll("input");
-    Array.from(all_inputs).forEach((input_content) => {
-        input_content.value = "";
-    })
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: "Se perderán los cambios que no hayas guardado.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, cerrar',
+        cancelButtonText: 'Cancelar',
+        reverseButtons: true // Pone el botón de cancelar a la izquierda
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // --- TODA TU LÓGICA DE LIMPIEZA AQUÍ ---
+            document.getElementById("property_register").classList.remove("d-none");
+            if (document.getElementById("property_update")) {
+                document.getElementById("property_update").classList.add("d-none");
+            }
 
-    document.getElementById("call_detail").value = "";
-    document.querySelector(".comments-area").innerHTML = "";
-    document.querySelector(".historial-container").innerHTML = "";
-    document.getElementById("down_payment_label_percent").innerHTML = "0,00";
-    document.getElementById("gastos_cierre_percent_label").innerHTML = "0,00";
-    document.getElementById("modal_gestion_title").innerHTML = "Nueva compra";
-    document.getElementById("programa_aplica").value = "";
-    document.querySelector(".programa_container").classList.add("d-none");
-    document.getElementById("total_requerido_label").parentElement.classList.remove("d-none");
-    tipo_proceso.value = "";
-    estatus_legal.value = "";
-    forma_pago.value = "";
-    tiempo_pago_formato.value = "dias";
-    primer_comprador_field.classList.add("d-none");
-    forma_pago_container.classList.add("d-none");
-    gastos_cierre.value = 8;
-    setTimeout(() => {
-        document.getElementById("layoutSidenav").classList.remove("opacity-body");
-        document.getElementById("asesor_name").innerHTML = "Asesor: " + document.querySelector(".sb-sidenav-footer").innerHTML;
-        resetIncomeSection();
-        document.getElementById("tabla_income_info").classList.add("d-none");
-    }, 600)
+            $(".modal-gestion").fadeOut();
+
+            var all_inputs = document.querySelector(".modal-gestion").querySelectorAll("input");
+            Array.from(all_inputs).forEach((input_content) => {
+                input_content.value = "";
+            });
+
+            // Limpieza de campos específicos
+            document.getElementById("call_detail").value = "";
+            document.querySelector(".comments-area").innerHTML = "";
+            document.querySelector(".historial-container").innerHTML = "";
+            document.getElementById("down_payment_label_percent").innerHTML = "0,00";
+            document.getElementById("gastos_cierre_percent_label").innerHTML = "0,00";
+            document.getElementById("modal_gestion_title").innerHTML = "Nueva compra";
+            document.getElementById("programa_aplica").value = "";
+            document.querySelector(".programa_container").classList.add("d-none");
+            document.getElementById("total_requerido_label").parentElement.classList.remove("d-none");
+
+            // Reset de selectores y variables de UI
+            tipo_proceso.value = "";
+            estatus_legal.value = "";
+            forma_pago.value = "";
+            tiempo_pago_formato.value = "dias";
+            primer_comprador_field.classList.add("d-none");
+            forma_pago_container.classList.add("d-none");
+            gastos_cierre.value = 8;
+
+            setTimeout(() => {
+                document.getElementById("layoutSidenav").classList.remove("opacity-body");
+                // Extraer nombre del asesor de forma limpia
+                const footerContent = document.querySelector(".sb-sidenav-footer").innerText;
+                document.getElementById("asesor_name").innerHTML = "Asesor: " + footerContent;
+
+                // Reset de la sección de ingresos (importante para el diccionario)
+                resetIncomeSection();
+                document.getElementById("tabla_income_info").classList.add("d-none");
+            }, 600);
+        }
+    });
 }
-
 
 
 if (document.getElementById("property_update")) {
@@ -599,7 +625,15 @@ if (document.getElementById("property_update")) {
 }
 
 function updateInfo(reload) {
-    console.log("modificando info")
+    console.log("modificando info");
+
+    // Aseguramos que el diccionario tenga la última data capturada de los inputs
+    if (typeof actualizarDiccionario === "function") {
+        actualizarDiccionario();
+    }
+
+    console.log(JSON.stringify(diccionarioIngresos));
+
     $.ajax({
         type: "POST",
         url: "index.php?c=boards&a=update_compra_info",
@@ -621,17 +655,24 @@ function updateInfo(reload) {
             "monto_max": monto_max.value,
             "condiciones": conditions.value,
             "total_requerido": document.getElementById("total_requerido").value,
+
+            // --- CAMPO RECIÉN AGREGADO ---
+            "programa_aplica": document.getElementById("programa_aplica").value,
+
             "board": document.getElementById("board_id").innerHTML,
-            "gestion_id": document.getElementById("modal_id_gestion").innerHTML
+            "gestion_id": document.getElementById("modal_id_gestion").innerHTML,
+
+            // --- BLOQUE DE INGRESOS ---
+            "detalle_ingresos": JSON.stringify(diccionarioIngresos)
         }
     }).done(function (result) {
-
-        console.log(result);
+        console.log("Respuesta actualización:", result);
         if (!reload) return;
         location.href = "index.php?c=boards&a=detail&info=" + document.getElementById("board_id").innerHTML;
-    })
+    }).fail(function (error) {
+        console.error("Error al actualizar:", error);
+    });
 }
-
 
 function info_validation() {
     // Función auxiliar para saber si un elemento está oculto
@@ -1271,7 +1312,7 @@ function actualizarDiccionario() {
     }
 
     diccionarioIngresos = dataFinal;
-    console.log("Diccionario Completo:", diccionarioIngresos);
+    //  console.log("Diccionario Completo:", diccionarioIngresos);
 }
 // Detecta cambios en cualquier input, select o al hacer clic en botones de eliminar
 $(document).on('input change click', '#income_cards_container', function (e) {
@@ -1321,10 +1362,10 @@ function resetIncomeSection() {
         `;
     }
 
-    console.log("Sección de ingresos reseteada por completo.");
+    //console.log("Sección de ingresos reseteada por completo.");
 }
 
-function calc_loan_amount(){
+function calc_loan_amount() {
     var purchase_price_val = parseMoneyCompras(monto_max.value);
     var dp_perc = down_payment.value !== "" ? parseFloat(down_payment.value) : 0;
     var loan_val = purchase_price_val - ((purchase_price_val * dp_perc) / 100);

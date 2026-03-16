@@ -122,7 +122,7 @@ class boards_model
 
 	public function get_boards()
 	{
-		// Usamos LEFT JOIN para ambas tablas y contamos según el board_type
+
 		$query = "SELECT 
                 b.*, 
                 u.name AS user_name, 
@@ -141,7 +141,6 @@ class boards_model
 		try {
 			$resultado = $this->conexion->prepare($query);
 			$resultado->execute();
-			// Retornamos directamente el fetchAll para simplificar el código
 			return $resultado->fetchAll(PDO::FETCH_ASSOC);
 		} catch (PDOException $e) {
 			return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
@@ -303,36 +302,5 @@ class boards_model
 			return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
 		}
 	}
-
-
-
-
-	// public function search_user()
-	// {
-
-	// 	$query = "SELECT * FROM users WHERE email='$this->email'";
-	// 	try {
-	// 		$resultado = $this->conexion->prepare($query);
-	// 		$resultado->execute();
-	// 		$resultado->setFetchMode(PDO::FETCH_ASSOC);
-	// 		$respuesta_arreglo = $resultado->fetchAll(PDO::FETCH_ASSOC);
-	// 		return $respuesta_arreglo;
-	// 	} catch (PDOException $e) {
-	// 		return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
-	// 	}
-	// }
-
-
-	// public function editar($acciones,$codigo){
-	// 	$query="UPDATE bitacora SET acciones='$this->acciones' WHERE codigo='$codigo'";
-	// 	try {
-	// 		$resultado = $this->conexion->prepare($query);
-	// 		$resultado->execute();
-	// 		return true;
-	// 	} catch (PDOException $e) {
-	// 		return "Ha ocurrido un error en la línea ".$e->getLine()." <br> Error: ".$e->getMessage();
-	// 	}
-	// }
-
 
 }

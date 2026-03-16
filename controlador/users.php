@@ -37,22 +37,6 @@ class usersController
         }
     }
 
-    // public function addUsers(){
-    //        require_once "vista/addUsers.php";
-    // }
-
-    // public function editUsers(){
-    // 	$modelo=new users_model();
-    // 	$usuarios=$modelo->get_users();
-    // 	$usuario="";
-    // 	foreach($usuarios as $u){
-    // 		if($u->get_cedula_usuario()==$_GET['id']){
-    // 			$usuario=$u;
-    // 		}
-    // 	}
-
-    //        require_once "vista/editUsers.php";
-    // }
 
     public function add_user()
     {
@@ -84,27 +68,5 @@ class usersController
         $modelo = new users_model();
         echo $modelo->delete_user($_POST['user_id']);
     }
-
-    // public function delete(){
-    // 	$modelo=new users_model();
-    // 	if($modelo->eliminar($_GET['id'])){
-    // 		echo "<script>alert('Se ha eliminado al usuario');setTimeout(function(){location.href='index.php?c=users&a=index'},100);</script>";
-    // 	}
-    // 	else{
-    // 		echo $modelo->eliminar($_GET['id']);
-    // 	}
-    // }
-
-    // public function update_user(){
-    // 	$modelo=new users_model();
-    // 	$modelo->set_usuario($_POST['cedula'],$_POST['nombre'],$_POST['apellido'],$_POST['telefono'],$_POST['correo'],$_POST['contrasenia'],$_POST['cargo'],$_POST['userName'],$_POST['tipoUsuario']);
-    //     $resultado=$modelo->editar();
-    // 	if($resultado){
-    // 		echo "<script>alert('Se ha modificado con éxito');setTimeout(function(){location.href='index.php?c=users&a=index'},100);</script>";
-    // 	}
-    // 	else{
-    // 		echo $resultado;
-    // 	}
-    // }
 
 }

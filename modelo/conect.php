@@ -16,7 +16,6 @@ class base_datos extends PDO
 		try {
 			$this->conexion = parent::__construct("mysql:host=$this->host;dbname=$this->bd", $this->usuario, $this->password);
 			$this->repconexion = true;
-			//	$this->errorconexion="";
 		} catch (PDOException $e) {
 			$this->error = "Ha ocurrido un error en la linea :" . $e->getLine() . " <br><br> Error: " . $e->getMessage();
 		}
