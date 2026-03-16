@@ -22,7 +22,7 @@
                                         <th>Nombre</th>
                                         <th>Apellido</th>
                                         <th>Teléfono</th>
-                                        <th>Acciones</th>
+                                   <?php if ($_SESSION['user_role'] == "admin") { ?>      <th>Acciones</th> <?php } ?> 
                                     </tr>
                                 </thead>
                                 <!-- <tfoot>
@@ -41,9 +41,11 @@
                                             <td><input class="form-control input-table" readonly="true" value="<?php echo ucfirst($client['name']) ?>"></td>
                                             <td><input class="form-control input-table" value="<?php echo ucfirst($client['last_name']) ?>"></td>
                                             <td><?php echo $client['phone'] ?></td>
+                                             <?php if ($_SESSION['user_role'] == "admin") { ?> 
                                             <td>
                                                 <div class="d-flex flex-row justify-content-around w-100"><button class="btn btn-primary edit-client" onclick="edit(this)"><i class='fas fa-pencil-alt'></i></button><button class="btn btn-danger" onclick="delete_client(this)"><i class="fas fa-trash"></i></button></div>
                                             </td>
+                                             <?php } ?> 
                                         </tr>
                                     <?php } ?>
                                 </tbody>

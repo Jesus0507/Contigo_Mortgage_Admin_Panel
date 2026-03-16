@@ -255,7 +255,10 @@ if (document.getElementById("property_update")) {
 }
 
 close_btn.onclick = function () {
-    const isEditing = !document.getElementById("property_update").classList.contains("d-none");
+    // VALIDACIÓN DE EXISTENCIA: Si el elemento no existe (es null), isEditing será false.
+    const updateEl = document.getElementById("property_update");
+    const isEditing = updateEl ? !updateEl.classList.contains("d-none") : false;
+    
     const isVisible = (el) => el && !el.closest('.d-none');
 
     // 1. OBTENER TODOS LOS CAMPOS VISIBLES ACTUALMENTE
@@ -266,7 +269,9 @@ close_btn.onclick = function () {
 
     if (isEditing) {
         // --- LÓGICA DE EDICIÓN (Comparar contra old_info) ---
-        const old_info_raw = document.getElementById("old_info_gestion").innerHTML;
+        const oldInfoEl = document.getElementById("old_info_gestion");
+        const old_info_raw = oldInfoEl ? oldInfoEl.innerHTML : "";
+        
         if (old_info_raw.trim() !== "") {
             const old = JSON.parse(old_info_raw);
             const hasChanged = (current, original) => {
@@ -289,9 +294,8 @@ close_btn.onclick = function () {
                 hasChanged(condiciones_adicionales.value, old.condiciones_adicionales);
         }
     } else {
-        // --- LÓGICA DE REGISTRO NUEVO ---
+        // --- LÓGICA DE REGISTRO NUEVO (O MODO AGENTE) ---
         // Verificamos si alguno de los campos visibles tiene información
-        // Excluimos LTV y Gastos de cierre porque suelen tener valores por defecto (75 y 8)
         tieneCambios = camposVisibles.some(el => {
             if (el === ltv_value || el === gastos_cierre) return false;
             return el.value.trim() !== "" && el.value !== "Seleccionar";
@@ -318,7 +322,7 @@ close_btn.onclick = function () {
             }
         });
     } else {
-        // Si todo está vacío, cerramos directamente
+        // Si todo está vacío o es un agente viendo información sin campos de edición, cerramos directamente
         finalizeClose();
     }
 };
@@ -328,7 +332,7 @@ close_btn.onclick = function () {
  */
 function finalizeClose() {
     property_register_btn.classList.remove("d-none");
-    document.getElementById("property_update").classList.add("d-none");
+    if(document.getElementById("property_update")) document.getElementById("property_update").classList.add("d-none");
 
     $(".modal-gestion").fadeOut();
     document.getElementById("layoutSidenav").classList.remove("opacity-body");

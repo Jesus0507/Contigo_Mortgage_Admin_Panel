@@ -150,7 +150,6 @@ public function get_full_gestion_info($id_compra)
         $query = "UPDATE compras SET 
                 id_board = $this->id_board,
                 client_id = $this->client_id,
-                user_id = $this->user_id,
                 tipo_proceso = '$this->tipo_proceso',
                 primer_comprador = '$this->primer_comprador',
                 forma_pago = '$this->forma_pago',

@@ -1,11 +1,12 @@
 var modal_btn = document.getElementById("modal_btn");
 var close_btn = document.getElementById("close_modal_btn");
 
+if(modal_btn){
 modal_btn.onclick = function () {
     $(".custom-modal").fadeIn();
     document.getElementById("layoutSidenav").classList.add("opacity-body");
 }
-
+}
 
 close_btn.onclick = function () {
     $(".custom-modal").fadeOut();

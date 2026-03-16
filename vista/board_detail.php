@@ -37,9 +37,12 @@
                     $all_tickets = explode('/', $board_info[0]['etapas']);
                     foreach ($all_tickets as $ticket) {
                         $cant = 0;
-                        foreach ($all_gestions as $gestion) {
-                            if ($gestion['etapa_actual'] == $ticket) {
-                                $cant = $cant + 1;
+                        // Verificamos que la variable esté definida y sea un array
+                        if (isset($all_gestions) && is_array($all_gestions)) {
+                            foreach ($all_gestions as $gestion) {
+                                if ($gestion['etapa_actual'] == $ticket) {
+                                    $cant = $cant + 1;
+                                }
                             }
                         }
 
@@ -66,6 +69,7 @@
 
                             <ul class="tasks">
                                 <?php
+                                 if (isset($all_gestions) && is_array($all_gestions)) {
                                 foreach ($all_gestions as $gestion) {
                                     if ($gestion['etapa_actual'] == $ticket && ($_SESSION['user_role'] == 'admin' || $_SESSION['user_id'] == $gestion['user_id'])) {
                                 ?>
@@ -73,6 +77,7 @@
                                 <?php
                                     }
                                 }
+                                 }
                                 ?>
                             </ul>
                         </div>
