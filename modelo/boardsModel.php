@@ -182,6 +182,27 @@ class boards_model
 		}
 	}
 
+
+	public function get_boards_users_gestions()
+	{
+		$query = "SELECT u.user_id, u.name AS asesor, ub.id_board, (SELECT COUNT(*) FROM gestion g WHERE g.user_id = u.user_id AND g.id_board = ub.id_board) AS total_en_gestion,
+     	(SELECT COUNT(*) FROM compras c WHERE c.user_id = u.user_id AND c.id_board = ub.id_board) AS total_en_compras FROM users u JOIN 
+    	users_boards ub ON u.user_id = ub.user_id ORDER BY u.user_id ASC, ub.id_board ASC;";
+		
+		try {
+			$users = [];
+			$resultado = $this->conexion->prepare($query);
+			$resultado->execute();
+			$resultado->setFetchMode(PDO::FETCH_ASSOC);
+			foreach ($resultado->fetchAll(PDO::FETCH_ASSOC) as $v) {
+				$users[] = $v;
+			}
+			return $users;
+		} catch (PDOException $e) {
+			return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
+		}
+	}
+
 	public function get_client($phone)
 	{
 		$query = "SELECT * from clients  WHERE phone = '$phone'";
@@ -302,5 +323,4 @@ class boards_model
 			return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
 		}
 	}
-
 }

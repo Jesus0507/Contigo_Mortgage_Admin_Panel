@@ -12,7 +12,7 @@
             <label for="board_type">Tipo de pizarra:</label>
             <select class="form-select" id="board_type">
                 <!-- <option value="gestion_clientes">Gestión de clientes</option> -->
-                <option value="refinanciamiento">Refinanciamiento</option>
+                <option value="gestion_clientes">Refinanciamiento</option>
                 <option value="compras">Compras</option>
                 <!-- <option value="clientes_online">Clientes en línea</option> -->
             </select>

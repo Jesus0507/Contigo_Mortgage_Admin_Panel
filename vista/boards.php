@@ -37,10 +37,30 @@
                                 foreach ($boards as $board) {
                                     if (in_array($board['id_board'], $boards_users) || $_SESSION['user_role'] == "admin") {
                                 ?>
+
                                         <tr>
                                             <td><?php echo $board['name'] ?><span class="d-none hidden-id"><?php echo $board['id_board'] ?></span></td>
                                             <td><?php echo $board['board_type'] ?></td>
-                                            <td><?php echo $board['total_gestiones'] ?></td>
+                                            <td>
+                                                <?php
+                                                if ($_SESSION['user_role'] == "admin") {
+                                                    echo $board['total_gestiones'];
+                                                } else {
+                                                    // Verificamos si este usuario tiene datos para ESTA board específica
+                                                    if (isset($users_gestions[$board['id_board']])) {
+                                                        $stats = $users_gestions[$board['id_board']];
+
+                                                        if ($board['board_type'] == "gestion_clientes") {
+                                                            echo $stats['total_en_gestion'];
+                                                        } else if ($board['board_type'] == "compras") {
+                                                            echo $stats['total_en_compras'];
+                                                        }
+                                                    } else {
+                                                        echo "0"; // Si no hay registros para el usuario en esta board
+                                                    }
+                                                }
+                                                ?>
+                                            </td>
                                             <td><?php echo $board['user_name'] . " " . $board['user_last_name'] ?></td>
                                         </tr>
                                 <?php }
