@@ -794,7 +794,7 @@ function change_column_name(column, opt, oldname) {
     var btn_deny = document.createElement("button");
     btn_deny.className = "btn btn-danger";
     btn_deny.innerHTML = "<i class='fas fa-times'></i>";
-    input.clasName = "form-control";
+    input.className = "form-control";
     input.style.width = "150px";
     input.placeholder = "Nuevo nombre";
     column.classList.add("d-flex");
@@ -938,3 +938,94 @@ function change_board_order(column, opt) {
 
 
 updateTaskCounts();
+
+// Función para el buscador interno de cada pestaña
+function searchInTab(input) {
+    const text = input.value.toLowerCase();
+    const container = input.closest('.tab-pane').querySelector('.options-list');
+    const items = container.querySelectorAll('.dropdown-item');
+
+    items.forEach(item => {
+        const label = item.querySelector('label').innerText.toLowerCase();
+        item.style.display = label.includes(text) ? 'block' : 'none';
+    });
+}
+
+// Función maestra para ocultar/mostrar tickets en el Kanban
+function applyBoardFilters() {
+    // 1. Obtener valores de los checkboxes
+    const selectedAgents = Array.from(document.querySelectorAll('.filter-check-agent:checked')).map(cb => cb.value.toString());
+    const selectedStatus = Array.from(document.querySelectorAll('.filter-check-status:checked')).map(cb => cb.value.toUpperCase());
+
+    // 2. Obtener el valor de la barra de búsqueda (Texto)
+    const searchInput = document.getElementById('searchInputTasks');
+    const searchText = searchInput ? searchInput.value.toLowerCase() : "";
+
+    document.querySelectorAll('.task-container').forEach(ticket => {
+        // Datos del ticket para checkboxes
+        const agentId = (ticket.getAttribute('data-user-id') || "").toString();
+        const status = (ticket.getAttribute('data-status') || "").toUpperCase();
+        
+        // Datos del ticket para búsqueda por nombre (el texto visible)
+        const taskName = (ticket.textContent || ticket.innerText).toLowerCase();
+
+        // Lógica de coincidencia TRIPLE
+        const matchesAgent = selectedAgents.length === 0 || selectedAgents.includes(agentId);
+        const matchesStatus = selectedStatus.length === 0 || selectedStatus.includes(status);
+        const matchesSearch = searchText === "" || taskName.includes(searchText);
+
+        // Mostrar solo si CUMPLE LAS TRES CONDICIONES
+        if (matchesAgent && matchesStatus && matchesSearch) {
+            ticket.classList.remove('d-none');
+            ticket.style.display = "block";
+        } else {
+            ticket.classList.add('d-none');
+            ticket.style.display = "none";
+        }
+    });
+
+    // Actualizar contadores de las columnas
+    if (typeof updateTaskCounts === 'function') {
+        updateTaskCounts();
+    } else if (typeof updateColumnCounters === 'function') {
+        updateColumnCounters();
+    }
+}
+function filterTasksByName() {
+    // 1. Obtener el valor del input y pasarlo a minúsculas
+    let input = document.getElementById('searchInputTasks');
+    let filter = input.value.toLowerCase();
+    
+    // 2. Seleccionar todas las tareas (los <li> con clase .task)
+    let tasks = document.querySelectorAll('.task-container');
+
+    tasks.forEach(task => {
+        // 3. Obtener el texto dentro de la tarea (Nombre y Apellido)
+        let taskText = task.textContent || task.innerText;
+        
+        // 4. Comparar y mostrar/ocultar
+        if (taskText.toLowerCase().indexOf(filter) > -1) {
+            task.style.display = ""; // Mostrar
+            task.classList.remove('d-none'); // Por si usas Bootstrap d-none
+        } else {
+            task.style.display = "none"; // Ocultar
+            task.classList.add('d-none');
+        }
+    });
+
+    // Opcional: Actualizar los contadores de cada columna tras filtrar
+    updateColumnCounters();
+}
+
+// Función auxiliar para que los números de las columnas coincidan con lo visible
+function updateColumnCounters() {
+    let columns = document.querySelectorAll('.task-column');
+    
+    columns.forEach(col => {
+        let visibleTasks = col.querySelectorAll('.task-container:not(.d-none)').length;
+        let counterSpan = col.querySelector('.task_cant');
+        if (counterSpan) {
+            counterSpan.textContent = visibleTasks;
+        }
+    });
+}

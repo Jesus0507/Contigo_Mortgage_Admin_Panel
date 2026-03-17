@@ -26,7 +26,6 @@
                                         <th>Apellido</th>
                                         <th>Correo</th>
                                         <th>Fecha de creación</th>
-                                        <th>Cantidad de pizarras</th>
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>
@@ -41,17 +40,21 @@
                                     </tr>
                                 </tfoot> -->
                                 <tbody>
-                                    <?php
-                                    foreach ($usuarios as $user) { ?>
+                                    <?php foreach ($usuarios as $user) { ?>
                                         <tr>
-                                            <td><input class="form-control input-table" readonly="true" value="<?php echo ucfirst($user['name']) ?>"></td>
-                                            <td><input class="form-control input-table" readonly="true" value="<?php echo ucfirst($user['last_name']) ?>"></td>
-                                            <td><input class="form-control input-table" readonly="true" value="<?php echo $user['email'] ?>"></td>
+                                            <td class="cell-name"><?php echo ucfirst($user['name']) ?></td>
+                                            <td class="cell-lastname"><?php echo ucfirst($user['last_name']) ?></td>
+                                            <td class="cell-email"><?php echo $user['email'] ?></td>
                                             <td><?php echo $user['date_created'] ?></td>
-                                            <td><?php echo $user['total_pizarras'] ?></td>
                                             <td>
-                                                <div class="d-flex flex-row justify-content-around w-100"><button class="<?php echo $user['user_id']?> btn btn-primary edit-client" onclick="edit(this)"><i class='fas fa-pencil-alt'></i></button><button class="<?php echo $user['user_id']?> btn btn-danger" onclick="delete_client(this)"><i class="fas fa-trash"></i></button></div>
-                                            </td>
+                                                <div class="d-flex flex-row justify-content-around w-100">
+                                                    <button class="btn btn-primary edit-client" data-id="<?php echo $user['user_id'] ?>" onclick="edit(this)">
+                                                        <i class='fas fa-pencil-alt'></i>
+                                                    </button>
+                                                    <button class="btn btn-danger" data-id="<?php echo $user['user_id'] ?>" onclick="delete_client(this)">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     <?php } ?>
@@ -82,7 +85,7 @@
     <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
     <script src="vista/js/datatables-simple-demo.js"></script>
     <script src="vista/js/scripts.js"></script>
-     <script src="vista/js/users.js"></script>
+    <script src="vista/js/users.js"></script>
 </body>
 
 </html>
