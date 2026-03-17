@@ -23,11 +23,104 @@
                     <span id="board_id" class="d-none"><?php echo $_GET['info']; ?></span>
                     <div class="w-100 d-flex flex-row justify-content-between">
                         <div class="d-flex flex-row">
-                            <div><input class="form-control" placeholder="Buscar..."></div><i class="fas fa-search mt-2 mx-3"></i>
+                            <div>
+                                <input id="searchInputTasks" class="form-control" placeholder="Buscar..." onkeyup="applyBoardFilters()">
+                            </div>
+                            <i class="fas fa-search mt-2 mx-3"></i>
                             <?php if ($_SESSION['user_role'] == "admin") { ?>
                                 <div><button class="btn btn-dark mx-2" id="access_modal_btn"><i class="fas fa-users-cog"></i> Administrar acceso</button></div>
                             <?php } ?>
                             <div><button class="btn btn-dark mx-2" id="add_column"><i class="far fa-plus-square"></i> Nueva columna</button></div>
+                            <div>
+                                <div class="d-flex gap-3 mb-4 flex-wrap">
+
+                                    <div class="dropdown">
+                                        <button class="btn btn-dark dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+                                            <i class="fas fa-filter me-2"></i> Filtro
+                                        </button>
+                                        <div class="dropdown-menu shadow-lg p-0" style="width: 550px; border-radius: 8px; overflow: hidden;">
+                                            <div class="d-flex" style="min-height: 350px;">
+
+                                                <div class="bg-light border-end" style="width: 40%;">
+                                                    <div class="nav flex-column nav-pills p-2" id="v-pills-tab" role="tablist">
+                                                        <button class="nav-link active text-start mb-1" data-bs-toggle="pill" data-bs-target="#tab-agentes" type="button" role="tab">
+                                                            Persona asignada
+                                                        </button>
+                                                        <button class="nav-link text-start" data-bs-toggle="pill" data-bs-target="#tab-estados" type="button" role="tab">
+                                                            Estado
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                <div class="tab-content p-3" id="v-pills-tabContent" style="width: 60%;">
+
+                                                    <div class="tab-pane fade show active" id="tab-agentes" role="tabpanel">
+                                                        <div class="input-group mb-3">
+                                                            <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
+                                                            <input type="text" class="form-control border-start-0 filter-search" placeholder="Buscar persona asignada..." onkeyup="searchInTab(this)">
+                                                        </div>
+                                                        <div class="options-list" style="max-height: 250px; overflow-y: auto;">
+                                                            <?php
+                                                            // 1. Extraemos todos los user_id presentes en las gestiones actuales
+                                                            $ids_con_gestion = array_column($all_gestions, 'user_id');
+
+                                                            foreach ($usuarios as $user) {
+                                                                // 2. Verificamos si el ID del usuario actual existe en esa lista extraída
+                                                                if (in_array($user['user_id'], $ids_con_gestion)) {
+                                                            ?>
+                                                                    <div class="form-check dropdown-item py-1">
+                                                                        <input class="form-check-input filter-check-agent"
+                                                                            type="checkbox"
+                                                                            value="<?php echo $user['user_id']; ?>"
+                                                                            id="u<?php echo $user['user_id']; ?>"
+                                                                            onchange="applyBoardFilters()">
+                                                                        <label class="form-check-label w-100" for="u<?php echo $user['user_id']; ?>">
+                                                                            <?php echo $user['name'] . " " . $user['last_name']; ?>
+                                                                        </label>
+                                                                    </div>
+                                                            <?php
+                                                                }
+                                                            }
+                                                            ?>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="tab-pane fade" id="tab-estados" role="tabpanel">
+                                                        <div class="input-group mb-3">
+                                                            <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
+                                                            <input type="text" class="form-control border-start-0 filter-search" placeholder="Buscar estado..." onkeyup="searchInTab(this)">
+                                                        </div>
+                                                        <div class="options-list" style="max-height: 250px; overflow-y: auto;">
+                                                            <?php
+                                                            // 1. Extraemos solo la columna 'etapa_actual'
+                                                            // 2. Aplicamos array_unique para eliminar duplicados
+                                                            $etapas_unicas = array_unique(array_column($all_gestions, 'etapa_actual'));
+
+                                                            foreach ($etapas_unicas as $index => $etapa) {
+                                                                // Normalizamos a mayúsculas para evitar problemas de comparación
+                                                                $etapa_label = strtoupper($etapa);
+                                                            ?>
+                                                                <div class="form-check dropdown-item py-1">
+                                                                    <input class="form-check-input filter-check-status"
+                                                                        type="checkbox"
+                                                                        value="<?php echo $etapa_label ?>"
+                                                                        id="status_<?php echo $index; ?>"
+                                                                        onchange="applyBoardFilters()">
+                                                                    <label class="form-check-label w-100" for="status_<?php echo $index; ?>">
+                                                                        <?php echo $etapa_label ?>
+                                                                    </label>
+                                                                </div>
+                                                            <?php } ?>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
                         </div>
                         <div><button class="btn btn-primary mb-4 modal-btn" id="modal_btn"><i class="fas fa-ticket-alt"></i> <?php if ($board_info[0]['board_type'] == "gestion_clientes") echo "Agregar gestión" ?><?php if ($board_info[0]['board_type'] != "gestion_clientes") echo "Agregar compra" ?></button></div>
                     </div>
@@ -69,62 +162,32 @@
 
                             <ul class="tasks">
                                 <?php
-                                 if (isset($all_gestions) && is_array($all_gestions)) {
-                                foreach ($all_gestions as $gestion) {
-                                    if ($gestion['etapa_actual'] == $ticket && ($_SESSION['user_role'] == 'admin' || $_SESSION['user_id'] == $gestion['user_id'])) {
+                                if (isset($all_gestions) && is_array($all_gestions)) {
+                                    foreach ($all_gestions as $gestion) {
+                                        if ($gestion['etapa_actual'] == $ticket && ($_SESSION['user_role'] == 'admin' || $_SESSION['user_id'] == $gestion['user_id'])) {
                                 ?>
-                                        <li class="task" draggable="true"><?php echo ucfirst($gestion['name']) . " " . ucfirst($gestion['last_name']); ?><span class="gestion-id d-none"><?php echo $board_info[0]['board_type'] == "gestion_clientes" ? $gestion['id_gestion'] : $gestion['id_compra'] ?></span></li>
+                                            <li class="task task-container"
+                                                draggable="true"
+                                                data-user-id="<?php echo $gestion['user_id']; ?>"
+                                                data-status="<?php echo strtoupper($gestion['etapa_actual']); ?>">
+
+                                                <?php echo ucfirst($gestion['name']) . " " . ucfirst($gestion['last_name']); ?>
+                                                <span class="gestion-id d-none">
+                                                    <?php echo $board_info[0]['board_type'] == "gestion_clientes" ? $gestion['id_gestion'] : $gestion['id_compra'] ?>
+                                                </span>
+                                            </li>
                                 <?php
+                                        }
                                     }
                                 }
-                                 }
                                 ?>
                             </ul>
                         </div>
                     <?php } ?>
                 </div>
-                <!-- <div class="card mb-4">
-                    <div class="card-header">
-                        <i class="fas fa-table me-1"></i>
-                        Listado de pizarras
-                    </div> -->
-                <!-- <div class="card-body">
-                        <table id="datatablesSimple">
-                            <thead>
-                                <tr>
-                                    <th>Nombre</th>
-                                    <th>Tipo</th>
-                                    <th>Etapa actual</th>
-                                    <th>Creado por</th>
-                                    <th>Cliente</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <th>Nombre</th>
-                                <th>Tipo</th>
-                                <th>Etapa actual</th>
-                                <th>Creado por</th>
-                                <th>Cliente</th>
-                                <th>Acciones</th>
-                            </tbody>
-                        </table>
-                    </div>
-                </div> -->
         </div>
         </main>
-        <!-- <footer class="py-4 bg-light mt-auto">
-                <div class="container-fluid px-4">
-                    <div class="d-flex align-items-center justify-content-between small">
-                        <div class="text-muted">Copyright &copy; Your Website 2023</div>
-                        <div>
-                            <a href="#">Privacy Policy</a>
-                            &middot;
-                            <a href="#">Terms &amp; Conditions</a>
-                        </div>
-                    </div>
-                </div>
-            </footer> -->
+
     </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

@@ -22,7 +22,7 @@
                                         <th>Nombre</th>
                                         <th>Apellido</th>
                                         <th>Teléfono</th>
-                                   <?php if ($_SESSION['user_role'] == "admin") { ?>      <th>Acciones</th> <?php } ?> 
+                                        <?php if ($_SESSION['user_role'] == "admin") { ?> <th>Acciones</th> <?php } ?>
                                     </tr>
                                 </thead>
                                 <!-- <tfoot>
@@ -38,14 +38,21 @@
                                 <tbody>
                                     <?php foreach ($clients as $client) { ?>
                                         <tr>
-                                            <td><input class="form-control input-table" readonly="true" value="<?php echo ucfirst($client['name']) ?>"></td>
-                                            <td><input class="form-control input-table" value="<?php echo ucfirst($client['last_name']) ?>"></td>
-                                            <td><?php echo $client['phone'] ?></td>
-                                             <?php if ($_SESSION['user_role'] == "admin") { ?> 
-                                            <td>
-                                                <div class="d-flex flex-row justify-content-around w-100"><button class="btn btn-primary edit-client" onclick="edit(this)"><i class='fas fa-pencil-alt'></i></button><button class="btn btn-danger" onclick="delete_client(this)"><i class="fas fa-trash"></i></button></div>
-                                            </td>
-                                             <?php } ?> 
+                                            <td class="cell-name"><?php echo ucfirst($client['name']) ?></td>
+                                            <td class="cell-lastname"><?php echo ucfirst($client['last_name']) ?></td>
+                                            <td class="cell-phone"><?php echo $client['phone'] ?></td>
+                                            <?php if ($_SESSION['user_role'] == "admin") { ?>
+                                                <td>
+                                                    <div class="d-flex flex-row justify-content-around w-100">
+                                                        <button class="btn btn-primary edit-client" data-phone="<?php echo $client['phone'] ?>" onclick="edit(this)">
+                                                            <i class='fas fa-pencil-alt'></i>
+                                                        </button>
+                                                        <button class="btn btn-danger" data-phone="<?php echo $client['phone'] ?>" onclick="delete_client(this)">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            <?php } ?>
                                         </tr>
                                     <?php } ?>
                                 </tbody>
