@@ -117,7 +117,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div><button class="btn btn-primary mb-4 modal-btn" id="modal_btn"><i class="fas fa-ticket-alt"></i> <?php if ($board_info[0]['board_type'] == "gestion_clientes") echo "Agregar gestión" ?><?php if ($board_info[0]['board_type'] != "gestion_clientes") echo "Agregar compra" ?></button></div>
+                        <div><button class="btn btn-primary mb-4 modal-btn" id="modal_btn"><i class="fas fa-ticket-alt"></i> <?php if ($board_info[0]['board_type'] == "gestion_clientes") echo "Agregar gestión" ?><?php if ($board_info[0]['board_type'] != "gestion_clientes") echo "Agregar proceso" ?></button></div>
                     </div>
                 </div>
                 <div class="container-tasks">
@@ -153,7 +153,7 @@
                                     <div class="opt-item opt-clickeable">Eliminar columna</div>
 
                                 </div><?php } ?>
-
+                            
                             <ul class="tasks">
                                 <?php
                                 if (isset($all_gestions) && is_array($all_gestions)) {
@@ -161,9 +161,15 @@
                                         if ($gestion['etapa_actual'] == $ticket && ($_SESSION['user_role'] == 'admin' || $_SESSION['user_id'] == $gestion['user_id'])) {
                                 ?>
                                             <li class="task task-container"
+                                                <?php if (strtolower($gestion['etapa_actual']) != "finalizado" || $_SESSION['user_role'] == 'admin') { ?>
                                                 draggable="true"
+                                                <?php } else{?>
+                                                draggable="false"
+                                                <?php }?>
                                                 data-user-id="<?php echo $gestion['user_id']; ?>"
-                                                data-status="<?php echo strtoupper($gestion['etapa_actual']); ?>">
+                                                data-status="<?php echo strtoupper($gestion['etapa_actual']); ?>"
+                                                data-user-type ="<?php echo $_SESSION['user_role'];?>"
+                                                >
 
                                                 <?php echo ucfirst($gestion['name']) . " " . ucfirst($gestion['last_name']); ?>
                                                 <span class="gestion-id d-none">

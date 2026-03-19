@@ -27,8 +27,8 @@
                             <thead>
                                 <tr>
                                     <th>Nombre</th>
-                                    <th>Tipo</th>
-                                    <th>Cantidad de tickets</th>
+                                    <th>Tipo de proceso</th>
+                                    <th>Cantidad de procesos</th>
                                     <th>Creado por</th>
                                 </tr>
                             </thead>

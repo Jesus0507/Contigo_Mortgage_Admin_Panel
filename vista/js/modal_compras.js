@@ -387,8 +387,10 @@ function fields_validation() {
 function calc_monto_max() {
     if (tipo_proceso.value == "income_check") {
         calc_loan_amount();
+        document.getElementById("calculated_required_money").parentElement.classList.remove("d-none");
         return;
     }
+    document.getElementById("calculated_required_money").parentElement.classList.add("d-none");
     // 1. Obtener valores base
     var disp_value = parseMoneyCompras(disponible_comprar.value);
     var dp_perc = down_payment.value !== "" ? parseFloat(down_payment.value) : 0;
@@ -408,7 +410,7 @@ function calc_monto_max() {
     monto_max.value = money_format(nuevo_monto_max);
     document.getElementById("down_payment_label_percent").innerHTML = money_format((nuevo_monto_max * dp_perc) / 100);
     document.getElementById("gastos_cierre_percent_label").innerHTML = money_format((gastos_perc * nuevo_monto_max) / 100);
-
+    document.getElementById("calculated_required_money").innerHTML = money_format(((nuevo_monto_max * dp_perc) / 100) + ((gastos_perc * nuevo_monto_max) / 100));
     // 4. Calcular el Total Requerido para verificar
     // (Debería dar igual a disp_value, pero restamos 0.01 para seguridad visual)
     var check_total = (nuevo_monto_max * dp_perc / 100) + (nuevo_monto_max * gastos_perc / 100);
@@ -587,6 +589,8 @@ close_btn.onclick = function () {
             document.querySelector(".historial-container").innerHTML = "";
             document.getElementById("down_payment_label_percent").innerHTML = "0,00";
             document.getElementById("gastos_cierre_percent_label").innerHTML = "0,00";
+            document.getElementById("calculated_required_money").innerHTML = "0,00";
+            document.getElementById("calculated_required_money").parentElement.classList.add("d-none");
             document.getElementById("modal_gestion_title").innerHTML = "Nueva compra";
             document.getElementById("programa_aplica").value = "";
             document.querySelector(".programa_container").classList.add("d-none");
@@ -979,9 +983,10 @@ function get_tiempo_requerido() {
     document.getElementById("total_requerido").value = total_requerido_val;
 }
 
-function agregarTarjetaCliente() {
+function agregarTarjetaCliente(el) {
     // 1. Calculamos la cantidad de tarjetas actuales
     var cant_cards = document.querySelectorAll(".cliente-card").length;
+    if (cant_cards == 3) el.disabled = true;
     const idCliente = Date.now();
 
     // 2. Definimos variables para los valores iniciales
@@ -1101,21 +1106,27 @@ function updateHeader(id) {
 }
 
 // --- NIVEL 3: AÑOS DE IMPUESTOS (DINÁMICOS) ---
-function agregarAnioImpuesto(idTrabajo) {
+function agregarAnioImpuesto(idTrabajo, el) {
+
+    var cant_taxes = el.parentElement.querySelectorAll(".tax-fields").length;
+    if (cant_taxes == 1) el.disabled = true;
     const contenedor = document.getElementById(`tax_list_${idTrabajo}`);
     const idTax = Date.now();
     const html = `
-        <div class="d-flex gap-1 mb-1 align-items-center" id="tax_row_${idTax}">
+        <div class="d-flex gap-1 mb-1 align-items-center tax-fields" id="tax_row_${idTax}">
             <input type="number" class="form-control form-control-sm w-50" placeholder="Año (ej. 2024)">  
         <input type="text" class="form-control form-control-sm w-50 tax-value-${idTrabajo}"  placeholder="Monto $" onfocus="focusMoney(this)" onblur="blurMoney(this); calcularAverage(${idTrabajo})">
-            <button class="btn btn-xs text-danger p-0" onclick="eliminarAnio(${idTax}, ${idTrabajo})">×</button>
+            <button class="btn btn-xs text-danger p-0" onclick="eliminarAnio(${idTax}, ${idTrabajo}, this)">×</button>
         </div>`;
     contenedor.insertAdjacentHTML('beforeend', html);
 }
 
-function eliminarAnio(idTax, idTrabajo) {
+function eliminarAnio(idTax, idTrabajo, el) {
+    var btn_tax = el.parentElement.parentElement.parentElement.querySelector(".btn-add-impuesto");
     document.getElementById(`tax_row_${idTax}`).remove();
     calcularAverage(idTrabajo);
+
+    btn_tax.disabled = false;
 }
 
 // --- CÁLCULOS ---
@@ -1140,7 +1151,7 @@ function renderFormW2(id) {
     return `
         <div id="taxes_w2_${id}">
             <div id="tax_list_${id}"></div>
-            <button type="button" class="btn btn-xs btn-outline-primary w-100 mb-1" style="font-size:10px" onclick="agregarAnioImpuesto(${id})">+ Añadir Año Tax</button>
+            <button type="button" class="btn btn-xs btn-outline-primary w-100 mb-1 btn-add-impuesto" style="font-size:10px" onclick="agregarAnioImpuesto(${id},this)">+ Añadir Año Tax</button>
             <div class="row g-1 mb-2">
                 <div class="col-6 small bg-light p-1 text-center border rounded">Average: <b>$ <span id="avg_display_${id}">0.00</span></b></div>
                 <div class="col-6">
@@ -1178,7 +1189,7 @@ function renderFormW2(id) {
 function renderForm1099(id) {
     return `
         <div id="tax_list_${id}"></div>
-        <button type="button" class="btn btn-xs btn-outline-primary w-100 mb-1" style="font-size:10px" onclick="agregarAnioImpuesto(${id})">+ Añadir Año Tax</button>
+        <button type="button" class="btn btn-xs btn-outline-primary w-100 mb-1 btn-add-impuesto" style="font-size:10px" onclick="agregarAnioImpuesto(${id},this)">+ Añadir Año Tax</button>
         <div class="row g-1 mb-1 mt-2">
             <div class="col-6 small bg-light p-1 text-center border rounded">AVG: <b>$<span id="avg_display_${id}">0.00</span></b></div>
             <div class="col-6"><input class="form-control form-control-sm" placeholder="FICO" oninput="actualizarDiccionario()"></div>
@@ -1218,6 +1229,11 @@ function actualizarDiccionario() {
     let dataFinal = [];
     let granTotalIncome = 0;
     let granTotalDeuda = 0;
+
+    var cant_cards = document.querySelectorAll(".cliente-card").length;
+    if (cant_cards < 4) document.getElementById("add_cosigner").disabled = false;
+
+
 
     document.querySelectorAll('.cliente-card').forEach(card => {
         let idCliente = card.id.split('_')[1];
@@ -1369,5 +1385,9 @@ function calc_loan_amount() {
     var purchase_price_val = parseMoneyCompras(monto_max.value);
     var dp_perc = down_payment.value !== "" ? parseFloat(down_payment.value) : 0;
     var loan_val = purchase_price_val - ((purchase_price_val * dp_perc) / 100);
+    var gastos_perc = gastos_cierre.value !== "" ? parseFloat(gastos_cierre.value) : 0;
     loan_amount.value = money_format(loan_val);
+    document.getElementById("down_payment_label_percent").innerHTML = money_format((purchase_price_val * dp_perc) / 100);
+    document.getElementById("gastos_cierre_percent_label").innerHTML = money_format((gastos_perc * purchase_price_val) / 100);
+    document.getElementById("calculated_required_money").innerHTML = money_format(((purchase_price_val * dp_perc) / 100) + ((gastos_perc * purchase_price_val) / 100));
 }

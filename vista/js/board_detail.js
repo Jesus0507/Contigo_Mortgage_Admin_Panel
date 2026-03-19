@@ -22,6 +22,7 @@ function updateTaskCounts() {
 // Configuración de eventos para las tareas (Drag)
 tasks.forEach((task) => {
     task.addEventListener("dragstart", (event) => {
+        if(task.dataset.status == "FINALIZADO" && task.dataset.userType != "admin") return;
         task.id = "dragged-task";
         event.dataTransfer.effectAllowed = "move";
         event.dataTransfer.setData("task", "");
@@ -29,6 +30,11 @@ tasks.forEach((task) => {
 
     task.addEventListener("dragend", (event) => {
         task.removeAttribute("id");
+        console.log(task.parentElement.parentElement.querySelector(".task-title-text").innerHTML);
+        if(task.parentElement.parentElement.querySelector(".task-title-text").innerHTML.toLowerCase() == "finalizado" && task.dataset.userType != "admin"){
+            task.draggable = false;
+            task.dataset.status ="FINALIZADO";
+        }
     });
 });
 
@@ -195,7 +201,7 @@ function add_new_column_val(input) {
 
 
 Array.from(tasks).forEach((task) => {
-    task.ondblclick = function (ev) {
+    task.onclick = function (ev) {
         document.getElementById("property_register").classList.add("d-none");
         if (document.getElementById("property_update")) document.getElementById("property_update").classList.remove("d-none");
         var board_type = document.getElementById("hidden_board_type").innerHTML;
