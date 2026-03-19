@@ -15,7 +15,6 @@ class boardsController
     {
         session_start();
 
-        // Validación de sesión
         if (!isset($_SESSION['user_id']) || empty($_SESSION['user_id'])) {
             require_once "vista/login.php";
             session_destroy();
@@ -23,27 +22,20 @@ class boardsController
             $modelo = new boards_model();
             $modelo_users = new users_model();
 
-            // 1. Obtener datos base
             $boards = $modelo->get_boards();
             $usuarios = $modelo_users->get_users();
             $boards_users = $modelo->get_all_boards_users($_SESSION['user_id']);
-
-            // 2. Obtener estadísticas de gestiones/compras
             $raw_gestions = $modelo->get_boards_users_gestions();
 
-            // 3. INDEXACIÓN CRÍTICA: Convertimos el array plano en un diccionario por id_board
-            // Esto permite que en la vista hagas: $users_gestions[$id_board]
             $users_gestions = [];
             if (is_array($raw_gestions)) {
                 foreach ($raw_gestions as $gestion) {
-                    // Solo mapeamos las estadísticas que pertenecen al usuario actual
                     if ($gestion['user_id'] == $_SESSION['user_id']) {
                         $users_gestions[$gestion['id_board']] = $gestion;
                     }
                 }
             }
 
-            // 4. Cargar la vista con las variables preparadas
             require_once "vista/boards.php";
         }
     }
@@ -397,6 +389,7 @@ class boardsController
         $modelo = new boards_model();
         echo $modelo->update_board(strtolower($_POST['order_etapas']), $_POST['id_board']);
     }
+    
 
     public function change_board_order()
     {

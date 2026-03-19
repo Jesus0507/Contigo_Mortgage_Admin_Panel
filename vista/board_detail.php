@@ -61,11 +61,9 @@
                                                         </div>
                                                         <div class="options-list" style="max-height: 250px; overflow-y: auto;">
                                                             <?php
-                                                            // 1. Extraemos todos los user_id presentes en las gestiones actuales
                                                             $ids_con_gestion = array_column($all_gestions, 'user_id');
 
                                                             foreach ($usuarios as $user) {
-                                                                // 2. Verificamos si el ID del usuario actual existe en esa lista extraída
                                                                 if (in_array($user['user_id'], $ids_con_gestion)) {
                                                             ?>
                                                                     <div class="form-check dropdown-item py-1">
@@ -92,12 +90,9 @@
                                                         </div>
                                                         <div class="options-list" style="max-height: 250px; overflow-y: auto;">
                                                             <?php
-                                                            // 1. Extraemos solo la columna 'etapa_actual'
-                                                            // 2. Aplicamos array_unique para eliminar duplicados
                                                             $etapas_unicas = array_unique(array_column($all_gestions, 'etapa_actual'));
 
                                                             foreach ($etapas_unicas as $index => $etapa) {
-                                                                // Normalizamos a mayúsculas para evitar problemas de comparación
                                                                 $etapa_label = strtoupper($etapa);
                                                             ?>
                                                                 <div class="form-check dropdown-item py-1">
@@ -130,7 +125,6 @@
                     $all_tickets = explode('/', $board_info[0]['etapas']);
                     foreach ($all_tickets as $ticket) {
                         $cant = 0;
-                        // Verificamos que la variable esté definida y sea un array
                         if (isset($all_gestions) && is_array($all_gestions)) {
                             foreach ($all_gestions as $gestion) {
                                 if ($gestion['etapa_actual'] == $ticket) {
