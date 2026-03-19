@@ -992,32 +992,27 @@ function applyBoardFilters() {
     }
 }
 function filterTasksByName() {
-    // 1. Obtener el valor del input y pasarlo a minúsculas
+
     let input = document.getElementById('searchInputTasks');
     let filter = input.value.toLowerCase();
     
-    // 2. Seleccionar todas las tareas (los <li> con clase .task)
     let tasks = document.querySelectorAll('.task-container');
 
     tasks.forEach(task => {
-        // 3. Obtener el texto dentro de la tarea (Nombre y Apellido)
         let taskText = task.textContent || task.innerText;
-        
-        // 4. Comparar y mostrar/ocultar
+
         if (taskText.toLowerCase().indexOf(filter) > -1) {
-            task.style.display = ""; // Mostrar
-            task.classList.remove('d-none'); // Por si usas Bootstrap d-none
+            task.style.display = ""; 
+            task.classList.remove('d-none'); 
         } else {
-            task.style.display = "none"; // Ocultar
+            task.style.display = "none"; 
             task.classList.add('d-none');
         }
     });
 
-    // Opcional: Actualizar los contadores de cada columna tras filtrar
     updateColumnCounters();
 }
 
-// Función auxiliar para que los números de las columnas coincidan con lo visible
 function updateColumnCounters() {
     let columns = document.querySelectorAll('.task-column');
     

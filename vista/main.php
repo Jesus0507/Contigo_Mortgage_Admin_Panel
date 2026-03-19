@@ -19,7 +19,7 @@
                                         <div><?php echo $cantUsers; ?></div>
                                     </div>
                                     <div class="card-footer d-flex align-items-center justify-content-between">
-                                        <a class="small text-white stretched-link" href="#">View Details</a>
+                                        <a class="small text-white stretched-link" href="index.php?c=users&a=index">Detalles</a>
                                         <div class="small text-white"><i class="fas fa-angle-right"></i></div>
                                     </div>
                                 </div>
@@ -31,7 +31,7 @@
                                         <div><?php echo $cantClients; ?></div>
                                     </div>
                                     <div class="card-footer d-flex align-items-center justify-content-between">
-                                        <a class="small text-white stretched-link" href="#">View Details</a>
+                                        <a class="small text-white stretched-link" href="index.php?c=clients&a=index">Detalles</a>
                                         <div class="small text-white"><i class="fas fa-angle-right"></i></div>
                                     </div>
                                 </div>
@@ -43,30 +43,31 @@
                                         <div><?php echo $cantBoards; ?></div>
                                     </div>
                                     <div class="card-footer d-flex align-items-center justify-content-between">
-                                        <a class="small text-white stretched-link" href="#">View Details</a>
+                                        <a class="small text-white stretched-link" href="index.php?c=boards&a=index">Detalles</a>
                                         <div class="small text-white"><i class="fas fa-angle-right"></i></div>
                                     </div>
                                 </div>
                             </div>
-                        <?php } ?>
+                        <?php } else{ ?>
                         <div class="col-xl-3 col-md-6">
                             <div class="card contigo-blue text-white mb-4">
                                 <div class="card-body d-flex flex-row justify-content-between">
-                                    <div><i class="fas fa-clipboard-list"></i> Mis pizarras</div>
+                                    <div><i class="fas fa-clipboard-list"></i> Pizarras</div>
                                     <div><?php echo $cantMyBoards; ?></div>
                                 </div>
                                 <div class="card-footer d-flex align-items-center justify-content-between">
-                                    <a class="small text-white stretched-link" href="#">View Details</a>
+                                    <a class="small text-white stretched-link" href="index.php?c=boards&a=index">Detalles</a>
                                     <div class="small text-white"><i class="fas fa-angle-right"></i></div>
                                 </div>
                             </div>
+                            <?php } ?>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-xl-6">
                             <div class="card" style="width: 100%; max-width: 800px; margin: auto;">
                                 <div class="card-body">
-                                    <h5 class="card-title text-center">Cartera Total por Tipo de Gestión</h5>
+                                    <h5 class="card-title text-center">Cartera Total por Tipo  de Gestión</h5>
                                     <canvas id="graficoCartera"></canvas>
                                 </div>
                             </div>
@@ -140,9 +141,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
     <script src="vista/js/scripts.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
-    <!-- <script src="vista/js/demo/chart-area-demo.js"></script> -->
-    <!-- <script src="vista/js/demo/chart-bar-demo.js"></script> -->
-    <!-- <script src="vista/js/demo/chart-pie-demo.js"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
     <script src="vista/js/datatables-simple-demo.js"></script>

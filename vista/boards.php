@@ -46,7 +46,6 @@
                                                 if ($_SESSION['user_role'] == "admin") {
                                                     echo $board['total_gestiones'];
                                                 } else {
-                                                    // Verificamos si este usuario tiene datos para ESTA board específica
                                                     if (isset($users_gestions[$board['id_board']])) {
                                                         $stats = $users_gestions[$board['id_board']];
 
@@ -56,7 +55,7 @@
                                                             echo $stats['total_en_compras'];
                                                         }
                                                     } else {
-                                                        echo "0"; // Si no hay registros para el usuario en esta board
+                                                        echo "0";
                                                     }
                                                 }
                                                 ?>
@@ -71,18 +70,6 @@
                 </div>
         </div>
         </main>
-        <!-- <footer class="py-4 bg-light mt-auto">
-                <div class="container-fluid px-4">
-                    <div class="d-flex align-items-center justify-content-between small">
-                        <div class="text-muted">Copyright &copy; Your Website 2023</div>
-                        <div>
-                            <a href="#">Privacy Policy</a>
-                            &middot;
-                            <a href="#">Terms &amp; Conditions</a>
-                        </div>
-                    </div>
-                </div>
-            </footer> -->
     </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

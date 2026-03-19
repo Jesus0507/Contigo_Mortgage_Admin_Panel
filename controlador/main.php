@@ -100,4 +100,9 @@ class mainController
     public function get_carga_boards() {
         echo (new main_model())->get_carga_boards();
     }
+
+
+	public function get_all_statistics(){
+
+	}
 }
