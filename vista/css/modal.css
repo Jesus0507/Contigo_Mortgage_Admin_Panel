@@ -55,7 +55,7 @@
             border-radius: 10px;
             
             div{
-                padding: 5px;
+                padding: 0 5px;
                 border-radius: 10px;
                 cursor: pointer;
             }
@@ -319,7 +319,7 @@
     width: 90%;
     margin: 10px auto;
     padding-top: 10px;
-    padding-bottom: 5px;
+    padding-bottom: 2px;
     font-size: 18px;
     border-bottom: 1px black solid;
     ;
@@ -401,4 +401,17 @@
     .comments-comment{
         font-size: 18px;
     }
+}
+
+label{
+    font-size: 15px;
+}
+
+.btn-gestion-action{
+    margin-top: 80px;
+    
+    @media(max-width: 1400px){
+        margin-top: 15px;
+    }
+    
 }

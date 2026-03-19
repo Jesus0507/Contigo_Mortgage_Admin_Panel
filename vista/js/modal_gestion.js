@@ -140,6 +140,7 @@ function run_calculations() {
         loan_amount.value = money_format(total_loan);
         document.getElementById("ltv_percent_value").innerHTML = money_format(total_loan);
         cashout.value = total_cashout < 0 ? "0,00" : money_format(total_cashout);
+        document.getElementById("gastos_cierre_percent_value").innerHTML = money_format(tax_perc * total_loan);
 
         // HABILITACIÓN TOTAL
         botonesAccion.forEach(btn => {
@@ -158,6 +159,7 @@ function run_calculations() {
         let needed_loan = (deudas_base + desired_cashout) / (1 - tax_perc);
         loan_amount.value = money_format(needed_loan);
         document.getElementById("ltv_percent_value").innerHTML = money_format(needed_loan);
+        document.getElementById("gastos_cierre_percent_value").innerHTML = money_format(tax_perc * needed_loan);
 
         if (prop_val > 0) {
             let ltv_calculado = (needed_loan / prop_val) * 100;
