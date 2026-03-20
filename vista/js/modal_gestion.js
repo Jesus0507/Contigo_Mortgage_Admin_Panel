@@ -25,6 +25,8 @@ var save_comment_btn = document.getElementById("btn_save_comment");
 var close_btn = document.getElementById("close_modal_btn");
 var property_register_btn = document.getElementById("property_register");
 var condiciones_adicionales = document.getElementById("aditional_conditions");
+var mortgage_estimado = document.getElementById("mortgage_estimado");
+
 
 
 var tabs_options = Array.from(document.querySelector(".tabs-options").querySelectorAll("div"));
@@ -352,6 +354,7 @@ function finalizeClose() {
     document.getElementById("editor").innerHTML = "";
     document.getElementById("gastos_cierre_percent_value").innerHTML = "0,00";
     document.getElementById("ltv_percent_value").innerHTML = "0,00";
+    document.getElementById("mortgage_estimado").value = "";
     document.getElementById("prepayment_penalty_percent_value").innerHTML = "0,00";
 
     // Valores por defecto
@@ -524,10 +527,10 @@ function fields_validation() {
         });
     }
 
-    [property_value, mortgage, cashout, ltv_value, gastos_cierre, prepayment_penalty].forEach(el => {
+    [property_value, mortgage, cashout, ltv_value, gastos_cierre, prepayment_penalty, mortgage_estimado].forEach(el => {
         if (!el) return;
         el.addEventListener('input', function () {
-            if (el === property_value || el === mortgage || el === cashout) {
+            if (el === property_value || el === mortgage || el === cashout || el === mortgage_estimado) {
                 applyInputMask(this);
             } else {
                 this.value = this.value.replace(/[^0-9.]/g, '');
@@ -580,6 +583,7 @@ property_register_btn.onclick = function () {
             "property_value": parseMoneyGestion(property_value.value),
             "mortgage": parseMoneyGestion(mortgage.value),
             "loan_amount": parseMoneyGestion(loan_amount.value),
+            "mortgage_estimado": parseMoneyGestion(mortgage_estimado.value),
             "cashout": parseMoneyGestion(cashout.value),
             "prepayment_penalty": prepayment_penalty.value,
             "ltv": ltv_value.value,
@@ -608,6 +612,7 @@ function updateInfo(reload) {
             "property_value": parseMoneyGestion(property_value.value),
             "interes_actual": interes_actual.value,
             "mortgage": parseMoneyGestion(mortgage.value),
+            "mortgage_estimado": parseMoneyGestion(mortgage_estimado.value),
             "occupancy": occupancy.value,
             "board": document.getElementById("board_id").innerHTML,
             "ltv": ltv_value.value,

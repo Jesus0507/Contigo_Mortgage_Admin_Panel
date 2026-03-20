@@ -32,7 +32,7 @@
 
     .custom-modal-body {
         height: 80%;
-        width: 95%;
+        width: 99%;
         scrollbar-width: thin;
         scrollbar-color: rgb(173, 190, 196) transparent;
         scrollbar-gutter: stable;
@@ -404,7 +404,7 @@
 }
 
 label{
-    font-size: 15px;
+    font-size: 14px;
 }
 
 .btn-gestion-action{

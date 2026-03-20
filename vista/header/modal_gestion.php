@@ -123,7 +123,7 @@
                     </div>
                     <div class="w-100 d-flex flex-row justify-content-between mb-2">
                         <div style="width:45%">
-                               <label for="address" id="prepayment_penalty_label">Prepayment penalty (%):</label>
+                            <label for="address" id="prepayment_penalty_label">Prepayment penalty (%):</label>
                             <div class="d-flex flex-row w-100">
                                 <div>
                                     <input style="width:40%" class="form-control" id="prepayment_penalty" placeholder="Prepayment penalty" <?php if ($_SESSION['user_role'] != "admin") { ?> disabled <?php } ?>>
@@ -147,16 +147,22 @@
                     </div>
                     <div class="w-100 d-flex flex-row justify-content-between mb-2">
 
-                        <div class="w-100">
-                            <label for="gastos_cierre mb-2" id="tipo_prestamo_label">Tipo de préstamo:</label>
-                            <select id="tipo_prestamo" class="form-select" <?php if ($_SESSION['user_role'] != "admin") { ?> disabled <?php } ?>>
-                                <option value="">Seleccionar</option>
-                                <option value="fha">Fha</option>
-                                <option value="conventional">Conventional</option>
-                                <option value="non_qm">Non qm</option>
-                                <option value="fnba_primary_profit_and_lost">Fnba primary profit and lost</option>
-                                <option value="fnba_primary_w2_income">Fnba primary w2 income</option>
-                            </select>
+                        <div class="w-100 d-flex flex-row justify-content-between">
+                            <div style="width: 45%">
+                                <label for="gastos_cierre mb-2" id="tipo_prestamo_label">Tipo de préstamo:</label>
+                                <select id="tipo_prestamo" class="form-select" <?php if ($_SESSION['user_role'] != "admin") { ?> disabled <?php } ?>>
+                                    <option value="">Seleccionar</option>
+                                    <option value="fha">Fha</option>
+                                    <option value="conventional">Conventional</option>
+                                    <option value="non_qm">Non qm</option>
+                                    <option value="fnba_primary_profit_and_lost">Fnba primary profit and lost</option>
+                                    <option value="fnba_primary_w2_income">Fnba primary w2 income</option>
+                                </select>
+                            </div>
+                            <div style="width: 45%">
+                                <label>Mortgage estimado $:</label>
+                                <input class="form-control" id="mortgage_estimado" placeholder="Mortgage estimado" <?php if ($_SESSION['user_role'] != "admin") { ?> disabled <?php } ?>>
+                            </div>
                         </div>
                     </div>
                     <div class="mb-2">

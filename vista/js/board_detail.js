@@ -22,7 +22,7 @@ function updateTaskCounts() {
 // Configuración de eventos para las tareas (Drag)
 tasks.forEach((task) => {
     task.addEventListener("dragstart", (event) => {
-        if(task.dataset.status == "FINALIZADO" && task.dataset.userType != "admin") return;
+        if (task.dataset.status == "FINALIZADO" && task.dataset.userType != "admin") return;
         task.id = "dragged-task";
         event.dataTransfer.effectAllowed = "move";
         event.dataTransfer.setData("task", "");
@@ -31,9 +31,9 @@ tasks.forEach((task) => {
     task.addEventListener("dragend", (event) => {
         task.removeAttribute("id");
         console.log(task.parentElement.parentElement.querySelector(".task-title-text").innerHTML);
-        if(task.parentElement.parentElement.querySelector(".task-title-text").innerHTML.toLowerCase() == "finalizado" && task.dataset.userType != "admin"){
+        if (task.parentElement.parentElement.querySelector(".task-title-text").innerHTML.toLowerCase() == "finalizado" && task.dataset.userType != "admin") {
             task.draggable = false;
-            task.dataset.status ="FINALIZADO";
+            task.dataset.status = "FINALIZADO";
         }
     });
 });
@@ -272,7 +272,7 @@ function load_compras_modal_info(ev) {
         document.getElementById("forma_pago").value = resultado['forma_pago'] ?? "medio_electronico";
         var purchase_val = document.getElementById("monto_max").value != "" ? parseMoneyAux(document.getElementById("monto_max").value) : 0;
         var perc_dp = document.getElementById("down_payment").value != "" ? parseFloat(document.getElementById("down_payment").value) : 0;
-        var perc_gastos = document.getElementById("gastos_cierre").value != ""? parseFloat(document.getElementById("gastos_cierre").value) : 0;
+        var perc_gastos = document.getElementById("gastos_cierre").value != "" ? parseFloat(document.getElementById("gastos_cierre").value) : 0;
 
         document.getElementById("down_payment_label_percent").innerHTML = money_format((purchase_val * perc_dp) / 100);
         document.getElementById("gastos_cierre_percent_label").innerHTML = money_format((purchase_val * perc_gastos) / 100);
@@ -645,7 +645,7 @@ function load_gestion_modal_info(ev) {
         var all_inputs = Array.from(document.querySelector(".custom-modal").querySelectorAll("input"));
         var i = 0;
         all_inputs.forEach((input) => {
-            input.value = i == 0 ? resultado['name'].replace(/\b\w/g, l => l.toUpperCase()) : i == 1 ? resultado['last_name'].replace(/\b\w/g, l => l.toUpperCase()) : i == 2 ? resultado['phone'] : i == 3 ? resultado['property_address'] : i == 4 ? money_format(resultado['property_value']) : i == 5 ? resultado['interes_actual'] : i == 6 ? money_format(resultado['mortgage']) : i == 8 ? resultado['ltv'] : i == 9 ? resultado['interes_estimado'] : i == 10 ? resultado['prepayment_penalty'] : i == 11 ? resultado['gastos_cierre'] : i == 12 ? money_format(resultado['loan_amount']) : money_format(resultado['cash_out']);
+            input.value = i == 0 ? resultado['name'].replace(/\b\w/g, l => l.toUpperCase()) : i == 1 ? resultado['last_name'].replace(/\b\w/g, l => l.toUpperCase()) : i == 2 ? resultado['phone'] : i == 3 ? resultado['property_address'] : i == 4 ? money_format(resultado['property_value']) : i == 5 ? resultado['interes_actual'] : i == 6 ? money_format(resultado['mortgage']) : i == 8 ? resultado['ltv'] : i == 9 ? resultado['interes_estimado'] : i == 10 ? resultado['prepayment_penalty'] : i == 11 ? resultado['gastos_cierre'] : i == 12 ? money_format(resultado['mortgage_estimado']) : i == 13 ? money_format(resultado['loan_amount']) : money_format(resultado['cash_out']);
             i++;
         })
 
@@ -971,7 +971,7 @@ function applyBoardFilters() {
         // Datos del ticket para checkboxes
         const agentId = (ticket.getAttribute('data-user-id') || "").toString();
         const status = (ticket.getAttribute('data-status') || "").toUpperCase();
-        
+
         // Datos del ticket para búsqueda por nombre (el texto visible)
         const taskName = (ticket.textContent || ticket.innerText).toLowerCase();
 
@@ -1001,17 +1001,17 @@ function filterTasksByName() {
 
     let input = document.getElementById('searchInputTasks');
     let filter = input.value.toLowerCase();
-    
+
     let tasks = document.querySelectorAll('.task-container');
 
     tasks.forEach(task => {
         let taskText = task.textContent || task.innerText;
 
         if (taskText.toLowerCase().indexOf(filter) > -1) {
-            task.style.display = ""; 
-            task.classList.remove('d-none'); 
+            task.style.display = "";
+            task.classList.remove('d-none');
         } else {
-            task.style.display = "none"; 
+            task.style.display = "none";
             task.classList.add('d-none');
         }
     });
@@ -1021,7 +1021,7 @@ function filterTasksByName() {
 
 function updateColumnCounters() {
     let columns = document.querySelectorAll('.task-column');
-    
+
     columns.forEach(col => {
         let visibleTasks = col.querySelectorAll('.task-container:not(.d-none)').length;
         let counterSpan = col.querySelector('.task_cant');
