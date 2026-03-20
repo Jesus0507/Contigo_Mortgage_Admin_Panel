@@ -28,7 +28,7 @@
                             </div>
                             <i class="fas fa-search mt-2 mx-3"></i>
                             <?php if ($_SESSION['user_role'] == "admin") { ?>
-                                <div><button class="btn btn-dark mx-2" id="access_modal_btn"><i class="fas fa-users-cog"></i> Administrar acceso</button></div>
+                                <div><button class="btn btn-dark mx-2" id="access_modal_btn" onclick="open_modal(null)"><i class="fas fa-users-cog"></i> Administrar acceso</button></div>
                             <?php } ?>
                             <div><button class="btn btn-dark mx-2" id="add_column"><i class="far fa-plus-square"></i> Nueva columna</button></div>
                             <div>

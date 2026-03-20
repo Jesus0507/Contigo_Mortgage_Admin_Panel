@@ -1,21 +1,43 @@
-var modal_btn = document.getElementById("access_modal_btn");
-var close_btn = document.getElementById("close_access_modal_btn");
-var btn_crear = document.getElementById("btn_crear");
-var selected_users = Array.from(document.querySelector(".users-list").querySelectorAll("input"));
-var search_users = document.getElementById("search_modal_user");
-var cant_checked = parseInt(document.getElementById("cant_users_span").innerHTML);
-var users_boards = JSON.parse(document.getElementById("users_boards_info").innerHTML);
+var modal_btn_access = document.getElementById("access_modal_btn");
+var close_btn_access = document.getElementById("close_access_modal_btn");
+var btn_crear_access = document.getElementById("btn_crear_access");
+var selected_users_access = Array.from(document.querySelectorAll(".check-user-access"));
+var search_users_access = document.getElementById("search_modal_user_access");
+var cant_checked_access = parseInt(document.getElementById("cant_users_span_access").innerHTML);
+var users_boards_access = JSON.parse(document.getElementById("users_boards_info_access").innerHTML);
+var board_name_access = document.getElementById("board_name_access");
 
-if(modal_btn){
-modal_btn.onclick = function () {
-    $(".access-custom-modal").fadeIn();
-    document.getElementById("layoutSidenav").classList.add("opacity-body");
+function open_modal(id) {
+    if (id == null) {
+        $(".access-custom-modal").fadeIn();
+        document.getElementById("layoutSidenav").classList.add("opacity-body");
+    }
+    else {
+        $.ajax({
+            type: "POST",
+            url: "index.php?c=boards&a=get_board_info_modal",
+            data: { "board_id": id }
+        }).done(function (result) {
+            var info = JSON.parse(result);
+            board_name_access.value = info['board_info'][0]['name'];
+            document.getElementById("cant_users_span_access").innerHTML = info['board_users'].length;
+            document.getElementById("users_boards_info_access").innerHTML = JSON.stringify(info['board_users']);
+            document.querySelector(".input-enabled-access").checked = info['board_info'][0]['enabled'] == 1? true : false;
+            Array.from(document.querySelectorAll(".check-user-access")).forEach((el)=>{
+                var user_id = el.id.split("_")[0];
+                info['board_users'].includes(parseInt(user_id)) ? el.checked = true : el.checked = false;
+            })
+
+
+            $(".access-custom-modal").fadeIn();
+            document.getElementById("layoutSidenav").classList.add("opacity-body");
+            btn_crear_access.setAttribute("data-id", id);
+        })
+    }
 }
-}
 
-
-close_btn.onclick = function () {
-    var all_users = Array.from(document.querySelectorAll(".users-modal-item"));
+close_btn_access.onclick = function () {
+    var all_users = Array.from(document.querySelectorAll(".access-custom-modal .users-modal-item"));
     $(".access-custom-modal").fadeOut();
     var all_inputs = document.querySelector(".access-custom-modal").querySelectorAll("input");
     Array.from(all_inputs).forEach((input_content) => {
@@ -23,98 +45,80 @@ close_btn.onclick = function () {
         input_content.style.border = "none";
     })
 
-    selected_users.forEach((item) => {
-        if (users_boards.includes(parseInt(item.id))) {
+    selected_users_access.forEach((item) => {
+        var realId = parseInt(item.id.replace('_access', ''));
+        if (users_boards_access.includes(realId)) {
             item.checked = true;
-        }
-        else {
+        } else {
             item.checked = false;
         }
     })
 
-    document.getElementById("cant_users_span").innerHTML = users_boards.length;
-    cant_checked = users_boards.length;
-    search_users.value = "";
-    board_name.value = document.getElementById("board_name_title").innerHTML;
+    document.getElementById("cant_users_span_access").innerHTML = users_boards_access.length;
+    cant_checked_access = users_boards_access.length;
+    search_users_access.value = "";
 
+    // Mantenemos tu lógica de board_name_title si existe
+    if (document.getElementById("board_name_title")) {
+        board_name_access.value = document.getElementById("board_name_title").innerHTML;
+    }
 
     all_users.forEach((user_item) => user_item.classList.remove("d-none"));
     setTimeout(() => { document.getElementById("layoutSidenav").classList.remove("opacity-body"); }, 600)
 }
 
-search_users.onkeyup = function () {
-    var all_users = Array.from(document.querySelectorAll(".users-modal-item"));
-    if (search_users.value == "" || search_users.value == null) {
+search_users_access.onkeyup = function () {
+    var all_users = Array.from(document.querySelectorAll(".access-custom-modal .users-modal-item"));
+    if (search_users_access.value == "" || search_users_access.value == null) {
         all_users.forEach((user_item) => user_item.classList.remove("d-none"));
-    }
-    else {
+    } else {
         all_users.forEach((user_item) => {
             var fields = Array.from(user_item.querySelectorAll(".w-25"));
-            if (!fields[0].innerHTML.toLowerCase().includes(search_users.value.toLowerCase()) && !fields[1].innerHTML.toLowerCase().includes(search_users.value.toLowerCase()) && !fields[2].innerHTML.toLowerCase().includes(search_users.value.toLowerCase())) {
+            if (!fields[0].innerHTML.toLowerCase().includes(search_users_access.value.toLowerCase()) && 
+                !fields[1].innerHTML.toLowerCase().includes(search_users_access.value.toLowerCase()) && 
+                !fields[2].innerHTML.toLowerCase().includes(search_users_access.value.toLowerCase())) {
                 user_item.classList.add("d-none");
-            }
-            else {
+            } else {
                 user_item.classList.remove("d-none");
             }
         })
     }
 }
 
-selected_users.forEach((item) => {
+selected_users_access.forEach((item) => {
     item.onchange = function (ev) {
-        ev.target.checked ? cant_checked++ : cant_checked--;
-        document.getElementById("cant_users_span").innerHTML = cant_checked;
-
+        ev.target.checked ? cant_checked_access++ : cant_checked_access--;
+        document.getElementById("cant_users_span_access").innerHTML = cant_checked_access;
     }
 })
 
-
-
-btn_crear.onclick = function () {
-    if (board_name.value == "" || board_name.value == null) {
-        board_name.focus()
-        board_name.style.border = "1px red solid";
-    }
-    else {
-        board_name.style.border = "none";
-        var is_user_selected = false;
+btn_crear_access.onclick = function () {
+    if (board_name_access.value == "" || board_name_access.value == null) {
+        board_name_access.focus();
+        board_name_access.style.border = "1px red solid";
+    } else {
+        board_name_access.style.border = "none";
         var selected = [];
-        selected_users.forEach((s_user) => {
+        selected_users_access.forEach((s_user) => {
             if (s_user.checked) {
-                is_user_selected = true;
-                selected.push(s_user.id);
+                selected.push(s_user.id.replace('_access', ''));
             }
         })
-        // if (!is_user_selected) {
-        //     Swal.fire({
-        //         title: 'Error',
-        //         text: 'Debe seleccionar al menos un usuario que tenga acceso a la pizarra',
-        //         icon: 'error',
-        //         timer: 3000,
-        //         showConfirmButton: false
-        //     });
-        //     return;
-
-        // }
-
 
         $.ajax({
             type: "POST",
             url: "index.php?c=boards&a=update_board_access",
             data: {
-                "board_id": document.getElementById("board_id").innerHTML,
-                "name": board_name.value,
-                "users_selected": selected
+                "board_id": btn_crear_access.getAttribute("data-id") || document.getElementById("board_id").innerHTML,
+                "name": board_name_access.value,
+                "users_selected": selected,
+                "board_enabled" : document.querySelector(".input-enabled-access").checked
             }
         }).done(function (result) {
-                Swal.fire({
-                    title: 'Éxito',
-                    text: 'Los cambios se guardaron correctamente',
-                    icon: 'success',
-                    timer: 3000,
-                    showConfirmButton: false
-                });
-                setTimeout(()=>{location.reload();}, 2500);
+            Swal.fire({
+                title: 'Éxito', text: 'Los cambios se guardaron correctamente', icon: 'success', timer: 3000, showConfirmButton: false
+            });
+            setTimeout(() => { location.reload(); }, 2500);
         })
     }
 }

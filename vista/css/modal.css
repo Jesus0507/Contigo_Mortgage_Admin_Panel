@@ -349,7 +349,7 @@
     filter: brightness(40%);
 }
 
-.users-list {
+.users-list, .users-list-access {
     background: rgb(173, 190, 196);
     width: 100%;
     border-radius: 10px;

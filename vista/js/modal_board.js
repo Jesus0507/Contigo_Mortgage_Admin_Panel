@@ -36,6 +36,7 @@ selected_users.forEach((item) => {
 
 
 btn_crear.onclick = function () {
+    console.log("creando");
     if (board_name.value == "" || board_name.value == null) {
         board_name.focus()
         board_name.style.border = "1px red solid";

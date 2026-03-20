@@ -2,6 +2,7 @@
 <html lang="en">
 <?php require_once 'header/header.php'; ?>
 <?php require_once 'header/modal.php'; ?>
+<?php require_once 'header/modal_access.php'; ?>
 
 <body class="sb-nav-fixed">
     <?php require_once 'header/navbar.php'; ?>
@@ -29,18 +30,26 @@
                                     <th>Nombre</th>
                                     <th>Tipo de proceso</th>
                                     <th>Cantidad de procesos</th>
+                                    <?php
+                                    if ($_SESSION['user_role'] == "admin") { ?>
+                                        <th>Estado</th>
+                                    <?php } ?>
                                     <th>Creado por</th>
+                                    <?php
+                                    if ($_SESSION['user_role'] == "admin") { ?>
+                                        <th>Acciones</th>
+                                    <?php } ?>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php
                                 foreach ($boards as $board) {
-                                    if (in_array($board['id_board'], $boards_users) || $_SESSION['user_role'] == "admin") {
+                                    if ((in_array($board['id_board'], $boards_users) && $board['enabled'] == 1) || $_SESSION['user_role'] == "admin") {
                                 ?>
 
                                         <tr>
                                             <td><?php echo $board['name'] ?><span class="d-none hidden-id"><?php echo $board['id_board'] ?></span></td>
-                                            <td><?php echo $board['board_type'] ?></td>
+                                            <td><?php echo $board['board_type'] ?><span class="d-none hidden-id"><?php echo $board['id_board'] ?></span></td>
                                             <td>
                                                 <?php
                                                 if ($_SESSION['user_role'] == "admin") {
@@ -59,8 +68,19 @@
                                                     }
                                                 }
                                                 ?>
+                                                <span class="d-none hidden-id"><?php echo $board['id_board'] ?></span>
                                             </td>
-                                            <td><?php echo $board['user_name'] . " " . $board['user_last_name'] ?></td>
+                                            <?php
+                                            if ($_SESSION['user_role'] == "admin") { ?>
+                                                <td><?php echo $board['enabled'] == 1 ? "Habilitado" : "Deshabilitado"; ?><span class="d-none hidden-id"><?php echo $board['id_board'] ?></span></td>
+                                            <?php } ?>
+                                            <td><?php echo $board['user_name'] . " " . $board['user_last_name'] ?><span class="d-none hidden-id"><?php echo $board['id_board'] ?></span></td>
+                                            <?php
+                                            if ($_SESSION['user_role'] == "admin") { ?>
+                                                <td>
+                                                    <div><button class="btn btn-dark mx-2 access-modal-btn-class" onclick="open_modal(<?php echo $board['id_board']; ?>)"><i class="fas fa-users-cog"></i></button></div>
+                                                </td>
+                                            <?php } ?>
                                         </tr>
                                 <?php }
                                 } ?>
@@ -82,6 +102,7 @@
     <script src="vista/js/custom_modal.js"></script>
     <script src="vista/js/modal_board.js"></script>
     <script src="vista/js/boards.js"></script>
+    <script src="vista/js/access_modal.js"></script>
 </body>
 
 </html>
