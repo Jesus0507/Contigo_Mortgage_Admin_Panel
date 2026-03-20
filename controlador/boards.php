@@ -116,7 +116,7 @@ class boardsController
         if (!$check_client) {
             $check_client = $modelo->add_client(strtolower($_POST['client_name']), strtolower($_POST['client_last_name']), $_POST['client_phone']);
         }
-        $modelo_gestion->set_gestion($_POST['board'], $check_client, $_SESSION['user_id'], $_POST['property_address'], $_POST['property_value'], $_POST['interes_actual'], $_POST['mortgage'], $_POST['occupancy'], $_POST['call_detail'], $_POST['ltv'], $_POST['interes_estimado'], $_POST['prepayment_penalty'], $_POST['gastos_cierre'], $_POST['tipo_prestamo'], $_POST['condiciones_adicionales'], $_POST['loan_amount'], $_POST['cashout']);
+        $modelo_gestion->set_gestion($_POST['board'], $check_client, $_SESSION['user_id'], $_POST['property_address'], $_POST['property_value'], $_POST['interes_actual'], $_POST['mortgage'], $_POST['occupancy'], $_POST['call_detail'], $_POST['ltv'], $_POST['interes_estimado'], $_POST['prepayment_penalty'], $_POST['gastos_cierre'], $_POST['tipo_prestamo'], $_POST['condiciones_adicionales'], $_POST['loan_amount'], $_POST['cashout'], $_POST['mortgage_estimado']);
         $resp = $modelo_gestion->registrar();
         $last_gestion = $modelo_gestion->get_last_gestion();
         if (isset($_POST['comments'])) {
@@ -366,10 +366,11 @@ class boardsController
         $condiciones_adicionales = empty($_POST['condiciones_adicionales']) ? $gestion_info[0]['condiciones_adicionales'] : $_POST['condiciones_adicionales'];
         $loan_amount = empty($_POST['loan_amount']) ? $gestion_info[0]['loan_amount'] : $_POST['loan_amount'];
         $cashout = empty($_POST['cashout']) ? $gestion_info[0]['cash_out'] : $_POST['cashout'];
+        $mortgage_estimado = empty($_POST['mortgage_estimado']) ? $gestion_info[0]['mortgage_estimado'] : $_POST['mortgage_estimado'];
 
 
 
-        $modelo_gestion->set_gestion($_POST['board'], $check_client, $_SESSION['user_id'], $property_address, $property_value, $interes_actual, $mortgage, $occupancy, $call_detail, $ltv, $interes_estimado, $prepayment_penalty, $gastos_cierre, $tipo_prestamo, $condiciones_adicionales, $loan_amount, $cashout);
+        $modelo_gestion->set_gestion($_POST['board'], $check_client, $_SESSION['user_id'], $property_address, $property_value, $interes_actual, $mortgage, $occupancy, $call_detail, $ltv, $interes_estimado, $prepayment_penalty, $gastos_cierre, $tipo_prestamo, $condiciones_adicionales, $loan_amount, $cashout, $mortgage_estimado);
         $resp = $modelo_gestion->update_gestion_info($_POST['gestion_id']);
         $accion = "El usuario " . $_SESSION['username'] . " ha modificado información de la gestión";
         $tipo_accion = "modificacion";
