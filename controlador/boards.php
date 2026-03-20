@@ -72,6 +72,18 @@ class boardsController
         }
     }
 
+    public function get_board_info_modal()
+    {
+        $modelo = new boards_model();
+        $id = $_POST['board_id'];
+        $board_info = $modelo->get_boards_by_id($id);
+        $boards_users = $modelo->get_boards_users($id);
+        echo json_encode([
+            "board_info" => $board_info,
+            "board_users" => $boards_users
+        ]);
+    }
+
     public function add_board()
     {
         $users = $_POST['users_selected'] ?? "";
@@ -389,7 +401,7 @@ class boardsController
         $modelo = new boards_model();
         echo $modelo->update_board(strtolower($_POST['order_etapas']), $_POST['id_board']);
     }
-    
+
 
     public function change_board_order()
     {
@@ -441,7 +453,7 @@ class boardsController
     public function update_board_access()
     {
         $modelo = new boards_model();
-        $modelo->update_board_name($_POST['board_id'], $_POST['name']);
+        $modelo->update_board_name($_POST['board_id'], $_POST['name'], $_POST['board_enabled']);
         if ($modelo->delete_relations($_POST['board_id'])) {
             $users = $_POST['users_selected'] ?? "";
             if ($users != "") {

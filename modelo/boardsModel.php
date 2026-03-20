@@ -95,9 +95,9 @@ class boards_model
 		}
 	}
 
-	public function update_board_name($board_id, $name)
+	public function update_board_name($board_id, $name, $board_enabled)
 	{
-		$query = "UPDATE boards SET name = '$name'  WHERE id_board = $board_id";
+		$query = "UPDATE boards SET name = '$name', enabled = $board_enabled  WHERE id_board = $board_id";
 		try {
 			$resultado = $this->conexion->prepare($query);
 			$resultado->execute();
