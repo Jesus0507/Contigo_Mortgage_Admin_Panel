@@ -527,7 +527,7 @@ function registerInfo() {
             "client_phone": client_phone.value,
             "call_detail": detalle_llamada.value,
             "tipo_proceso": tipo_proceso.value,
-            "estatus_legal": tipo_proceso.value == "non_qm" ? estatus_legal.value : null,
+            "estatus_legal": estatus_legal.value,
             "primer_comprador": primer_comprador.value,
             "forma_pago": forma_pago.value,
             "tiempo_pago_electronico": forma_pago.value == "medio_electronico" ? (tiempo_pago.value + " " + tiempo_pago_formato.value) : null,
@@ -595,6 +595,7 @@ close_btn.onclick = function () {
             document.getElementById("programa_aplica").value = "";
             document.querySelector(".programa_container").classList.add("d-none");
             document.getElementById("total_requerido_label").parentElement.classList.remove("d-none");
+            document.getElementById("conditions").value = "";
 
             // Reset de selectores y variables de UI
             tipo_proceso.value = "";
@@ -647,7 +648,7 @@ function updateInfo(reload) {
             "client_phone": client_phone.value,
             "call_detail": detalle_llamada.value,
             "tipo_proceso": tipo_proceso.value,
-            "estatus_legal": tipo_proceso.value == "non_qm" ? estatus_legal.value : null,
+            "estatus_legal": estatus_legal.value,
             "primer_comprador": primer_comprador.value,
             "forma_pago": forma_pago.value,
             "tiempo_pago_electronico": forma_pago.value == "medio_electronico" ? (tiempo_pago.value + " " + tiempo_pago_formato.value) : null,
@@ -1319,11 +1320,11 @@ function actualizarDiccionario() {
     if (resumenGlobal) {
         console.log("llenando general info");
         var all_deudas = document.querySelectorAll(".info-deuda-client");
-        var all_income =  document.querySelectorAll(".info-income-client");
+        var all_income = document.querySelectorAll(".info-income-client");
         var deudas_total = 0;
         var income_total = 0;
-        Array.from(all_deudas).forEach((d) =>{deudas_total += parseFloat(parseMoneyCompras(d.innerText))} );
-       Array.from(all_income).forEach((inc) =>{income_total += parseFloat(parseMoneyCompras(inc.innerText.split("/")[0]))} );
+        Array.from(all_deudas).forEach((d) => { deudas_total += parseFloat(parseMoneyCompras(d.innerText)) });
+        Array.from(all_income).forEach((inc) => { income_total += parseFloat(parseMoneyCompras(inc.innerText.split("/")[0])) });
 
 
 

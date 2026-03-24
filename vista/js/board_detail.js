@@ -313,8 +313,13 @@ function load_compras_modal_info(ev) {
 function load_income_section(info, ingresos) {
     var purchase_val = document.getElementById("monto_max").value != "" ? parseMoneyAux(document.getElementById("monto_max").value) : 0;
     var perc_dp = document.getElementById("down_payment").value != "" ? parseFloat(document.getElementById("down_payment").value) : 0;
+    var perc_gastos = document.getElementById("gastos_cierre").value != "" ? parseFloat(document.getElementById("gastos_cierre").value) : 0;
 
     document.getElementById("total_requerido_label").parentElement.classList.add("d-none");
+
+
+    document.getElementById("calculated_required_money").innerHTML = money_format(((purchase_val * perc_dp) / 100) + ((perc_gastos * purchase_val) / 100));
+    document.getElementById("calculated_required_money").parentElement.classList.remove("d-none");
     document.querySelector(".programa_container").classList.remove("d-none");
     document.getElementById("monto_max_label").innerHTML = "Purchase price:";
     document.getElementById("tabla_income_info").classList.remove("d-none");
