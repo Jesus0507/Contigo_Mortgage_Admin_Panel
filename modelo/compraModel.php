@@ -160,6 +160,7 @@ class compra_model
                 monto_max_aplicado = '$this->monto_max_aplicado',
                 condiciones_notas = '$this->condiciones_notas',
                 detalle_llamada = '$this->detalle_llamada',
+                programa_aplica = '$this->programa_aplica',
                 total_requerido = '$this->total_requerido'
               WHERE id_compra = $id_compra";
 
