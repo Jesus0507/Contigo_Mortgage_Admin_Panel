@@ -181,28 +181,29 @@ class boardsController
             if (is_array($ingresos)) {
                 foreach ($ingresos as $cliente) {
 
+                    // 1. Ahora pasamos FICO, Deuda y Estatus al crear el cliente
                     $id_cliente_income = $modelo_compra->add_cliente_income(
                         $id_compra,
                         strtolower($cliente['nombre']),
-                        strtolower($cliente['apellido'])
+                        strtolower($cliente['apellido']),
+                        $cliente['fico'] ?? null,          // <--- Nuevo
+                        $cliente['deuda'] ?? 0,      // <--- Nuevo
+                        $cliente['estatusLegal'] ?? null  // <--- Nuevo
                     );
 
                     foreach ($cliente['trabajos'] as $job) {
 
+                        // 2. Limpiamos la llamada de trabajos (ya no enviamos deuda/fico/estatus aquí)
                         $id_trabajo = $modelo_compra->add_cliente_trabajo(
                             $id_cliente_income,
                             $job['tipo'],
                             $job['empresa'],
                             $job['modo'] ?? 'taxes',
-                            $job['deuda'] ?? 0,
-                            $job['fico'] ?? null,
-                            $job['estatusLegal'] ?? null,
-                            $job['paystubDetails']['valorHora'] ?? null,
-                            $job['paystubDetails']['horas'] ?? null,
-                            $job['paystubDetails']['frecuencia'] ?? null,
-                            $job['incomeCalculado']
+                            $job['valor_hora'] ?? null,
+                            $job['horas_semanales'] ?? null,
+                            $job['frecuencia_anual'] ?? null,
+                            $job['incomeAnual']
                         );
-
 
                         if (!empty($job['detallesTaxes'])) {
                             foreach ($job['detallesTaxes'] as $tax) {
@@ -217,7 +218,6 @@ class boardsController
                 }
             }
         }
-
 
         if (isset($_POST['comments'])) {
             foreach ($_POST['comments'] as $note) {
@@ -278,38 +278,45 @@ class boardsController
         $resp = $modelo_compra->update_compra_info($id_compra);
 
 
-        $modelo_compra->delete_cliente_comra($id_compra);
+        $modelo_compra->delete_cliente_compra($id_compra);
 
         if (isset($_POST['detalle_ingresos'])) {
             $ingresos = json_decode($_POST['detalle_ingresos'], true);
+
             if (is_array($ingresos)) {
                 foreach ($ingresos as $cliente) {
 
+                    // 1. Ahora pasamos FICO, Deuda y Estatus al crear el cliente
                     $id_cliente_income = $modelo_compra->add_cliente_income(
                         $id_compra,
                         strtolower($cliente['nombre']),
-                        strtolower($cliente['apellido'])
+                        strtolower($cliente['apellido']),
+                        $cliente['fico'] ?? null,          // <--- Nuevo
+                        $cliente['deuda'] ?? 0,      // <--- Nuevo
+                        $cliente['estatusLegal'] ?? null  // <--- Nuevo
                     );
 
                     foreach ($cliente['trabajos'] as $job) {
+
+                        // 2. Limpiamos la llamada de trabajos (ya no enviamos deuda/fico/estatus aquí)
                         $id_trabajo = $modelo_compra->add_cliente_trabajo(
                             $id_cliente_income,
                             $job['tipo'],
                             $job['empresa'],
                             $job['modo'] ?? 'taxes',
-                            $job['deuda'] ?? 0,
-                            $job['fico'] ?? null,
-                            $job['estatusLegal'] ?? null,
-                            $job['paystubDetails']['valorHora'] ?? null,
-                            $job['paystubDetails']['horas'] ?? null,
-                            $job['paystubDetails']['frecuencia'] ?? null,
-                            $job['incomeCalculado']
+                            $job['valor_hora'] ?? null,
+                            $job['horas_semanales'] ?? null,
+                            $job['frecuencia_anual'] ?? null,
+                            $job['incomeAnual']
                         );
-
 
                         if (!empty($job['detallesTaxes'])) {
                             foreach ($job['detallesTaxes'] as $tax) {
-                                $modelo_compra->add_trabajo_tax_detalle($id_trabajo, $tax['anio'], $tax['monto']);
+                                $modelo_compra->add_trabajo_tax_detalle(
+                                    $id_trabajo,
+                                    $tax['anio'],
+                                    $tax['monto']
+                                );
                             }
                         }
                     }

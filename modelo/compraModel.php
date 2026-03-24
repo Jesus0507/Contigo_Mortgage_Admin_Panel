@@ -29,7 +29,7 @@ class compra_model
         $this->conexion = new base_datos();
     }
 
-    public function set_compra($id_board, $client_id, $user_id, $tipo_proceso, $primer_comprador, $forma_pago, $tiempo_pago_electronico, $disponible_comprar, $credito_cliente, $estatus_legal, $interes_ofrecido, $gastos_cierre, $down_payment, $monto_max_aplicado, $condiciones_notas, $detalle_llamada, $total_requerido,$programa_aplica)
+    public function set_compra($id_board, $client_id, $user_id, $tipo_proceso, $primer_comprador, $forma_pago, $tiempo_pago_electronico, $disponible_comprar, $credito_cliente, $estatus_legal, $interes_ofrecido, $gastos_cierre, $down_payment, $monto_max_aplicado, $condiciones_notas, $detalle_llamada, $total_requerido, $programa_aplica)
     {
         $this->id_board = $id_board;
         $this->client_id = $client_id;
@@ -52,10 +52,10 @@ class compra_model
     }
 
 
-public function registrar()
-{
+    public function registrar()
+    {
 
-    $query = "INSERT INTO compras (
+        $query = "INSERT INTO compras (
         id_board, client_id, user_id, tipo_proceso, primer_comprador, 
         forma_pago, tiempo_pago_electronico, disponible_comprar, credito_cliente, 
         estatus_legal, interes_ofrecido, gastos_cierre, down_payment, 
@@ -66,15 +66,15 @@ public function registrar()
         '$this->estatus_legal', '$this->interes_ofrecido', '$this->gastos_cierre', '$this->down_payment', 
         '$this->monto_max_aplicado', '$this->programa_aplica', '$this->condiciones_notas', '$this->total_requerido', '$this->detalle_llamada', 'prospecto'
     )";
-    
-    try {
-        $resultado = $this->conexion->prepare($query);
-        $resultado->execute();
-        return true;
-    } catch (PDOException $e) {
-        return "Error: " . $e->getMessage();
+
+        try {
+            $resultado = $this->conexion->prepare($query);
+            $resultado->execute();
+            return true;
+        } catch (PDOException $e) {
+            return "Error: " . $e->getMessage();
+        }
     }
-}
 
     public function update_gestion($etapa, $id_compra)
     {
@@ -90,60 +90,57 @@ public function registrar()
     }
 
 
-public function get_full_gestion_info($id_compra)
-{
-    $query = "SELECT co.*, c.*, u.name as user_name, u.last_name as user_last_name 
+    public function get_full_gestion_info($id_compra)
+    {
+        $query = "SELECT co.*, c.*, u.name as user_name, u.last_name as user_last_name 
               FROM compras co 
               JOIN clients c ON co.client_id = c.client_id 
               JOIN users u ON co.user_id = u.user_id 
               WHERE co.id_compra = $id_compra";
-    
-    try {
-        $stmt = $this->conexion->prepare($query);
-        $stmt->execute();
-        $gestion = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if (!$gestion) return null;
+        try {
+            $stmt = $this->conexion->prepare($query);
+            $stmt->execute();
+            $gestion = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        $query_ingresos = "SELECT id_cliente_income, client_name, client_last_name 
-                           FROM compra_clientes_income 
-                           WHERE id_compra = $id_compra";
-        $stmt_ing = $this->conexion->prepare($query_ingresos);
-        $stmt_ing->execute();
-        $clientes_income = $stmt_ing->fetchAll(PDO::FETCH_ASSOC);
+            if (!$gestion) return null;
+
+            $query_ingresos = "SELECT * FROM compra_clientes_income WHERE id_compra = $id_compra";
+            $stmt_ing = $this->conexion->prepare($query_ingresos);
+            $stmt_ing->execute();
+            $clientes_income = $stmt_ing->fetchAll(PDO::FETCH_ASSOC);
 
 
-        foreach ($clientes_income as &$cliente) {
-            $id_cli = $cliente['id_cliente_income'];
-            $query_trabajos = "SELECT * FROM cliente_trabajos WHERE id_cliente_income = $id_cli";
-            $stmt_trab = $this->conexion->prepare($query_trabajos);
-            $stmt_trab->execute();
-            $trabajos = $stmt_trab->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($clientes_income as &$cliente) {
+                $id_cli = $cliente['id_cliente_income'];
+                $query_trabajos = "SELECT * FROM cliente_trabajos WHERE id_cliente_income = $id_cli";
+                $stmt_trab = $this->conexion->prepare($query_trabajos);
+                $stmt_trab->execute();
+                $trabajos = $stmt_trab->fetchAll(PDO::FETCH_ASSOC);
 
 
-            foreach ($trabajos as &$trabajo) {
-                $id_trab = $trabajo['id_trabajo'];
-                $query_taxes = "SELECT id_tax_detalle, anio, monto 
+                foreach ($trabajos as &$trabajo) {
+                    $id_trab = $trabajo['id_trabajo'];
+                    $query_taxes = "SELECT id_tax_detalle, anio, monto 
                                 FROM trabajo_taxes_detalle 
                                 WHERE id_trabajo = $id_trab 
                                 ORDER BY anio DESC";
-                $stmt_tax = $this->conexion->prepare($query_taxes);
-                $stmt_tax->execute();
-                $trabajo['taxes'] = $stmt_tax->fetchAll(PDO::FETCH_ASSOC);
+                    $stmt_tax = $this->conexion->prepare($query_taxes);
+                    $stmt_tax->execute();
+                    $trabajo['taxes'] = $stmt_tax->fetchAll(PDO::FETCH_ASSOC);
+                }
+
+                $cliente['trabajos'] = $trabajos;
             }
-            
-            $cliente['trabajos'] = $trabajos;
+
+            return [
+                "base" => [$gestion],
+                "ingresos" => $clientes_income
+            ];
+        } catch (PDOException $e) {
+            return "Error: " . $e->getMessage();
         }
-
-        return [
-            "base" => [$gestion],
-            "ingresos" => $clientes_income
-        ];
-
-    } catch (PDOException $e) {
-        return "Error: " . $e->getMessage();
     }
-}
 
     public function update_compra_info($id_compra)
     {
@@ -242,10 +239,15 @@ public function get_full_gestion_info($id_compra)
     }
 
 
-    public function add_cliente_income($id_compra, $name, $last_name)
+    public function add_cliente_income($id_compra, $name, $last_name, $fico = null, $deuda = 0, $estatus = null)
     {
-        $query = "INSERT INTO compra_clientes_income (id_compra, client_name, client_last_name) 
-              VALUES ($id_compra, '$name', '$last_name')";
+        // Manejo de valores nulos para SQL
+        $fico_val = $fico ? (int)$fico : "NULL";
+        $deuda_val = $deuda ?: 0;
+        $estatus_val = $estatus ? "'$estatus'" : "NULL";
+
+        $query = "INSERT INTO compra_clientes_income (id_compra, client_name, client_last_name, fico, deuda_total, estatus_legal, created) 
+              VALUES ($id_compra, '$name', '$last_name', $fico_val, $deuda_val, $estatus_val, NOW())";
         try {
             $resultado = $this->conexion->prepare($query);
             $resultado->execute();
@@ -254,21 +256,21 @@ public function get_full_gestion_info($id_compra)
             return "Error en línea " . $e->getLine() . ": " . $e->getMessage();
         }
     }
-
-    public function add_cliente_trabajo($id_cliente, $tipo, $empresa, $modo, $deuda, $fico, $estatus, $v_hora, $horas, $freq, $mensual)
+    public function add_cliente_trabajo($id_cliente, $tipo, $empresa, $modo, $v_hora, $horas, $freq, $anual)
     {
-        $fico = $fico ? "'$fico'" : "NULL";
-        $estatus = $estatus ? "'$estatus'" : "NULL";
+        // Limpieza de valores opcionales
         $v_hora = $v_hora ?: "NULL";
         $horas = $horas ?: "NULL";
         $freq = $freq ?: "NULL";
 
         $query = "INSERT INTO cliente_trabajos (
-                id_cliente_income, tipo, empresa, modo, deuda, fico, 
-                estatus_legal, valor_hora, horas_semanales, frecuencia_anual, 
-                income_calculado_mensual
-            ) VALUES ($id_cliente, '$tipo', '$empresa', '$modo', $deuda, $fico, 
-                      $estatus, $v_hora, $horas, $freq, $mensual)";
+                id_cliente_income, tipo, empresa, modo, 
+                valor_hora, horas_semanales, frecuencia_anual, 
+                income_anual
+            ) VALUES (
+                $id_cliente, '$tipo', '$empresa', '$modo', 
+                $v_hora, $horas, $freq, $anual
+            )";
         try {
             $resultado = $this->conexion->prepare($query);
             $resultado->execute();
@@ -279,8 +281,8 @@ public function get_full_gestion_info($id_compra)
     }
 
 
-    
-    public function delete_cliente_comra($id_compra)
+
+    public function delete_cliente_compra($id_compra)
     {
         $query = "DELETE FROM compra_clientes_income WHERE id_compra = $id_compra";
         try {
@@ -304,6 +306,4 @@ public function get_full_gestion_info($id_compra)
             return "Error en línea " . $e->getLine() . ": " . $e->getMessage();
         }
     }
-
-
 }
