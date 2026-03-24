@@ -331,11 +331,16 @@ function load_income_section(info, ingresos) {
 }
 
 function agregarTarjetaClienteDetail(cliente) {
-    // console.log(cliente);
     const idCliente = cliente['id_cliente_income'];
     const container = document.getElementById('income_cards_container');
 
+
     if (!container) return;
+
+    // Extraemos los valores de nivel cliente (o valores por defecto)
+    const ficoCliente = cliente['fico'] || "";
+    const deudaCliente = cliente['deuda_total'] || "";
+    const estatusCliente = cliente['estatus_legal'] || "ciudadano";
 
     const cardHtml = `
         <div class="card mb-2 shadow-sm cliente-card" id="cliente_${idCliente}">
@@ -344,27 +349,49 @@ function agregarTarjetaClienteDetail(cliente) {
                     <div class="d-flex flex-column w-100 ps-2" onclick="toggleCollapse('body_${idCliente}')" style="cursor:pointer">
                         <div class="d-flex align-items-center gap-2">
                             <i class="fas fa-chevron-down mt-1" style="font-size: 10px;" id="icon_${idCliente}"></i>
-                            <span class="fw-bold" style="font-size: 13px; line-height: 1.2;" id="header_name_${idCliente}">
+                            <span class="fw-bold text-primary" style="font-size: 13px; line-height: 1.2;" id="header_name_${idCliente}">
                                 ${cliente['client_name'].toUpperCase()} ${cliente['client_last_name'].toUpperCase()}
                             </span>
                         </div>
                         <div id="resumen_cliente_${idCliente}" style="font-size: 10px; margin-left: 18px; margin-top: 1px;">
-                            <span class="text-success me-2" title="Total Income"><i class="fas fa-hand-holding-usd"></i> $0,00</span>
-                            <span class="text-danger" title="Total Deudas"><i class="fas fa-credit-card"></i> $0,00</span>
+                            <span class="info-income-client text-success me-2" title="Total Income"><i class="fas fa-hand-holding-usd"></i> $0,00</span>
+                            <span class="info-deuda-client text-danger" title="Total Deudas"><i class="fas fa-credit-card"></i> $0,00</span>
                         </div>
                     </div>
-                    <button type="button" class="btn btn-xs text-danger border-0 pe-2" onclick="document.getElementById('cliente_${idCliente}').remove();">×</button>
+                    <button type="button" class="btn btn-xs text-danger border-0 pe-2" onclick="document.getElementById('cliente_${idCliente}').remove(); actualizarDiccionario();">×</button>
                 </div>
             </div>
             <div class="card-body p-2" id="body_${idCliente}">
-                <div class="d-flex justify-content-between mb-2 gap-2">
-                    <input class="form-control form-control-sm cl-nombre" placeholder="Nombre" value="${cliente['client_name']}" oninput="updateHeader(${idCliente})">
-                    <input class="form-control form-control-sm cl-apellido" placeholder="Apellido" value="${cliente['client_last_name']}" oninput="updateHeader(${idCliente})">
+                <div class="row g-2 mb-2 border-bottom pb-2">
+                    <div class="col-6">
+                        <input class="form-control form-control-sm cl-nombre input-nombre" placeholder="Nombre" value="${cliente['client_name']}" oninput="updateHeader(${idCliente})">
+                    </div>
+                    <div class="col-6">
+                        <input class="form-control form-control-sm cl-apellido input-apellido" placeholder="Apellido" value="${cliente['client_last_name']}" oninput="updateHeader(${idCliente})">
+                    </div>
+                    <div class="col-4">
+                        <label class="text-muted" style="font-size: 9px;">FICO</label>
+                        <input type="number" class="form-control form-control-sm cl-fico input-fico" placeholder="FICO" value="${ficoCliente}" oninput="actualizarDiccionario()">
+                    </div>
+                    <div class="col-4">
+                        <label class="text-muted" style="font-size: 9px;">Deuda</label>
+                        <input type="text" class="form-control form-control-sm cl-deuda-global input-deuda" placeholder="Deuda $" 
+                               value="${money_format(deudaCliente)}" onfocus="focusMoney(this)" onblur="blurMoney(this); actualizarDiccionario()">
+                    </div>
+                    <div class="col-4">
+                        <label class="text-muted" style="font-size: 9px;">Estatus</label>
+                        <select class="form-select form-select-sm cl-estatus-cliente select-estatus" onchange="actualizarDiccionario()">
+                            <option value="ciudadano" ${estatusCliente === 'ciudadano' ? 'selected' : ''}>Ciudadano</option>
+                            <option value="residente" ${estatusCliente === 'residente' ? 'selected' : ''}>Residente</option>
+                            <option value="permiso_trabajo" ${estatusCliente === 'permiso_trabajo' ? 'selected' : ''}>Permiso</option>
+                            <option value="tax_id" ${estatusCliente === 'tax_id' ? 'selected' : ''}>Tax ID</option>
+                        </select>
+                    </div>
                 </div>
                 
                 <div id="trabajos_container_${idCliente}"></div>
                 
-                <div class="mt-2 d-flex gap-2 border-top pt-2">
+                <div class="mt-2 d-flex gap-2">
                     <button class="btn btn-xs btn-outline-info text-dark py-0" onclick="agregarTrabajo(${idCliente}, 'W2')">+ W2</button>
                     <button class="btn btn-xs btn-outline-secondary text-dark py-0" onclick="agregarTrabajo(${idCliente}, '1099')">+ 1099</button>
                 </div>
@@ -373,65 +400,10 @@ function agregarTarjetaClienteDetail(cliente) {
 
     container.insertAdjacentHTML('beforeend', cardHtml);
 
-    // --- CORRECCIÓN CRUCIAL: Cargar los trabajos existentes ---
+    // Cargar trabajos
     if (cliente['trabajos'] && cliente['trabajos'].length > 0) {
         cliente['trabajos'].forEach(trabajo => {
-            // Llamamos a tu función agregarTrabajo pasando el monto que viene de la DB
-            agregarTrabajoDetail(idCliente, trabajo.tipo, trabajo.income_calculado_mensual, trabajo);
-        });
-    }
-}
-
-function renderizarTarjetaClienteFull(container, datos) {
-    // Generamos un ID único para la tarjeta y así poder referenciarla al añadir trabajos
-    console.log("cargando clientes");
-    const cardId = 'cliente_' + Math.floor(Math.random() * 100000);
-    const card = document.createElement("div");
-    card.className = "cliente-card mb-3 p-3 border rounded bg-light position-relative";
-    card.id = cardId;
-
-    // Estructura de la tarjeta
-    card.innerHTML = `
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            <h6 class="m-0 text-primary"><i class="fas fa-user-tie"></i> Datos del Cliente</h6>
-            <button type="button" class="btn btn-sm btn-outline-danger border-0" 
-                    onclick="this.closest('.cliente-card').remove()" title="Eliminar cliente">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="row g-2 mb-2">
-            <div class="col-6">
-                <input type="text" class="form-control form-control-sm cl-nombre" 
-                       placeholder="Nombre" value="${datos.nombre || ''}">
-            </div>
-            <div class="col-6">
-                <input type="text" class="form-control form-control-sm cl-apellido" 
-                       placeholder="Apellido" value="${datos.apellido || ''}">
-            </div>
-        </div>
-        
-        <div class="trabajos-container"></div>
-        
-        <div class="mt-2 d-flex gap-2">
-            <button type="button" class="btn btn-xs btn-outline-primary" 
-                    onclick="agregarFilaTrabajo('${cardId}', 'w2')">
-                <i class="fas fa-plus"></i> W2
-            </button>
-            <button type="button" class="btn btn-xs btn-outline-success" 
-                    onclick="agregarFilaTrabajo('${cardId}', '1099')">
-                <i class="fas fa-plus"></i> 1099
-            </button>
-        </div>
-    `;
-
-    container.appendChild(card);
-
-    // Si el cliente ya trae trabajos (al cargar desde la DB), los renderizamos de una vez
-    const trabajosContainer = card.querySelector(".trabajos-container");
-    if (datos.trabajos && datos.trabajos.length > 0) {
-        datos.trabajos.forEach(trabajo => {
-            // Pasamos el monto que viene del modelo (income_calculado_mensual)
-            agregarFilaTrabajo(cardId, trabajo.tipo, trabajo.monto);
+            agregarTrabajoDetail(idCliente, trabajo.tipo, null, trabajo);
         });
     }
 }
@@ -439,6 +411,8 @@ function renderizarTarjetaClienteFull(container, datos) {
 function agregarTrabajoDetail(idCliente, tipo, dataExistente = null, trabajo) {
     const idTrabajo = trabajo['id_trabajo'];
     const contenedor = document.getElementById(`trabajos_container_${idCliente}`);
+
+    if (!contenedor) return;
 
     const nombreEmpresa = trabajo['empresa'] || '';
     const labelInicial = tipo === 'W2' ? (nombreEmpresa || 'Nueva Empresa') : 'Ingreso 1099';
@@ -450,25 +424,25 @@ function agregarTrabajoDetail(idCliente, tipo, dataExistente = null, trabajo) {
                 <div class="d-flex align-items-center gap-2 w-100" onclick="toggleCollapse('job_body_${idTrabajo}')" style="cursor:pointer">
                     <i class="fas fa-chevron-down small-icon" id="icon_job_${idTrabajo}"></i>
                     <span class="badge ${tipo === 'W2' ? 'bg-info text-dark' : 'bg-secondary text-white'}">${tipo}</span>
-                    <span class="small text-muted" id="job_label_${idTrabajo}">${labelInicial}</span>
+                    <span class="small text-muted fw-bold" id="job_label_${idTrabajo}">${labelInicial}</span>
                 </div>
                 
                 <div class="d-flex align-items-center">
                     ${tipo === 'W2' ? `
                     <div class="form-check form-switch me-4" style="font-size: 11px; min-width: 90px;">
-                        <input class="form-check-input" type="checkbox" ${esModoPaystub ? 'checked' : ''} onchange="toggleW2Mode(this, ${idTrabajo})"> 
+                        <input class="form-check-input check-paystub" type="checkbox" ${esModoPaystub ? 'checked' : ''} onchange="toggleW2Mode(this, ${idTrabajo})"> 
                         <span class="ms-1">Paystubs</span>
                     </div>` : ''}
-                    <button type="button" class="btn btn-xs text-danger border-0" onclick="eliminarTrabajo(${idTrabajo})">×</button>
+                    <button type="button" class="btn btn-xs text-danger border-0" onclick="this.closest('.job-item').remove(); actualizarDiccionario();">×</button>
                 </div>
             </div>
 
-            <div class="p-2 ${esModoPaystub ? '' : ''}" id="job_body_${idTrabajo}">
+            <div class="p-2" id="job_body_${idTrabajo}">
                 ${tipo === 'W2' ? `
-                    <input class="form-control form-control-sm mb-2" 
+                    <input class="form-control form-control-sm mb-2 cl-empresa input-empresa" 
                            placeholder="Nombre Empresa" 
                            value="${nombreEmpresa}"
-                           oninput="document.getElementById('job_label_${idTrabajo}').innerText = this.value || 'Nueva Empresa'">
+                           oninput="document.getElementById('job_label_${idTrabajo}').innerText = this.value || 'Nueva Empresa'; actualizarDiccionario();">
                     <div id="area_dinamica_${idTrabajo}">
                         ${renderFormW2Detail(idTrabajo, trabajo)}
                     </div>
@@ -483,127 +457,102 @@ function agregarTrabajoDetail(idCliente, tipo, dataExistente = null, trabajo) {
     contenedor.insertAdjacentHTML('beforeend', html);
 
     // --- CARGA DE TAXES ---
-    // Si el trabajo tiene el array de taxes, los agregamos uno por uno
     if (trabajo.taxes && trabajo.taxes.length > 0) {
         trabajo.taxes.forEach(t => {
-            // Asegúrate de que agregarAnioImpuesto acepte (idTrabajo, anio, monto)
             agregarAnioImpuestoDetail(idTrabajo, t.anio, t.monto);
         });
     }
 
-    if (esModoPaystub) {
-        toggleW2Mode({ checked: true }, idTrabajo); // Para asegurar que se vea la sección paystub
+    if (tipo === 'W2' && esModoPaystub) {
+        const taxesDiv = document.getElementById(`taxes_w2_${idTrabajo}`);
+        const paystubsDiv = document.getElementById(`paystubs_w2_${idTrabajo}`);
+        if (taxesDiv) taxesDiv.classList.add('d-none');
+        if (paystubsDiv) paystubsDiv.classList.remove('d-none');
     }
+
+    calcularAverage(idTrabajo);
 
     if (typeof actualizarDiccionario === "function") {
         actualizarDiccionario();
     }
 }
-
 function renderFormW2Detail(id, trabajo) {
-    const deuda = trabajo['deuda'] || "";
+    // Extraemos los valores que ahora sí vendrán de la BD
+    console.log(trabajo);
     const valorHora = trabajo['valor_hora'] || "";
     const horas = trabajo['horas_semanales'] || "";
     const freq = trabajo['frecuencia_anual'] || "52";
-    const incomeMensual = trabajo['income_calculado_mensual'] || "0.00";
+    const incomeMensual = parseFloat(valorHora) * parseInt(horas) * parseInt(freq);
+    const incomeAnual = incomeMensual * 12;
     const esModoPaystub = trabajo['modo'] === 'paystubs';
 
     return `
         <div id="taxes_w2_${id}" class="${esModoPaystub ? 'd-none' : ''}">
             <div id="tax_list_${id}"></div>
             <button type="button" class="btn btn-xs btn-outline-primary w-100 mb-1" style="font-size:10px" onclick="agregarAnioImpuestoDetail(${id})">+ Añadir Año Tax</button>
-            <div class="row g-1 mb-2">
-                <div class="col-6 small bg-light p-1 text-center border rounded">Average: <b>$ <span id="avg_display_${id}">0.00</span></b></div>
-                <div class="col-6">
-                    <input type="text" class="form-control form-control-sm cl-deuda" placeholder="Deuda" 
-                           value="${money_format(deuda)}" onfocus="focusMoney(this)" onblur="blurMoney(this)">
-                </div>
-            </div>
+            <div class="small bg-light p-1 text-center border rounded">AVG: <b>$ <span class="avg-info" id="avg_display_${id}">0.00</span></b></div>
         </div>
         <div id="paystubs_w2_${id}" class="${esModoPaystub ? '' : 'd-none'} mt-2">
             <div class="row g-1 text-center">
                 <div class="col-4">
                     <label style="font-size:9px">$/Hora</label>
                     <input type="text" class="form-control form-control-sm text-center cl-valor-hora" 
-                           placeholder="0" value="${money_format(valorHora)}" onfocus="focusMoney(this)" onblur="blurMoney(this)" oninput="calcPS(${id})">
+                           value="${money_format(valorHora)}" onfocus="focusMoney(this)" onblur="blurMoney(this)" oninput="calcPS(${id})">
                 </div>
                 <div class="col-4">
                     <label style="font-size:9px">Horas</label>
-                    <input type="number" class="form-control form-control-sm text-center cl-horas" 
-                           placeholder="0" value="${horas}" oninput="calcPS(${id})">
+                    <input type="number" class="form-control form-control-sm text-center cl-horas" value="${horas}" oninput="calcPS(${id})">
                 </div>
                 <div class="col-4">
                     <label style="font-size:9px">Freq (Sems)</label>
-                    <input type="number" class="form-control form-control-sm text-center cl-freq" 
-                           placeholder="52" value="${freq}" oninput="calcPS(${id})">
-                </div>
-                <div class="col-12 mt-1">
-                    <input type="text" class="form-control form-control-sm cl-deuda-ps" placeholder="Deuda" 
-                           value="${money_format(deuda)}" onfocus="focusMoney(this)" onblur="blurMoney(this)">
+                    <input type="number" class="form-control form-control-sm text-center cl-freq" value="${freq}" oninput="calcPS(${id})">
                 </div>
                 <div class="col-12 mt-1 small bg-success-subtle p-1 border rounded">
-                    Income Mensual: <b>$ <span id="ps_res_${id}">${money_format(incomeMensual)}</span></b>
+                    Mensual: <b>$ <span id="ps_res_${id}">${money_format(incomeMensual)}</span></b> | 
+                    Anual: <b>$ <span class="avg-info" id="ps_anual_res_${id}">${money_format(incomeAnual)}</span></b>
                 </div>
             </div>
         </div>`;
 }
 
 function renderForm1099Detail(id, trabajo) {
-    const fico = trabajo['fico'] || "";
-    const deuda = trabajo['deuda'] || "";
-    const estatus = trabajo['estatus_legal'] || "";
-
     return `
         <div id="tax_list_${id}"></div>
         <button type="button" class="btn btn-xs btn-outline-primary w-100 mb-1" style="font-size:10px" onclick="agregarAnioImpuestoDetail(${id})">+ Añadir Año Tax</button>
-        <div class="row g-1 mb-1 mt-2">
-            <div class="col-6 small bg-light p-1 text-center border rounded">AVG: <b>$<span id="avg_display_${id}">0.00</span></b></div>
-            <div class="col-6">
-                <input class="form-control form-control-sm cl-fico" placeholder="FICO" value="${fico}" oninput="actualizarDiccionario()">
-            </div>
-            <div class="col-12 mb-1">
-                <input type="text" class="form-control form-control-sm cl-deuda" placeholder="Deuda" 
-                       value="${money_format(deuda)}" onfocus="focusMoney(this)" onblur="blurMoney(this)">
-            </div>
-            <div class="col-12">
-                <select class="form-select form-select-sm cl-estatus" onchange="actualizarDiccionario()">
-                    <option value="">Estatus legal</option>
-                    <option value="ciudadano" ${estatus === 'ciudadano' ? 'selected' : ''}>Ciudadano</option>
-                    <option value="residente" ${estatus === 'residente' ? 'selected' : ''}>Residente</option>
-                    <option value="permiso_trabajo" ${estatus === 'permiso_trabajo' ? 'selected' : ''}>Permiso de trabajo</option>
-                    <option value="tax_id" ${estatus === 'tax_id' ? 'selected' : ''}>Tax id</option>
-                </select>
-            </div>
-        </div>`;
+        <div class="small bg-light p-1 text-center border rounded">AVG: <b>$<span class="avg-info" id="avg_display_${id}">0.00</span></b></div>
+    `;
 }
 
 function agregarAnioImpuestoDetail(idTrabajo, anio = "", monto = "") {
     const contenedor = document.getElementById(`tax_list_${idTrabajo}`);
-    const idTax = Date.now() + Math.floor(Math.random() * 1000); // ID único para la fila
+    const idTax = Date.now() + Math.floor(Math.random() * 1000);
 
     const html = `
-        <div class="d-flex gap-1 mb-1 align-items-center" id="tax_row_${idTax}">
+        <div class="d-flex gap-1 mb-1 align-items-center tax-row-item" id="tax_row_${idTax}">
             <input type="number" 
-                   class="form-control form-control-sm w-50" 
+                   class="form-control form-control-sm w-50 cl-tax-anio" 
                    placeholder="Año" 
                    value="${anio}">  
             
             <input type="text" 
-                   class="form-control form-control-sm w-50 tax-value-${idTrabajo}" 
+                   class="form-control form-control-sm w-50 cl-tax-monto tax-value-${idTrabajo}" 
                    placeholder="Monto $" 
                    value="${monto ? money_format(monto) : ''}"
                    onfocus="focusMoney(this)" 
-                   onblur="blurMoney(this); calcularAverage(${idTrabajo})">
+                   onblur="blurMoney(this); calcularAverage(${idTrabajo}); actualizarDiccionario()">
             
             <button type="button" class="btn btn-xs text-danger p-0 border-0" 
-                    onclick="document.getElementById('tax_row_${idTax}').remove(); calcularAverage(${idTrabajo})">×</button>
+                    onclick="document.getElementById('tax_row_${idTax}').remove(); calcularAverage(${idTrabajo}); actualizarDiccionario()">×</button>
         </div>`;
 
     contenedor.insertAdjacentHTML('beforeend', html);
 
-    // Si estamos cargando datos, recalculamos el promedio de inmediato
+    // Recalcular promedio y actualizar el resumen global si hay datos
     if (monto !== "") {
         calcularAverage(idTrabajo);
+        if (typeof actualizarDiccionario === "function") {
+            actualizarDiccionario();
+        }
     }
 }
 
