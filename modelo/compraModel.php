@@ -146,6 +146,7 @@ class compra_model
     {
         $query = "UPDATE compras SET 
                 id_board = $this->id_board,
+                user_id = $this->user_id,
                 client_id = $this->client_id,
                 tipo_proceso = '$this->tipo_proceso',
                 primer_comprador = '$this->primer_comprador',

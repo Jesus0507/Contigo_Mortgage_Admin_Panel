@@ -4,6 +4,8 @@ var all_options_btn = document.querySelectorAll(".ticket-options");
 var add_column = document.getElementById("add_column");
 var columns_options = Array.from(document.querySelectorAll(".opt-item"));
 
+
+
 // Función para actualizar los contadores de cada columna
 function updateTaskCounts() {
     columns.forEach((column) => {
@@ -210,6 +212,7 @@ Array.from(tasks).forEach((task) => {
     }
 });
 
+
 function load_compras_modal_info(ev) {
     $.ajax({
         type: "POST",
@@ -225,7 +228,6 @@ function load_compras_modal_info(ev) {
         var historial = resParsed['historial'];
 
         document.getElementById("modal_id_gestion").innerHTML = resultado['id_compra'];
-        document.getElementById("asesor_name").innerHTML = "Asesor: " + resultado['user_name'] + " " + resultado['user_last_name'];
 
         // Procesar el tiempo de pago (Separar "12 meses" en ["12", "meses"])
         var tiempoArray = resultado['tiempo_pago_electronico'] ? resultado['tiempo_pago_electronico'].split(" ") : ["", "meses"];
@@ -237,17 +239,18 @@ function load_compras_modal_info(ev) {
         // Mapeo de inputs (Modificado el índice 3 que corresponde al tiempo)
         all_inputs.forEach((input, i) => {
             input.value =
-                i == 0 ? resultado['name'].replace(/\b\w/g, l => l.toUpperCase()) :
-                    i == 1 ? resultado['last_name'].replace(/\b\w/g, l => l.toUpperCase()) :
-                        i == 2 ? resultado['phone'] :
-                            i == 3 ? valorTiempo : // <-- Aquí ahora solo va el número
-                                i == 4 ? resultado['disponible_comprar'] :
-                                    i == 5 ? resultado['credito_cliente'] :
-                                        i == 6 ? resultado['monto_max_aplicado'] :
-                                            i == 7 ? resultado['interes_ofrecido'] :
-                                                i == 8 ? resultado['down_payment'] :
-                                                    i == 9 ? resultado['gastos_cierre'] :
-                                                        i == 10 ? resultado['total_requerido'] : '';
+                i == 0 ? resultado['user_name'] + " " + resultado['user_last_name'] :
+                    i == 1 ? resultado['name'].replace(/\b\w/g, l => l.toUpperCase()) :
+                        i == 2 ? resultado['last_name'].replace(/\b\w/g, l => l.toUpperCase()) :
+                            i == 3 ? resultado['phone'] :
+                                i == 4 ? valorTiempo : // <-- Aquí ahora solo va el número
+                                    i == 5 ? resultado['disponible_comprar'] :
+                                        i == 6 ? resultado['credito_cliente'] :
+                                            i == 7 ? resultado['monto_max_aplicado'] :
+                                                i == 8 ? resultado['interes_ofrecido'] :
+                                                    i == 9 ? resultado['down_payment'] :
+                                                        i == 10 ? resultado['gastos_cierre'] :
+                                                            i == 11 ? resultado['total_requerido'] : '';
         });
 
         // Asignar el valor al SELECT de formato
@@ -483,7 +486,7 @@ function agregarTrabajoDetail(idCliente, tipo, dataExistente = null, trabajo) {
 }
 function renderFormW2Detail(id, trabajo) {
     // Extraemos los valores que ahora sí vendrán de la BD
-    console.log(trabajo);
+    //console.log(trabajo);
     const valorHora = trabajo['valor_hora'] || "";
     const horas = trabajo['horas_semanales'] || "";
     const freq = trabajo['frecuencia_anual'] || "52";
@@ -574,6 +577,7 @@ function load_gestion_modal_info(ev) {
             "id_gestion": ev.target.querySelector("span").innerHTML
         }
     }).done(function (result) {
+        
         var resultado = JSON.parse(result)["gestion_info"][0];
         var notas = JSON.parse(result)['notas'];
         var deudas = JSON.parse(result)['deudas']
@@ -582,7 +586,6 @@ function load_gestion_modal_info(ev) {
 
         document.getElementById("modal_id_gestion").innerHTML = resultado['id_gestion'];
 
-        document.getElementById("asesor_name").innerHTML = "Asesor: " + resultado['user_name'] + " " + resultado['user_last_name'];
 
         deudas.forEach((deuda) => {
             new_deuda_item(deuda);
@@ -596,13 +599,31 @@ function load_gestion_modal_info(ev) {
             add_historial(h);
         })
 
+        console.log(resultado);
+
         var all_inputs = Array.from(document.querySelector(".custom-modal").querySelectorAll("input"));
         var i = 0;
         all_inputs.forEach((input) => {
-            input.value = i == 0 ? resultado['name'].replace(/\b\w/g, l => l.toUpperCase()) : i == 1 ? resultado['last_name'].replace(/\b\w/g, l => l.toUpperCase()) : i == 2 ? resultado['phone'] : i == 3 ? resultado['property_address'] : i == 4 ? money_format(resultado['property_value']) : i == 5 ? resultado['interes_actual'] : i == 6 ? money_format(resultado['mortgage']) : i == 8 ? resultado['ltv'] : i == 9 ? resultado['interes_estimado'] : i == 10 ? resultado['prepayment_penalty'] : i == 11 ? resultado['gastos_cierre'] : i == 12 ? money_format(resultado['mortgage_estimado']) : i == 13 ? money_format(resultado['loan_amount']) : money_format(resultado['cash_out']);
+            i == 0 ? resultado['user_name'] + " " + resultado['user_last_name'] :
+                input.value = i == 1 ?
+                    resultado['name'].replace(/\b\w/g, l => l.toUpperCase()) : i == 2 ?
+                        resultado['last_name'].replace(/\b\w/g, l => l.toUpperCase()) : i == 3 ?
+                            resultado['phone'] : i == 4 ?
+                                resultado['property_address'] : i == 5 ?
+                                    money_format(resultado['property_value']) : i == 6 ?
+                                        resultado['interes_actual'] : i == 7 ?
+                                            money_format(resultado['mortgage']) : i == 9 ?
+                                                resultado['ltv'] : i == 10 ?
+                                                    resultado['interes_estimado'] : i == 11 ?
+                                                        resultado['prepayment_penalty'] : i == 12 ?
+                                                            resultado['gastos_cierre'] : i == 13 ?
+                                                                money_format(resultado['mortgage_estimado']) : i == 14 ?
+                                                                    money_format(resultado['loan_amount']) : money_format(resultado['cash_out']);
             i++;
         })
 
+          document.getElementById("asesor_name").value = resultado['user_name'] + " " + resultado['user_last_name'];
+        console.log(document.getElementById("asesor_name").value);
         document.getElementById("ltv_percent_value").innerHTML = money_format(resultado['loan_amount']);
         document.getElementById("gastos_cierre_percent_value").innerHTML = money_format(parseFloat(resultado['property_value']) * parseFloat(resultado["gastos_cierre"]) / 100);
         document.getElementById("prepayment_penalty_percent_value").innerHTML = money_format((parseFloat(resultado['mortgage']) * parseFloat(resultado['prepayment_penalty'])) / 100);
