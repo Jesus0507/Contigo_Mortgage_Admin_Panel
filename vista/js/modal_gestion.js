@@ -26,6 +26,10 @@ var close_btn = document.getElementById("close_modal_btn");
 var property_register_btn = document.getElementById("property_register");
 var condiciones_adicionales = document.getElementById("aditional_conditions");
 var mortgage_estimado = document.getElementById("mortgage_estimado");
+var asesor_asignado = document.getElementById("asesor_name");
+var asesor_asignado_label = document.getElementById("asesor_asignado_label_gestion");
+var current_user_asigned = false;
+var users_list = document.getElementById("hidden_users_list");
 
 
 
@@ -138,7 +142,6 @@ function run_calculations() {
         let total_loan = prop_val * ltv_perc;
         let gastos_total = total_loan * tax_perc;
         let total_cashout = total_loan - deudas_base - gastos_total;
-        console.log(total_loan, prop_val, ltv_perc, property_value.value );
         loan_amount.value = money_format(total_loan);
         document.getElementById("ltv_percent_value").innerHTML = money_format(total_loan);
         cashout.value = total_cashout < 0 ? "0,00" : money_format(total_cashout);
@@ -158,10 +161,11 @@ function run_calculations() {
 
     } else {
         let desired_cashout = parseMoneyGestion(cashout.value);
-        let needed_loan = (deudas_base + desired_cashout) / (1 - tax_perc);
+        var gastos_cierre_val = (desired_cashout + deudas_base) * tax_perc;
+        let needed_loan = deudas_base + desired_cashout + gastos_cierre_val;
         loan_amount.value = money_format(needed_loan);
         document.getElementById("ltv_percent_value").innerHTML = money_format(needed_loan);
-        document.getElementById("gastos_cierre_percent_value").innerHTML = money_format(tax_perc * needed_loan);
+        document.getElementById("gastos_cierre_percent_value").innerHTML = money_format(gastos_cierre_val);
 
         if (prop_val > 0) {
             let ltv_calculado = (needed_loan / prop_val) * 100;
@@ -245,6 +249,36 @@ max_ltv_switch.onchange = function () {
 
 if (document.getElementById("property_update")) {
     document.getElementById("property_update").onclick = function () {
+
+        var users_list_parse = JSON.parse(users_list.innerHTML);
+        var is_user_assigned = false;
+        current_user_asigned = false;
+
+        users_list_parse.forEach((u) => {
+            var surname = u.name.toLowerCase() + " " + u.last_name.toLowerCase();
+            console.log(surname + " - " + asesor_asignado.value);
+            if (asesor_asignado.value.toLowerCase() == surname) {
+                is_user_assigned = u.user_id;
+                current_user_asigned = u.user_id;
+            }
+        })
+
+
+        if (is_user_assigned == false) {
+            asesor_asignado_label.style.color = "red";
+            var msg_asesor = "";
+            asesor_asignado.value == "" ? msg_asesor = "Indique el asesor asignado" : msg_asesor = "Asesor no existente";
+            asesor_asignado_label.innerHTML = msg_asesor;
+            setTimeout(() => {
+                asesor_asignado_label.style.color = "black";
+                asesor_asignado_label.innerHTML = "Asesor:";
+            }, 3000)
+            return;
+        }
+
+
+
+
         let fields = [client_name, client_last_name, client_phone, detalle_llamada, property_address, property_value, occupancy];
         let isValid = true;
         fields.forEach(f => {
@@ -262,7 +296,7 @@ close_btn.onclick = function () {
     // VALIDACIÓN DE EXISTENCIA: Si el elemento no existe (es null), isEditing será false.
     const updateEl = document.getElementById("property_update");
     const isEditing = updateEl ? !updateEl.classList.contains("d-none") : false;
-    
+
     const isVisible = (el) => el && !el.closest('.d-none');
 
     // 1. OBTENER TODOS LOS CAMPOS VISIBLES ACTUALMENTE
@@ -275,7 +309,7 @@ close_btn.onclick = function () {
         // --- LÓGICA DE EDICIÓN (Comparar contra old_info) ---
         const oldInfoEl = document.getElementById("old_info_gestion");
         const old_info_raw = oldInfoEl ? oldInfoEl.innerHTML : "";
-        
+
         if (old_info_raw.trim() !== "") {
             const old = JSON.parse(old_info_raw);
             const hasChanged = (current, original) => {
@@ -336,7 +370,7 @@ close_btn.onclick = function () {
  */
 function finalizeClose() {
     property_register_btn.classList.remove("d-none");
-    if(document.getElementById("property_update")) document.getElementById("property_update").classList.add("d-none");
+    if (document.getElementById("property_update")) document.getElementById("property_update").classList.add("d-none");
 
     $(".modal-gestion").fadeOut();
     document.getElementById("layoutSidenav").classList.remove("opacity-body");
@@ -547,6 +581,38 @@ function fields_validation() {
 
 property_register_btn.onclick = function () {
     // Validación rápida de campos requeridos
+
+    var users_list_parse = JSON.parse(users_list.innerHTML);
+    var is_user_assigned = false;
+    current_user_asigned = false;
+
+    users_list_parse.forEach((u) => {
+        var surname = u.name.toLowerCase() + " " + u.last_name.toLowerCase();
+        console.log(surname + " - " + asesor_asignado.value);
+        if (asesor_asignado.value.toLowerCase() == surname) {
+            is_user_assigned = u.user_id;
+            current_user_asigned = u.user_id;
+        }
+    })
+
+
+    if (is_user_assigned == false) {
+        asesor_asignado_label.style.color = "red";
+        var msg_asesor = "";
+        asesor_asignado.value == "" ? msg_asesor = "Indique el asesor asignado" : msg_asesor = "Asesor no existente";
+        asesor_asignado_label.innerHTML = msg_asesor;
+        setTimeout(() => {
+            asesor_asignado_label.style.color = "black";
+            asesor_asignado_label.innerHTML = "Asesor:";
+        }, 3000)
+        return;
+    }
+
+
+
+
+
+
     let fields = [client_name, client_last_name, client_phone, detalle_llamada, property_address, property_value, occupancy];
     let isValid = true;
     fields.forEach(f => {
@@ -589,10 +655,11 @@ property_register_btn.onclick = function () {
             "ltv": ltv_value.value,
             "deudas_adicionales": deudas_lista,
             "comments": unsaved_comments,
+            "user_id": current_user_asigned,
             "board": document.getElementById("board_id").innerHTML
         }
     }).done(function () {
-            location.reload();
+        location.reload();
     });
 };
 
@@ -621,8 +688,9 @@ function updateInfo(reload) {
             "gastos_cierre": gastos_cierre.value,
             "tipo_prestamo": tipo_prestamo.value,
             "condiciones_adicionales": condiciones_adicionales.value,
-            "loan_amount":  parseMoneyGestion(loan_amount.value),
+            "loan_amount": parseMoneyGestion(loan_amount.value),
             "cashout": parseMoneyGestion(cashout.value),
+            "user_id": current_user_asigned,
             "gestion_id": document.getElementById("modal_id_gestion").innerHTML
         }
     }).done(function (result) {

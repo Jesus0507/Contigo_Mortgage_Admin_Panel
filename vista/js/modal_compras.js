@@ -38,6 +38,10 @@ var property_register_btn = document.getElementById("property_register");
 var primer_comprador_field = document.querySelector(".primer-comprador-field");
 var forma_pago_container = document.querySelector(".forma-pago-container");
 var loan_amount = document.getElementById("loan_amount_compra");
+var users_list = document.getElementById("hidden_users_list");
+var asesor_asignado = document.getElementById("asesor_name_compras");
+var asesor_asignado_label = document.getElementById("asesor_asignado_label");
+var current_user_asigned = false;
 
 loan_amount.disabled = true;
 
@@ -542,6 +546,7 @@ function registerInfo() {
             "programa_aplica": document.getElementById("programa_aplica").value,
             "comments": unsaved_comments,
             "board": document.getElementById("board_id").innerHTML,
+            "user_asigned": current_user_asigned,
 
             // --- NUEVOS CAMPOS DE INCOME ---
             // Enviamos el array completo de objetos convertido a JSON string
@@ -610,7 +615,7 @@ close_btn.onclick = function () {
                 document.getElementById("layoutSidenav").classList.remove("opacity-body");
                 // Extraer nombre del asesor de forma limpia
                 const footerContent = document.querySelector(".sb-sidenav-footer").innerText;
-                document.getElementById("asesor_name").innerHTML = "Asesor: " + footerContent;
+                //    document.getElementById("asesor_name").innerHTML = "Asesor: " + footerContent;
 
                 // Reset de la sección de ingresos (importante para el diccionario)
                 resetIncomeSection();
@@ -660,6 +665,7 @@ function updateInfo(reload) {
             "monto_max": monto_max.value,
             "condiciones": conditions.value,
             "total_requerido": document.getElementById("total_requerido").value,
+            "user_asigned": current_user_asigned,
 
             // --- CAMPO RECIÉN AGREGADO ---
             "programa_aplica": document.getElementById("programa_aplica").value,
@@ -681,9 +687,24 @@ function updateInfo(reload) {
 
 function info_validation() {
     // Función auxiliar para saber si un elemento está oculto
+    var users_list_parse = JSON.parse(users_list.innerHTML);
+    var is_user_assigned = false;
+    current_user_asigned = false;
+
+    users_list_parse.forEach((u) => {
+        var surname = u.name.toLowerCase() + " " + u.last_name.toLowerCase();
+        console.log(surname + " - " + asesor_asignado.value);
+        if (asesor_asignado.value.toLowerCase() == surname) {
+            is_user_assigned = u.user_id;
+            current_user_asigned = u.user_id;
+        }
+    })
+
     const isVisible = (el) => {
         return el && !el.closest('.d-none');
     };
+
+
 
     // --- RESET DE ESTILOS ---
     // Limpiamos todos los labels a negro antes de empezar la nueva validación
@@ -779,6 +800,19 @@ function info_validation() {
         credito_cliente_label.style.color = "red";
         return false;
     }
+
+    if (is_user_assigned == false) {
+        asesor_asignado_label.style.color = "red";
+        var msg_asesor = "";
+        asesor_asignado.value == "" ? msg_asesor = "Indique el asesor asignado" : msg_asesor = "Asesor no existente";
+        asesor_asignado_label.innerHTML = msg_asesor;
+        setTimeout(() => {
+            asesor_asignado_label.style.color = "black";
+            asesor_asignado_label.innerHTML = "Asesor:";
+        }, 3000)
+        return false;
+    }
+
 
     return true;
 }
@@ -1318,7 +1352,6 @@ function actualizarDiccionario() {
 
     const resumenGlobal = document.getElementById('resumen_global_ingresos');
     if (resumenGlobal) {
-        console.log("llenando general info");
         var all_deudas = document.querySelectorAll(".info-deuda-client");
         var all_income = document.querySelectorAll(".info-income-client");
         var deudas_total = 0;
@@ -1339,7 +1372,7 @@ function actualizarDiccionario() {
     }
 
     // Opcional: imprimir en consola para debug
-    console.log("Diccionario Actualizado:", data);
+  //  console.log("Diccionario Actualizado:", data);
 
     // Si necesitas guardar esto en un input oculto para el form submit
     const inputOculto = document.getElementById('json_clientes_income');
