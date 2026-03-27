@@ -37,70 +37,79 @@ class main_model
 
 public function get_stadistics()
 {
+    // Limpieza estándar: punto fuera, coma por punto decimal
+    $cleanG = "CAST(REPLACE(REPLACE(loan_amount, '.', ''), ',', '.') AS DECIMAL(15,2))";
+    $cleanC_monto = "CAST(REPLACE(REPLACE(monto_max_aplicado, '.', ''), ',', '.') AS DECIMAL(15,2))";
+    $cleanC_down = "CAST(REPLACE(REPLACE(down_payment, '.', ''), ',', '.') AS DECIMAL(15,2))";
+    $formulaC = "($cleanC_monto - ($cleanC_monto * $cleanC_down / 100))";
 
     $sql = "SELECT 
-                (SELECT SUM(loan_amount) FROM gestion) as total_gestion,
-                (SELECT SUM(monto_max_aplicado) FROM compras) as total_compras";
+                -- PROYECCIÓN (Todo)
+                (SELECT SUM($cleanG) FROM gestion) as prog_g,
+                (SELECT SUM($formulaC) FROM compras) as prog_c,
+                -- REAL (Solo finalizados)
+                (SELECT SUM($cleanG) FROM gestion WHERE etapa_actual = 'finalizado') as real_g,
+                (SELECT SUM($formulaC) FROM compras WHERE etapa_actual = 'finalizado') as real_c";
+
     try {
         $resultado = $this->conexion->prepare($sql);
         $resultado->execute();
-        
-
-        $respuesta = $resultado->fetch(PDO::FETCH_ASSOC);
-
-
-        $total_g = isset($respuesta['total_gestion']) ? (float)$respuesta['total_gestion'] : 0;
-        $total_c = isset($respuesta['total_compras']) ? (float)$respuesta['total_compras'] : 0;
+        $res = $resultado->fetch(PDO::FETCH_ASSOC);
 
         return json_encode([
             'labels' => ['Refinanciamientos (Gestión)', 'Compras de Vivienda'],
-            'totals' => [$total_g, $total_c]
+            'proyeccion' => [(float)$res['prog_g'], (float)$res['prog_c']],
+            'real' => [(float)$res['real_g'], (float)$res['real_c']]
         ]);
     } catch (PDOException $e) {
         return json_encode(["error" => $e->getMessage()]);
     }
 }
-
 	public function get_ranking_agentes()
 	{
 		$sql = "SELECT 
-    u.name, 
-    u.last_name, 
-    COUNT(universo.tipo) as total_casos,
-    SUM(CASE WHEN universo.tipo = 'Refinanciamiento' THEN 1 ELSE 0 END) as total_refi,
-    SUM(CASE WHEN universo.tipo = 'Compra' THEN 1 ELSE 0 END) as total_compra
-FROM users u 
-LEFT JOIN (
+        u.name, 
+        u.last_name, 
+        SUM(CASE WHEN universo.tipo = 'Refinanciamiento' AND universo.etapa_actual != 'finalizado' THEN 1 ELSE 0 END) as refi_iniciado,
+        SUM(CASE WHEN universo.tipo = 'Refinanciamiento' AND universo.etapa_actual = 'finalizado' THEN 1 ELSE 0 END) as refi_finalizado,
+        SUM(CASE WHEN universo.tipo = 'Compra' AND universo.etapa_actual != 'finalizado' THEN 1 ELSE 0 END) as compra_iniciado,
+        SUM(CASE WHEN universo.tipo = 'Compra' AND universo.etapa_actual = 'finalizado' THEN 1 ELSE 0 END) as compra_finalizado,
+        COUNT(universo.user_id) as total_casos
+    FROM users u 
+    LEFT JOIN (
+        SELECT user_id, 'Refinanciamiento' as tipo, etapa_actual FROM gestion
+        UNION ALL
+        SELECT user_id, 'Compra' as tipo, etapa_actual FROM compras
+    ) as universo ON u.user_id = universo.user_id 
+    GROUP BY u.user_id, u.name, u.last_name
+    ORDER BY total_casos DESC 
+    LIMIT 5;";
 
-    SELECT user_id, 'Refinanciamiento' as tipo FROM gestion
-    UNION ALL
-    SELECT user_id, 'Compra' as tipo FROM compras
-) as universo ON u.user_id = universo.user_id 
-GROUP BY u.user_id, u.name, u.last_name
-ORDER BY total_casos DESC 
-LIMIT 5;";
 		try {
 			$resultado = $this->conexion->prepare($sql);
 			$resultado->execute();
 			$respuesta = $resultado->fetchAll(PDO::FETCH_ASSOC);
 
 			$nombres = [];
-			$totales = [];
-			$refis = [];
-			$compras = [];
+			$refi_ini = [];
+			$refi_fin = [];
+			$compra_ini = [];
+			$compra_fin = [];
 
 			foreach ($respuesta as $row) {
 				$nombres[] = $row['name'] . " " . $row['last_name'];
-				$totales[] = (int)$row['total_casos'];
-				$refis[]   = (int)$row['total_refi'];
-				$compras[] = (int)$row['total_compra'];
+				$refi_ini[] = (int)$row['refi_iniciado'];
+				$refi_fin[] = (int)$row['refi_finalizado'];
+				$compra_ini[] = (int)$row['compra_iniciado'];
+				$compra_fin[] = (int)$row['compra_finalizado'];
 			}
 
 			return json_encode([
-				'labels'  => $nombres,
-				'data'    => $totales,
-				'refis'   => $refis,
-				'compras' => $compras
+				'labels' => $nombres,
+				'refi_iniciado' => $refi_ini,
+				'refi_finalizado' => $refi_fin,
+				'compra_iniciado' => $compra_ini,
+				'compra_finalizado' => $compra_fin
 			]);
 		} catch (PDOException $e) {
 			return json_encode(["error" => $e->getMessage()]);
@@ -109,48 +118,71 @@ LIMIT 5;";
 
 	public function get_embudo_ventas()
 	{
-		$sql = "SELECT etapa_actual, COUNT(*) as cantidad 
-                FROM gestion 
-                WHERE etapa_actual IS NOT NULL 
-                GROUP BY etapa_actual 
-                ORDER BY cantidad DESC";
+		$sql = "SELECT 
+        b.name as pizarra,
+        COUNT(universo.id) as total,
+        SUM(CASE WHEN universo.etapa_actual = 'finalizado' THEN 1 ELSE 0 END) as finalizados
+    FROM boards b
+    LEFT JOIN (
+        SELECT id_board, etapa_actual, id_gestion as id FROM gestion
+        UNION ALL
+        SELECT id_board, etapa_actual, id_compra as id FROM compras
+    ) as universo ON b.id_board = universo.id_board
+    WHERE b.enabled = 1
+    GROUP BY b.id_board, b.name";
+
 		try {
 			$resultado = $this->conexion->prepare($sql);
 			$resultado->execute();
 			$respuesta = $resultado->fetchAll(PDO::FETCH_ASSOC);
 
-			$etapas = [];
+			$pizarras = [];
 			$totales = [];
+			$finalizados = [];
+
 			foreach ($respuesta as $row) {
-				$etapas[] = ucfirst($row['etapa_actual']);
-				$totales[] = (int)$row['cantidad'];
+				$pizarras[] = $row['pizarra'];
+				$totales[] = (int)$row['total'];
+				$finalizados[] = (int)$row['finalizados'];
 			}
-			return json_encode(['labels' => $etapas, 'data' => $totales]);
+
+			return json_encode([
+				'labels' => $pizarras,
+				'totales' => $totales,
+				'finalizados' => $finalizados
+			]);
 		} catch (PDOException $e) {
 			return json_encode(["error" => $e->getMessage()]);
 		}
 	}
 
-
 	public function get_velocidad_cierre()
 	{
-		$sql = "SELECT DATE_FORMAT(last_update, '%M') as mes, 
-                AVG(DATEDIFF(last_update, date_created)) as promedio_dias 
-                FROM gestion 
-                WHERE etapa_actual = 'finalizado' 
-                GROUP BY MONTH(last_update) 
-                ORDER BY MONTH(last_update) ASC";
+		$sql = "SELECT 
+                CONCAT(u.name, ' ', u.last_name) as agente,
+                AVG(DATEDIFF(universo.last_update, universo.date_created)) as promedio_dias
+            FROM users u
+            INNER JOIN (
+                SELECT user_id, date_created, last_update, etapa_actual FROM gestion
+                UNION ALL
+                SELECT user_id, date_created, last_update, etapa_actual FROM compras
+            ) as universo ON u.user_id = universo.user_id
+            WHERE universo.etapa_actual = 'finalizado'
+            GROUP BY u.user_id
+            ORDER BY promedio_dias ASC"; // Ordenar del más rápido al más lento
+
 		try {
 			$resultado = $this->conexion->prepare($sql);
 			$resultado->execute();
 			$res = $resultado->fetchAll(PDO::FETCH_ASSOC);
-			$meses = [];
+
+			$agentes = [];
 			$dias = [];
 			foreach ($res as $row) {
-				$meses[] = $row['mes'];
-				$dias[] = round($row['promedio_dias'], 1);
+				$agentes[] = $row['agente'];
+				$dias[] = round((float)$row['promedio_dias'], 1);
 			}
-			return json_encode(['labels' => $meses, 'data' => $dias]);
+			return json_encode(['labels' => $agentes, 'data' => $dias]);
 		} catch (PDOException $e) {
 			return json_encode(["error" => $e->getMessage()]);
 		}
@@ -194,7 +226,7 @@ LIMIT 5;";
                 CAST(REPLACE(REPLACE(REPLACE(loan_amount, '$', ''), ',', ''), ' ', '') AS DECIMAL(15,2)) as monto_prestamo
             FROM gestion 
             ORDER BY date_created ASC 
-            LIMIT 20"; 
+            LIMIT 20";
 
 		try {
 			$resultado = $this->conexion->prepare($sql);
@@ -240,7 +272,7 @@ LIMIT 5;";
 
 
 			foreach ($respuesta_arreglo as $fila) {
-				$labels[] = $fila['tipo_prestamo'];
+				$labels[] = str_replace("_", " ", $fila['tipo_prestamo']);
 				$counts[] = (int)$fila['cantidad'];
 			}
 
@@ -254,37 +286,55 @@ LIMIT 5;";
 			return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
 		}
 	}
-
 	public function get_meta_cierre_mensual()
 	{
-
-		$sql = "SELECT SUM(CAST(REPLACE(REPLACE(REPLACE(gastos_cierre, '$', ''), ',', ''), ' ', '') AS DECIMAL(15,2))) as total_actual
-            FROM gestion 
-            WHERE etapa_actual = 'finalizado' 
-            AND MONTH(date_created) = MONTH(CURRENT_DATE()) 
-            AND YEAR(date_created) = YEAR(CURRENT_DATE())";
+		$mes_actual = date('n');
+		$anio_actual = date('Y');
 
 		try {
-			$resultado = $this->conexion->prepare($sql);
-			$resultado->execute();
-			$fila = $resultado->fetch(PDO::FETCH_ASSOC);
+			// 1. Obtener total de Gestión
+			$sqlG = "SELECT COALESCE(SUM(CAST(REPLACE(REPLACE(REPLACE(REPLACE(loan_amount, '$', ''), '.', ''), ',', '.'), ' ', '') AS DECIMAL(15,2))), 0) as total 
+                 FROM gestion 
+                 WHERE (etapa_actual = 'finalizado' OR etapa_actual = 'en proceso') 
+                 AND MONTH(date_created) = :mes AND YEAR(date_created) = :anio";
 
-			$total_actual = (float)($fila['total_actual'] ?? 0);
-			$meta_objetivo = 50000.00; 
+			$queryG = $this->conexion->prepare($sqlG);
+			$queryG->execute([':mes' => $mes_actual, ':anio' => $anio_actual]);
+			$total_g = $queryG->fetch(PDO::FETCH_ASSOC)['total'];
+
+			// 2. Obtener total de Compras (Calculado)
+			$sqlC = "SELECT COALESCE(SUM(
+                    CAST(REPLACE(REPLACE(REPLACE(REPLACE(monto_max_aplicado, '$', ''), '.', ''), ',', '.'), ' ', '') AS DECIMAL(15,2)) - 
+                    (CAST(REPLACE(REPLACE(REPLACE(REPLACE(monto_max_aplicado, '$', ''), '.', ''), ',', '.'), ' ', '') AS DECIMAL(15,2)) * CAST(REPLACE(REPLACE(REPLACE(REPLACE(down_payment, '$', ''), '.', ''), ',', '.'), ' ', '') AS DECIMAL(15,2)) / 100)
+                 ), 0) as total 
+                 FROM compras 
+                 WHERE (etapa_actual = 'finalizado' OR etapa_actual = 'en proceso') 
+                 AND MONTH(date_created) = :mes AND YEAR(date_created) = :anio";
+
+			$queryC = $this->conexion->prepare($sqlC);
+			$queryC->execute([':mes' => $mes_actual, ':anio' => $anio_actual]);
+			$total_c = $queryC->fetch(PDO::FETCH_ASSOC)['total'];
+
+			// 3. Obtener Meta
+			$sqlM = "SELECT COALESCE(monto_meta, 50000.00) as meta 
+                 FROM metas_mensuales 
+                 WHERE mes = :mes AND anio = :anio LIMIT 1";
+
+			$queryM = $this->conexion->prepare($sqlM);
+			$queryM->execute([':mes' => $mes_actual, ':anio' => $anio_actual]);
+			$meta_res = $queryM->fetch(PDO::FETCH_ASSOC);
+			$meta = $meta_res ? $meta_res['meta'] : 50000.00;
+
+			$actual = (float)$total_g + (float)$total_c;
 
 			return json_encode([
-				'actual' => $total_actual,
-				'meta' => $meta_objetivo,
-				'porcentaje' => ($total_actual / $meta_objetivo) * 100
+				'actual' => $actual,
+				'meta' => (float)$meta
 			]);
 		} catch (PDOException $e) {
-			return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
+			return json_encode(["error" => $e->getMessage()]);
 		}
 	}
-
-
-
-
 	public function get_speed_stadistic()
 	{
 		if ($_SESSION['user_role'] == "admin") {
@@ -308,7 +358,7 @@ LIMIT 5;";
 
 			foreach ($respuesta_arreglo as $row) {
 				$labels[] = $row['fecha_finalizacion'];
-				$puntos[] = round($row['promedio_dias'], 1); 
+				$puntos[] = round($row['promedio_dias'], 1);
 			}
 
 			$velocidad_data = [
@@ -372,6 +422,93 @@ LIMIT 5;";
 			return $json_limbo;
 		} catch (PDOException $e) {
 			return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
+		}
+	}
+	public function get_monthly_agent_stats()
+	{
+		$anio_actual = date('Y');
+
+		try {
+			// 1. CIERRES POR ASESOR
+			$sqlCierres = "SELECT 
+                            CONCAT(u.name, ' ', u.last_name) as agente,
+                            MONTH(universo.last_update) as mes,
+                            COUNT(*) as total_cierres
+                        FROM users u
+                        INNER JOIN (
+                            SELECT user_id, last_update, etapa_actual FROM gestion
+                            UNION ALL
+                            SELECT user_id, last_update, etapa_actual FROM compras
+                        ) as universo ON u.user_id = universo.user_id
+                        WHERE universo.etapa_actual = 'finalizado'
+                        AND YEAR(universo.last_update) = :anio
+                        GROUP BY u.user_id, mes";
+
+			$queryCierres = $this->conexion->prepare($sqlCierres);
+			$queryCierres->execute([':anio' => $anio_actual]);
+			$resCierres = $queryCierres->fetchAll(PDO::FETCH_ASSOC);
+
+			// 2. PROCESOS INICIADOS
+			$sqlIniciados = "SELECT 
+                            CONCAT(u.name, ' ', u.last_name) as agente,
+                            MONTH(universo.date_created) as mes,
+                            COUNT(*) as total_iniciados
+                        FROM users u
+                        INNER JOIN (
+                            SELECT user_id, date_created FROM gestion
+                            UNION ALL
+                            SELECT user_id, date_created FROM compras
+                        ) as universo ON u.user_id = universo.user_id
+                        WHERE YEAR(universo.date_created) = :anio
+                        GROUP BY u.user_id, mes";
+
+			$queryIniciados = $this->conexion->prepare($sqlIniciados);
+			$queryIniciados->execute([':anio' => $anio_actual]);
+			$resIniciados = $queryIniciados->fetchAll(PDO::FETCH_ASSOC);
+
+			// 3. FINANCIAMIENTOS MENSUALES (Limpieza basada en tu función de éxito)
+			$sqlFinanciamiento = "SELECT 
+                                mes, 
+                                SUM(monto_mensual) as monto_total
+                              FROM (
+                                  -- Suma de GESTIÓN
+                                  SELECT 
+                                      MONTH(last_update) as mes, 
+                                      SUM(CAST(REPLACE(REPLACE(loan_amount, '.', ''), ',', '.') AS DECIMAL(15,2))) as monto_mensual
+                                  FROM gestion
+                                  WHERE etapa_actual = 'finalizado'
+                                  AND YEAR(last_update) = :anio
+                                  GROUP BY mes
+
+                                  UNION ALL
+
+                                  -- Suma de COMPRAS
+                                  SELECT 
+                                      MONTH(last_update) as mes,
+                                      SUM(
+                                          CAST(REPLACE(REPLACE(monto_max_aplicado, '.', ''), ',', '.') AS DECIMAL(15,2)) - 
+                                          (CAST(REPLACE(REPLACE(monto_max_aplicado, '.', ''), ',', '.') AS DECIMAL(15,2)) * CAST(REPLACE(REPLACE(down_payment, '.', ''), ',', '.') AS DECIMAL(15,2)) / 100)
+                                      ) as monto_mensual
+                                  FROM compras
+                                  WHERE etapa_actual = 'finalizado'
+                                  AND YEAR(last_update) = :anio
+                                  GROUP BY mes
+                              ) as subconsulta_unificada
+                              GROUP BY mes
+                              ORDER BY mes ASC";
+
+			$queryFin = $this->conexion->prepare($sqlFinanciamiento);
+			$queryFin->execute([':anio' => $anio_actual]);
+			$resFin = $queryFin->fetchAll(PDO::FETCH_ASSOC);
+
+			return json_encode([
+				'meses_labels' => ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+				'cierres_por_agente' => $resCierres,
+				'iniciados_por_agente' => $resIniciados,
+				'financiamiento_mensual' => $resFin
+			]);
+		} catch (PDOException $e) {
+			return json_encode(["error" => $e->getMessage()]);
 		}
 	}
 }

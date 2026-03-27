@@ -13228,7 +13228,75 @@ body {
   user-select: none;
 }
 
-button i{
+button i {
   pointer-events: none;
 }
 
+
+.reportes-options {
+  border: 1px solid;
+  width: 400px;
+  border-radius: 10px;
+
+  div {
+    width: 50%;
+    text-align: center;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+
+  div:hover {
+    background: rgb(208, 226, 232);
+  }
+
+  .selected {
+    background: rgb(108, 133, 141);
+    color: white;
+  }
+
+  .selected:hover {
+    background: rgb(108, 133, 141);
+  }
+}
+
+
+.statistics-filter {
+  border-radius: 5px;
+  border: 1px solid black;
+  position: relative;
+  z-index: 200;
+  width: 309px;
+
+  .filtros-header {
+    cursor: pointer;
+    padding: 2px 10px;
+    border-bottom: 1px solid;
+
+    div {
+      height: 24px;
+    }
+  }
+
+  .filtros-body {
+    height: fit-content;
+    background: white;
+
+    div {
+      padding: 2px 5px;
+      cursor: pointer;
+    }
+
+    div:hover {
+      background: rgb(208, 226, 232);
+    }
+  }
+}
+
+.graficos-section-container {
+  display: grid;
+  grid-template-columns: auto auto;
+  
+  div{
+    width: 90% !important;
+  }
+}
