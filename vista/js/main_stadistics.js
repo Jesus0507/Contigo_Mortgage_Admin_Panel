@@ -1,4 +1,33 @@
 document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById("graficos_opt").onclick = function () {
+        document.getElementById("graficos_opt").classList.add("selected");
+        document.getElementById("reportes_opt").classList.remove("selected");
+        document.getElementById("graficos_container").classList.remove("d-none");
+        document.getElementById("reportes_container").classList.add("d-none");
+    }
+
+    document.getElementById("reportes_opt").onclick = function () {
+        document.getElementById("reportes_opt").classList.add("selected");
+        document.getElementById("graficos_opt").classList.remove("selected");
+        document.getElementById("graficos_container").classList.add("d-none");
+        document.getElementById("reportes_container").classList.remove("d-none");
+    }
+
+    document.getElementById("filtros_header").onclick = function () {
+        if (document.getElementById("filtros_body").classList.contains("d-none")) {
+            document.getElementById("filtros_body").classList.remove("d-none");
+            document.getElementById("graficos_section_container").style.bottom = "336px";
+            document.getElementById("filter_icon").innerHTML = "keyboard_arrow_up";
+        }
+        else {
+            document.getElementById("filtros_body").classList.add("d-none");
+            document.getElementById("graficos_section_container").style.bottom = "0px";
+            document.getElementById("filter_icon").innerHTML = "keyboard_arrow_down";
+        }
+    }
+
+
+    filters_activation();
     get_cartera_total_data();
     get_distribucion_prestamos();
     get_comparativa_valores();
@@ -9,66 +38,148 @@ document.addEventListener('DOMContentLoaded', function () {
     get_carga_boards();
 });
 
+function filters_activation() {
+    var checks_divs = document.getElementById("filtros_body").querySelectorAll("div");
+    var all_container_graficos = document.querySelectorAll(".container-grafico-card");
+    Array.from(checks_divs).forEach((checkDiv) => {
+        checkDiv.onclick = function (ev) {
+            var check_input = ev.target.querySelector("input") != null ? ev.target.querySelector("input") : ev.target.parentElement.querySelector("input");
+            var check_label = ev.target.querySelector("label") != null ? ev.target.querySelector("label") : ev.target.parentElement.querySelector("label");
+            check_input.checked = !check_input.checked;
+
+            switch (check_label.innerText.toLowerCase()) {
+                case "todos":
+                    if (check_input.checked == true) {
+                        Array.from(checks_divs).forEach((cd) => {
+                            if (cd != checkDiv) cd.querySelector("input").checked = true;
+                        });
+                        Array.from(all_container_graficos).forEach((c) => { c.classList.remove("d-none") })
+                    }
+                    else {
+
+                        Array.from(checks_divs).forEach((cd) => {
+                            if (cd != checkDiv) cd.querySelector("input").checked = false;
+                        });
+
+                        Array.from(all_container_graficos).forEach((c) => { c.classList.add("d-none") })
+                    }
+
+                    break;
+                case "cartera total":
+                    check_input.checked == true? all_container_graficos[0].classList.remove('d-none') : all_container_graficos[0].classList.add('d-none');
+                break;
+                 case "distribucion de programas de préstamo":
+                    check_input.checked == true? all_container_graficos[1].classList.remove('d-none') : all_container_graficos[1].classList.add('d-none');
+                break;
+                 case "valor de propiedad vs monto de préstamo":
+                    check_input.checked == true? all_container_graficos[2].classList.remove('d-none') : all_container_graficos[2].classList.add('d-none');
+                break;
+                 case "meta de cierre mensual":
+                    check_input.checked == true? all_container_graficos[3].classList.remove('d-none') : all_container_graficos[3].classList.add('d-none');
+                break;
+                 case "productividad por agente":
+                    check_input.checked == true? all_container_graficos[4].classList.remove('d-none') : all_container_graficos[4].classList.add('d-none');
+                break;
+                 case "embudo de ventas":
+                    check_input.checked == true? all_container_graficos[5].classList.remove('d-none') : all_container_graficos[5].classList.add('d-none');
+                break;
+                 case "tiempo promedio de cierre":
+                    check_input.checked == true? all_container_graficos[6].classList.remove('d-none') : all_container_graficos[6].classList.add('d-none');
+                break;
+                 case "volumen por pizarra":
+                    check_input.checked == true? all_container_graficos[7].classList.remove('d-none') : all_container_graficos[7].classList.add('d-none');
+                break;
+                 case "cierres de asesor por mes":
+                    check_input.checked == true? all_container_graficos[8].classList.remove('d-none') : all_container_graficos[8].classList.add('d-none');
+                break;
+                 case "procesos iniciados por mes":
+                    check_input.checked == true? all_container_graficos[9].classList.remove('d-none') : all_container_graficos[9].classList.add('d-none');
+                break;
+                default:
+                    check_input.checked == true? all_container_graficos[10].classList.remove('d-none') : all_container_graficos[10].classList.add('d-none');
+                break;
+            }
+
+
+
+        }
+
+    })
+
+
+}
+
+
+
+
+
+let datosCarteraProyeccion = [];
+let datosCarteraReal = [];
 
 function get_cartera_total_data() {
-    const ctx = document.getElementById('graficoCartera').getContext('2d');
-
-    // Usando el formato jQuery AJAX que solicitaste
     $.ajax({
-        type: "POST", // O "GET" dependiendo de cómo lo manejes en el controlador
+        type: "POST",
         url: "index.php?c=main&a=get_cartera_total_data",
-        data: {}, // No necesitamos enviar datos para esta consulta
     }).done(function (result) {
-        // Parseamos el resultado en caso de que venga como string
-        const data = JSON.parse(result);
+        try {
+            const data = JSON.parse(result);
 
-        console.log("Datos recibidos para el gráfico:", data);
+            // Guardamos ambos estados
+            datosCarteraProyeccion = data.proyeccion;
+            datosCarteraReal = data.real;
 
-        // Renderizado del gráfico
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: data.labels,
-                datasets: [{
-                    label: 'Monto Total en Dólares ($)',
-                    data: data.totals,
-                    backgroundColor: [
-                        'rgba(54, 162, 235, 0.7)',
-                        'rgba(75, 192, 192, 0.7)'
-                    ],
-                    borderColor: [
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(75, 192, 192, 1)'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function (value) {
-                                return '$' + value.toLocaleString();
-                            }
-                        }
-                    }
-                },
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function (context) {
-                                return 'Total: $' + context.raw.toLocaleString();
-                            }
-                        }
-                    }
-                }
-            }
-        });
+            // Renderizamos inicialmente con Proyección
+            renderCarteraChart(data.labels, datosCarteraProyeccion);
+
+        } catch (e) {
+            console.error("Error en Cartera Total:", e);
+        }
     });
 }
 
+function renderCarteraChart(labels, totals) {
+    const ctx = document.getElementById('graficoCartera').getContext('2d');
+
+    // Si ya existe el gráfico, lo destruimos para evitar solapamiento
+    if (window.chartCarteraTotal) {
+        window.chartCarteraTotal.destroy();
+    }
+
+    window.chartCarteraTotal = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Monto Total ($)',
+                data: totals,
+                backgroundColor: ['rgba(54, 162, 235, 0.7)', 'rgba(75, 192, 192, 0.7)'],
+                borderColor: ['rgba(54, 162, 235, 1)', 'rgba(75, 192, 192, 1)'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { callback: (v) => '$' + v.toLocaleString() }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: { label: (ctx) => 'Total: $' + ctx.raw.toLocaleString() }
+                }
+            }
+        }
+    });
+}
+
+// Función que se activa al mover el Switch
+function toggleCartera(mostrarSoloReal) {
+    const labels = ['Refinanciamientos (Gestión)', 'Compras de Vivienda'];
+    const dataAMostrar = mostrarSoloReal ? datosCarteraReal : datosCarteraProyeccion;
+    renderCarteraChart(labels, dataAMostrar);
+}
 function get_distribucion_prestamos() {
 
     const ctxPie = document.getElementById('graficoProgramas').getContext('2d');
@@ -109,7 +220,7 @@ function get_distribucion_prestamos() {
                             label: function (context) {
                                 let label = context.label || '';
                                 let value = context.raw || 0;
-                                return label + ': ' + value + ' casos';
+                                return ': ' + value + ' casos';
                             }
                         }
                     }
@@ -177,51 +288,154 @@ function get_comparativa_valores() {
 }
 
 function get_meta_cierre_mensual() {
-    const ctxGauge = document.getElementById('graficoGauge').getContext('2d');
+    const canvasElement = document.getElementById('graficoGauge');
+    if (!canvasElement) return;
+
+    const ctxGauge = canvasElement.getContext('2d');
 
     $.ajax({
         type: "POST",
         url: "index.php?c=main&a=get_meta_cierre_mensual",
-        data: {},
     }).done(function (result) {
         console.log(result);
         try {
             const res = JSON.parse(result);
-            const restante = res.meta - res.actual > 0 ? res.meta - res.actual : 0;
+            const alcanzado = parseFloat(res.actual) || 0;
+            const meta = parseFloat(res.meta) || 50000;
+            const restante = (meta - alcanzado) > 0 ? (meta - alcanzado) : 0;
 
-            // Actualizar el texto debajo del gráfico
             document.getElementById('gaugeText').innerText =
-                `$${res.actual.toLocaleString()} / $${res.meta.toLocaleString()}`;
+                `$${alcanzado.toLocaleString('en-US')} / $${meta.toLocaleString('en-US')}`;
 
-            new Chart(ctxGauge, {
+            if (window.myGaugeChart) {
+                window.myGaugeChart.destroy();
+            }
+
+            window.myGaugeChart = new Chart(ctxGauge, {
                 type: 'doughnut',
                 data: {
                     labels: ['Alcanzado', 'Restante'],
                     datasets: [{
-                        data: [res.actual, restante],
-                        backgroundColor: ['#28a745', '#e9ecef'], // Verde y Gris claro
+                        data: [alcanzado, restante],
+                        backgroundColor: ['#28a745', '#e9ecef'],
                         borderWidth: 0
                     }]
                 },
                 options: {
-                    rotation: -90, // Empezar desde la izquierda
-                    circumference: 180, // Solo medio círculo
-                    cutout: '80%', // Grosor del arco
+                    rotation: -90,
+                    circumference: 180,
+                    cutout: '80%',
+                    responsive: true,
+                    maintainAspectRatio: true, // ¡IMPORTANTE! Cambiado a true
+                    aspectRatio: 2,           // ¡ESTO EVITA QUE SE ESTIRE!
                     plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            enabled: false
-                        }
+                        legend: { display: false },
+                        tooltip: { enabled: true }
                     }
                 }
             });
         } catch (e) {
-            console.error("Error en Gauge:", result);
+            console.error("Error procesando JSON de Meta:", e);
         }
     });
 }
+
+function loadMonthlyAgentCharts() {
+    $.ajax({
+        type: "POST",
+        url: "index.php?c=main&a=get_monthly_agent_stats",
+    }).done(function (result) {
+        try {
+            const data = JSON.parse(result);
+            const mesesLabels = data.meses_labels;
+            const colores = ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#858796', '#5a5c69'];
+
+            const formatData = (rawData, key) => {
+                const map = {};
+                rawData.forEach(row => {
+                    if (!map[row.agente]) map[row.agente] = new Array(12).fill(0);
+                    map[row.agente][row.mes - 1] = parseInt(row[key]);
+                });
+                return Object.keys(map).map((agente, i) => ({
+                    label: agente,
+                    data: map[agente],
+                    borderColor: colores[i % colores.length],
+                    backgroundColor: 'transparent',
+                    tension: 0.3,
+                    pointRadius: 3
+                }));
+            };
+
+            // --- 1. Gráfico de Cierres ---
+            const ctxCierres = document.getElementById('chartCierresAgente');
+            if (ctxCierres) {
+                if (window.chartCierres) window.chartCierres.destroy(); // Destruir si ya existe
+                window.chartCierres = new Chart(ctxCierres, {
+                    type: 'line',
+                    data: { labels: mesesLabels, datasets: formatData(data.cierres_por_agente, 'total_cierres') },
+                    options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+                });
+            }
+
+            // --- 2. Gráfico de Inicios ---
+            const ctxIniciados = document.getElementById('chartIniciadosAgente');
+            if (ctxIniciados) {
+                if (window.chartIniciados) window.chartIniciados.destroy(); // Destruir si ya existe
+                window.chartIniciados = new Chart(ctxIniciados, {
+                    type: 'line',
+                    data: { labels: mesesLabels, datasets: formatData(data.iniciados_por_agente, 'total_iniciados') },
+                    options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+                });
+            }
+
+            // --- 3. Gráfico de Financiamientos ($) ---
+            const ctxFin = document.getElementById('chartFinanciamientoMensual');
+            if (ctxFin) {
+                const finData = new Array(12).fill(0);
+                data.financiamiento_mensual.forEach(row => finData[row.mes - 1] = parseFloat(row.monto_total));
+
+                if (window.chartFin) window.chartFin.destroy(); // Destruir si ya existe
+                window.chartFin = new Chart(ctxFin, {
+                    type: 'bar',
+                    data: {
+                        labels: mesesLabels,
+                        datasets: [{
+                            label: 'Total $',
+                            data: finData,
+                            backgroundColor: '#36b9cc'
+                        }]
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                ticks: {
+                                    callback: (v) => '$' + v.toLocaleString('en-US', { notation: 'compact' })
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: (ctx) => 'Total: $' + ctx.raw.toLocaleString('en-US')
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+        } catch (e) {
+            console.error("Error cargando estadísticas:", e, result);
+        }
+    });
+}
+// Iniciar la carga al cargar la página
+$(document).ready(function () {
+    loadMonthlyAgentCharts();
+});
+
+
 
 function get_ranking_agentes() {
     $.ajax({
@@ -229,42 +443,62 @@ function get_ranking_agentes() {
         url: "index.php?c=main&a=get_ranking_agentes",
     }).done(function (result) {
         const data = JSON.parse(result);
-        
+
         new Chart(document.getElementById('graficoRanking'), {
             type: 'bar',
             data: {
                 labels: data.labels,
                 datasets: [
+                    // --- GRUPO REFINANCIAMIENTOS ---
                     {
-                        label: 'Refinanciamientos',
-                        data: data.refis, // Usamos el nuevo campo de Refis
-                        backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                        label: 'Refis (Iniciados)',
+                        data: data.refi_iniciado,
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)', // Azul Claro
                         borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 1
+                        borderWidth: 1,
+                        stack: 'Refi' // Agrupa este dataset con los otros 'Refi'
                     },
                     {
-                        label: 'Compras',
-                        data: data.compras, // Usamos el nuevo campo de Compras
-                        backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                        label: 'Refis (Finalizados)',
+                        data: data.refi_finalizado,
+                        backgroundColor: 'rgba(54, 162, 235, 0.9)', // Azul Oscuro
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1,
+                        stack: 'Refi'
+                    },
+                    // --- GRUPO COMPRAS ---
+                    {
+                        label: 'Compras (Iniciados)',
+                        data: data.compra_iniciado,
+                        backgroundColor: 'rgba(75, 192, 192, 0.5)', // Verde Claro
                         borderColor: 'rgba(75, 192, 192, 1)',
-                        borderWidth: 1
+                        borderWidth: 1,
+                        stack: 'Compra' // Agrupa este dataset con los otros 'Compra'
+                    },
+                    {
+                        label: 'Compras (Finalizados)',
+                        data: data.compra_finalizado,
+                        backgroundColor: 'rgba(75, 192, 192, 0.9)', // Verde Oscuro
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1,
+                        stack: 'Compra'
                     }
                 ]
             },
             options: {
-                indexAxis: 'y', 
+                indexAxis: 'y',
                 responsive: true,
                 scales: {
                     x: {
-                        stacked: true, // Apila las barras en el eje X
+                        stacked: true, // Habilita el apilamiento global en X
                     },
                     y: {
-                        stacked: true // Apila las barras en el eje Y
+                        stacked: true // Habilita el apilamiento global en Y
                     }
                 },
                 plugins: {
-                    legend: { 
-                        display: true, // Ahora sí conviene mostrar la leyenda para saber cuál es cuál
+                    legend: {
+                        display: true,
                         position: 'top'
                     }
                 }
@@ -272,24 +506,61 @@ function get_ranking_agentes() {
         });
     });
 }
-
 function get_embudo_ventas() {
     $.ajax({
         type: "POST",
         url: "index.php?c=main&a=get_embudo_ventas",
     }).done(function (result) {
         const data = JSON.parse(result);
+
         new Chart(document.getElementById('graficoEmbudo'), {
             type: 'bar',
             data: {
                 labels: data.labels,
-                datasets: [{
-                    label: 'Cantidad de Clientes',
-                    data: data.data,
-                    backgroundColor: ['#f6c23e', '#fd7e14', '#e74a3b', '#1cc88a']
-                }]
+                datasets: [
+                    {
+                        label: 'Total Tickets',
+                        data: data.totales,
+                        backgroundColor: 'rgba(201, 203, 207, 0.5)', // Gris claro
+                        borderColor: 'rgb(201, 203, 207)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Finalizados',
+                        data: data.finalizados,
+                        backgroundColor: 'rgba(28, 200, 138, 0.8)', // Verde
+                        borderColor: 'rgb(28, 200, 138)',
+                        borderWidth: 1
+                    }
+                ]
             },
-            options: { responsive: true }
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                let label = context.dataset.label || '';
+                                let value = context.parsed.y;
+                                let dataIndex = context.dataIndex;
+
+                                if (label === 'Finalizados') {
+                                    let total = context.chart.data.datasets[0].data[dataIndex];
+                                    let percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                    return `${label}: ${value} (${percentage}% del total)`;
+                                }
+                                return `${label}: ${value}`;
+                            }
+                        }
+                    }
+                }
+            }
         });
     });
 }
@@ -300,20 +571,40 @@ function get_velocidad_cierre() {
         url: "index.php?c=main&a=get_velocidad_cierre",
     }).done(function (result) {
         const d = JSON.parse(result);
+
         new Chart(document.getElementById('graficoVelocidad'), {
-            type: 'line',
+            type: 'bar', // Cambiado a barra para mejor comparación entre agentes
             data: {
                 labels: d.labels,
                 datasets: [{
                     label: 'Días promedio para cerrar',
                     data: d.data,
-                    borderColor: '#1cc88a',
-                    backgroundColor: 'rgba(28, 200, 138, 0.1)',
-                    fill: true,
-                    tension: 0.3
+                    // Color dinámico: más oscuro si tarda más
+                    backgroundColor: d.data.map(valor => valor > 5 ? 'rgba(231, 74, 59, 0.7)' : 'rgba(28, 200, 138, 0.7)'),
+                    borderColor: d.data.map(valor => valor > 5 ? '#e74a3b' : '#1cc88a'),
+                    borderWidth: 1
                 }]
             },
-            options: { responsive: true }
+            options: {
+                indexAxis: 'y', // Barra horizontal para leer mejor los nombres
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return `Promedio: ${context.parsed.x} días`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Días transcurridos' }
+                    }
+                }
+            }
         });
     });
 }

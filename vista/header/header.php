@@ -9,6 +9,7 @@
     <link rel="icon" href="vista/images/favicon.png" type="image/x-icon">
     <link href="vista/css/styles.css" rel="stylesheet" />
     <link href="vista/css/modal.css" rel="stylesheet" />
-     <link href="vista/css/board_detail.css" rel="stylesheet" />
+    <link href="vista/css/board_detail.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
 </head>

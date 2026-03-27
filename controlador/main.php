@@ -81,6 +81,15 @@ class mainController
 		echo $estadisticas;
 	}
 
+	public function get_monthly_agent_stats()
+	{
+		// Verificación de sesión de admin (opcional pero recomendada)
+		// if($_SESSION['role'] != 'admin') { echo json_encode(['error' => 'No autorizado']); return; }
+
+		$modelo = new main_model();
+		echo $modelo->get_monthly_agent_stats();
+	}
+
 	public function get_ranking_agentes()
 	{
 		$modelo = new main_model();
@@ -93,16 +102,16 @@ class mainController
 		echo $modelo->get_embudo_ventas();
 	}
 
-	public function get_velocidad_cierre() {
-        echo (new main_model())->get_velocidad_cierre();
-    }
-
-    public function get_carga_boards() {
-        echo (new main_model())->get_carga_boards();
-    }
-
-
-	public function get_all_statistics(){
-
+	public function get_velocidad_cierre()
+	{
+		echo (new main_model())->get_velocidad_cierre();
 	}
+
+	public function get_carga_boards()
+	{
+		echo (new main_model())->get_carga_boards();
+	}
+
+
+	public function get_all_statistics() {}
 }
