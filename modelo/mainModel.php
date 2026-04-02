@@ -35,15 +35,186 @@ class main_model
 		}
 	}
 
-public function get_stadistics()
-{
-    // Limpieza estándar: punto fuera, coma por punto decimal
-    $cleanG = "CAST(REPLACE(REPLACE(loan_amount, '.', ''), ',', '.') AS DECIMAL(15,2))";
-    $cleanC_monto = "CAST(REPLACE(REPLACE(monto_max_aplicado, '.', ''), ',', '.') AS DECIMAL(15,2))";
-    $cleanC_down = "CAST(REPLACE(REPLACE(down_payment, '.', ''), ',', '.') AS DECIMAL(15,2))";
-    $formulaC = "($cleanC_monto - ($cleanC_monto * $cleanC_down / 100))";
+	public function get_unique_board_types()
+	{
+		// Aplicamos el REPLACE para normalizar 'gestion_clientes' a 'refinanciamientos'
+		$query = "SELECT DISTINCT REPLACE(board_type, 'gestion_clientes', 'gestion_clientes') as board_type FROM boards";
 
-    $sql = "SELECT 
+		try {
+			$types = [];
+			$resultado = $this->conexion->prepare($query);
+			$resultado->execute();
+			$resultado->setFetchMode(PDO::FETCH_ASSOC);
+
+			foreach ($resultado->fetchAll(PDO::FETCH_ASSOC) as $v) {
+				$types[] = $v;
+			}
+
+			return $types;
+		} catch (PDOException $e) {
+			return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
+		}
+	}
+
+	public function get_filtered_report_data($filtros)
+	{
+		// Definimos las fórmulas de limpieza para los montos (basado en tus imágenes de formato moneda)
+		$cleanG_loan = "CAST(REPLACE(REPLACE(t.loan_amount, '.', ''), ',', '.') AS DECIMAL(15,2))";
+		$cleanC_monto = "CAST(REPLACE(REPLACE(t.monto_max_aplicado, '.', ''), ',', '.') AS DECIMAL(15,2))";
+		$cleanC_down = "CAST(REPLACE(REPLACE(t.down_payment, '.', ''), ',', '.') AS DECIMAL(15,2))";
+
+		// Fórmula para compras: monto - (monto * down / 100)
+		$formulaC = "($cleanC_monto - ($cleanC_monto * $cleanC_down / 100))";
+
+		// SQL Base con todos los joins necesarios por cada tipo de tabla
+		$sqlBase = "
+        SELECT 
+            t.client_id, t.user_id, t.id_board, t.etapa_actual, t.date_created,
+            c.name as cliente_nombre, c.last_name as cliente_apellido,
+            b.name as board_nombre,
+            b.board_type as tipo_tabla,
+            u.name as agente_nombre, u.last_name as agente_apellido,
+            $formulaC as loan_amount,
+            t.monto_max_aplicado as propiedad_valor, -- O la columna que definas para valor propiedad
+            'compras' as origen
+        FROM compras t
+        LEFT JOIN clients c ON t.client_id = c.client_id
+        LEFT JOIN boards b ON t.id_board = b.id_board
+        LEFT JOIN users u ON t.user_id = u.user_id
+        
+        UNION ALL
+        
+        SELECT 
+            t.client_id, t.user_id, t.id_board, t.etapa_actual, t.date_created,
+            c.name as cliente_nombre, c.last_name as cliente_apellido,
+            b.name as board_nombre,
+            b.board_type as tipo_tabla,
+            u.name as agente_nombre, u.last_name as agente_apellido,
+            $cleanG_loan as loan_amount,
+            t.property_value as propiedad_valor,
+            'gestion' as origen
+        FROM gestion t
+        LEFT JOIN clients c ON t.client_id = c.client_id
+        LEFT JOIN boards b ON t.id_board = b.id_board
+        LEFT JOIN users u ON t.user_id = u.user_id
+    ";
+
+		$sql = "SELECT * FROM ($sqlBase) as report WHERE date_created BETWEEN ? AND ?";
+
+		$params = [
+			$filtros['fecha_inicio'] . " 00:00:00",
+			$filtros['fecha_fin'] . " 23:59:59"
+		];
+
+		// --- Filtros Dinámicos ---
+
+		// 1. Tipos de tabla (compras / gestion_clientes)
+		if (!empty($filtros['tipos'])) {
+			$placeholders = implode(',', array_fill(0, count($filtros['tipos']), '?'));
+			$sql .= " AND tipo_tabla IN ($placeholders)";
+			foreach ($filtros['tipos'] as $t) $params[] = $t;
+		}
+
+		// 2. Tablas específicas (id_board)
+		if (!empty($filtros['tablas'])) {
+			$placeholders = implode(',', array_fill(0, count($filtros['tablas']), '?'));
+			$sql .= " AND id_board IN ($placeholders)";
+			foreach ($filtros['tablas'] as $id) $params[] = $id;
+		}
+
+		// 3. Agentes (user_id)
+		if (!empty($filtros['agentes'])) {
+			$placeholders = implode(',', array_fill(0, count($filtros['agentes']), '?'));
+			$sql .= " AND user_id IN ($placeholders)";
+			foreach ($filtros['agentes'] as $id) $params[] = $id;
+		}
+
+		// 4. Estados (etapa_actual)
+		if (!empty($filtros['estados'])) {
+			$placeholders = implode(',', array_fill(0, count($filtros['estados']), '?'));
+			$sql .= " AND etapa_actual IN ($placeholders)";
+			foreach ($filtros['estados'] as $estado) $params[] = $estado;
+		}
+
+		// 5. Clientes específicos
+		if (!empty($filtros['clientes'])) {
+			$placeholders = implode(',', array_fill(0, count($filtros['clientes']), '?'));
+			$sql .= " AND client_id IN ($placeholders)";
+			foreach ($filtros['clientes'] as $id) $params[] = $id;
+		}
+
+		$sql .= " ORDER BY date_created DESC";
+
+		try {
+			$stmt = $this->conexion->prepare($sql);
+			$stmt->execute($params);
+			return $stmt->fetchAll(PDO::FETCH_ASSOC);
+		} catch (PDOException $e) {
+			return ["error" => $e->getMessage()];
+		}
+	}
+
+
+	public function get_todas_las_etapas()
+	{
+		// Usamos UNION para juntar los resultados de ambas tablas y DISTINCT de forma implícita
+		$query = "SELECT etapa_actual, id_board FROM compras 
+              UNION 
+              SELECT etapa_actual, id_board FROM gestion";
+
+		try {
+			$etapas = [];
+			$resultado = $this->conexion->prepare($query);
+			$resultado->execute();
+			$resultado->setFetchMode(PDO::FETCH_ASSOC);
+
+			foreach ($resultado->fetchAll() as $v) {
+				// Validamos que no sea un valor vacío o nulo antes de agregarlo
+				if (!empty($v['etapa_actual'])) {
+					$etapas[] = $v;
+				}
+			}
+
+			return $etapas;
+		} catch (PDOException $e) {
+			return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
+		}
+	}
+
+	public function get_clientes_con_tickets()
+	{
+		// Seleccionamos nombre y apellido unicos de clientes que existen en compras o gestion
+		$query = "SELECT  c.client_id,  c.name,  c.last_name, ( SELECT GROUP_CONCAT(DISTINCT relacion) FROM (
+		SELECT CONCAT('compras-', id_board) AS relacion, client_id FROM compras UNION ALL SELECT CONCAT('gestion_clientes-', id_board) AS relacion, client_id FROM gestion) AS t_relaciones_clientes
+        WHERE t_relaciones_clientes.client_id = c.client_id ) AS tablas_presente FROM clients c WHERE EXISTS (SELECT 1 FROM compras WHERE client_id = c.client_id)
+   		OR EXISTS (SELECT 1 FROM gestion WHERE client_id = c.client_id) ORDER BY c.name ASC;";
+
+		try {
+			$clientes = [];
+			$resultado = $this->conexion->prepare($query);
+			$resultado->execute();
+			$resultado->setFetchMode(PDO::FETCH_ASSOC);
+
+			foreach ($resultado->fetchAll() as $v) {
+				$clientes[] = $v;
+			}
+
+			return $clientes;
+		} catch (PDOException $e) {
+			return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
+		}
+	}
+
+
+	public function get_stadistics()
+	{
+		// Limpieza estándar: punto fuera, coma por punto decimal
+		$cleanG = "CAST(REPLACE(REPLACE(loan_amount, '.', ''), ',', '.') AS DECIMAL(15,2))";
+		$cleanC_monto = "CAST(REPLACE(REPLACE(monto_max_aplicado, '.', ''), ',', '.') AS DECIMAL(15,2))";
+		$cleanC_down = "CAST(REPLACE(REPLACE(down_payment, '.', ''), ',', '.') AS DECIMAL(15,2))";
+		$formulaC = "($cleanC_monto - ($cleanC_monto * $cleanC_down / 100))";
+
+		$sql = "SELECT 
                 -- PROYECCIÓN (Todo)
                 (SELECT SUM($cleanG) FROM gestion) as prog_g,
                 (SELECT SUM($formulaC) FROM compras) as prog_c,
@@ -51,20 +222,20 @@ public function get_stadistics()
                 (SELECT SUM($cleanG) FROM gestion WHERE etapa_actual = 'finalizado') as real_g,
                 (SELECT SUM($formulaC) FROM compras WHERE etapa_actual = 'finalizado') as real_c";
 
-    try {
-        $resultado = $this->conexion->prepare($sql);
-        $resultado->execute();
-        $res = $resultado->fetch(PDO::FETCH_ASSOC);
+		try {
+			$resultado = $this->conexion->prepare($sql);
+			$resultado->execute();
+			$res = $resultado->fetch(PDO::FETCH_ASSOC);
 
-        return json_encode([
-            'labels' => ['Refinanciamientos (Gestión)', 'Compras de Vivienda'],
-            'proyeccion' => [(float)$res['prog_g'], (float)$res['prog_c']],
-            'real' => [(float)$res['real_g'], (float)$res['real_c']]
-        ]);
-    } catch (PDOException $e) {
-        return json_encode(["error" => $e->getMessage()]);
-    }
-}
+			return json_encode([
+				'labels' => ['Refinanciamientos (Gestión)', 'Compras de Vivienda'],
+				'proyeccion' => [(float)$res['prog_g'], (float)$res['prog_c']],
+				'real' => [(float)$res['real_g'], (float)$res['real_c']]
+			]);
+		} catch (PDOException $e) {
+			return json_encode(["error" => $e->getMessage()]);
+		}
+	}
 	public function get_ranking_agentes()
 	{
 		$sql = "SELECT 

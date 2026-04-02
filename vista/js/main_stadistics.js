@@ -189,7 +189,7 @@ function get_distribucion_prestamos() {
         url: "index.php?c=main&a=get_distribucion_prestamos",
         data: {},
     }).done(function (result) {
-        console.log(result);
+      //  console.log(result);
         const dataParsed = JSON.parse(result);
 
         new Chart(ctxPie, {
@@ -239,7 +239,7 @@ function get_comparativa_valores() {
         url: "index.php?c=main&a=get_comparativa_valores",
         data: {},
     }).done(function (result) {
-        console.log(result);
+      //  console.log(result);
         try {
             const dataParsed = JSON.parse(result);
 
@@ -297,7 +297,7 @@ function get_meta_cierre_mensual() {
         type: "POST",
         url: "index.php?c=main&a=get_meta_cierre_mensual",
     }).done(function (result) {
-        console.log(result);
+    //    console.log(result);
         try {
             const res = JSON.parse(result);
             const alcanzado = parseFloat(res.actual) || 0;
@@ -614,7 +614,7 @@ function get_carga_boards() {
         type: "POST",
         url: "index.php?c=main&a=get_carga_boards",
     }).done(function (result) {
-        console.log(result);
+      //  console.log(result);
         const d = JSON.parse(result);
         new Chart(document.getElementById('graficoCargaBoards'), {
             type: 'doughnut',
