@@ -46,7 +46,9 @@ class users_model
 
 	public function get_users()
 	{
-		$query = "SELECT u.*, COUNT(b.id_board) AS total_pizarras FROM users u LEFT JOIN boards b ON u.user_id = b.user_id WHERE u.role != 'admin' GROUP BY u.user_id;";
+		$query = "SELECT u.*, COUNT(DISTINCT b.id_board) AS total_pizarras,(SELECT GROUP_CONCAT(DISTINCT relacion) FROM (
+        SELECT CONCAT('compras-', id_board) AS relacion, user_id FROM compras UNION ALL SELECT CONCAT('gestion_clientes-', id_board) AS relacion, user_id FROM gestion) AS t_relaciones
+        WHERE t_relaciones.user_id = u.user_id) AS relaciones_completas FROM users u  LEFT JOIN boards b ON u.user_id = b.user_id WHERE u.role != 'admin' GROUP BY u.user_id;";
 		try {
 			$users = [];
 			$resultado = $this->conexion->prepare($query);
@@ -100,5 +102,40 @@ class users_model
 		}
 	}
 
+	// Obtener agentes para el datalist (excluyendo al eliminado)
+	public function get_agents_except($user_id)
+	{
+		$query = "SELECT user_id, name, last_name FROM users WHERE user_id != $user_id AND is_active = 1";
+		return $this->conexion->query($query)->fetchAll(PDO::FETCH_ASSOC);
+	}
 
+	public function delete_user_with_reassign($user_id, $new_agent_id)
+	{
+		if ($user_id == $new_agent_id) return "Error: El agente de destino no puede ser el mismo que el eliminado.";
+
+		try {
+			$this->conexion->beginTransaction();
+
+			// 1. Reasignar en tabla gestion
+			$q1 = "UPDATE gestion SET user_id = :new_agent WHERE user_id = :old_user";
+			$res1 = $this->conexion->prepare($q1);
+			$res1->execute(['new_agent' => $new_agent_id, 'old_user' => $user_id]);
+
+			// 2. Reasignar en tabla compras
+			$q2 = "UPDATE compras SET user_id = :new_agent WHERE user_id = :old_user";
+			$res2 = $this->conexion->prepare($q2);
+			$res2->execute(['new_agent' => $new_agent_id, 'old_user' => $user_id]);
+
+			// 3. Eliminar el usuario
+			$q3 = "DELETE FROM users WHERE user_id = :old_user";
+			$res3 = $this->conexion->prepare($q3);
+			$res3->execute(['old_user' => $user_id]);
+
+			$this->conexion->commit();
+			return true;
+		} catch (PDOException $e) {
+			$this->conexion->rollBack();
+			return "Error: " . $e->getMessage();
+		}
+	}
 }

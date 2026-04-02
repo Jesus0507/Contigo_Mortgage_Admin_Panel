@@ -78,7 +78,7 @@ class gestion_model
         }
     }
 
-     public function update_gestion_info($id_gestion)
+    public function update_gestion_info($id_gestion)
     {
         $query = "UPDATE gestion SET client_id = '$this->client_id', user_id = '$this->user_id', property_address = '$this->property_address', property_value = '$this->property_value', interes_actual = '$this->interes_actual', mortgage = '$this->mortgage', occupancy = '$this->occupancy', detalle_llamada = '$this->detalle_llamada',ltv = '$this->ltv', interes_estimado = '$this->interes_estimado', prepayment_penalty = '$this->prepayment_penalty', gastos_cierre = '$this->gastos_cierre', tipo_prestamo = '$this->tipo_prestamo', condiciones_adicionales = '$this->condiciones_adicionales', loan_amount = '$this->loan_amount', cash_out = '$this->cashout', mortgage_estimado = '$this->mortgage_estimado'  WHERE id_gestion = $id_gestion";
         try {

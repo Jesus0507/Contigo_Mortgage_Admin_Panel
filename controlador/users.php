@@ -63,10 +63,22 @@ class usersController
         echo $modelo->update_user($_POST['name'], $_POST['last_name'], strtolower($_POST['email']), $_POST['user_id']);
     }
 
+    // public function delete()
+    // {
+    //     $modelo = new users_model();
+    //     echo $modelo->delete_user($_POST['user_id']);
+    // }
+
+    public function get_available_agents()
+    {
+        $modelo = new users_model();
+        echo json_encode($modelo->get_agents_except($_GET['exclude_id']));
+    }
+
     public function delete()
     {
         $modelo = new users_model();
-        echo $modelo->delete_user($_POST['user_id']);
+        // Recibimos ambos IDs por POST
+        echo $modelo->delete_user_with_reassign($_POST['user_id'], $_POST['new_agent_id']);
     }
-
 }

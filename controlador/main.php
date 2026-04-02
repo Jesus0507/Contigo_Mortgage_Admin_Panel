@@ -49,10 +49,43 @@ class mainController
 			$cantClients = count($modeloClients->get_clients());
 			$cantBoards = count($modeloBoards->get_boards());
 			$cantMyBoards = count($modeloBoards->get_my_boards($_SESSION['user_id']));
+			$all_board_types = $modelo->get_unique_board_types();
+			$boards = $modeloBoards->get_boards();
+			$users = $modeloUsers->get_users();
+			$all_etapas = $modelo->get_todas_las_etapas();
+			$clients_tickets = $modelo->get_clientes_con_tickets();
 			require_once "vista/main.php";
 		}
 	}
+	public function get_report_preview_data()
+	{
+		// Recibimos y sanitizamos entradas básicas
+		$filtros = [
+			'tipos'        => $_POST['tipos'] ?? [],
+			'tablas'       => $_POST['tablas'] ?? [],
+			'agentes'      => $_POST['agentes'] ?? [],
+			'estados'      => $_POST['estados'] ?? [],
+			'clientes'     => $_POST['clientes'] ?? [],
+			'fecha_inicio' => $_POST['fecha_inicio'] ?? null,
+			'fecha_fin'    => $_POST['fecha_fin'] ?? null
+		];
 
+		// Validación obligatoria de fechas
+		if (empty($filtros['fecha_inicio']) || empty($filtros['fecha_fin'])) {
+			echo json_encode(['error' => 'Rango de fechas incompleto']);
+			return;
+		}
+
+		$modelo = new main_model();
+		$data = $modelo->get_filtered_report_data($filtros);
+
+		if (isset($data['error'])) {
+			http_response_code(500);
+			echo json_encode($data);
+		} else {
+			echo json_encode($data);
+		}
+	}
 	public function get_cartera_total_data()
 	{
 		$modelo = new main_model();

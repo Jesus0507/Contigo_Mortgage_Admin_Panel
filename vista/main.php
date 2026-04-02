@@ -155,7 +155,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="container-grafico-card"> 
+                            <div class="container-grafico-card">
                                 <div class="card" style="width: 100%; max-width: 900px; margin: 20px auto;">
                                     <div class="card-body">
                                         <h5 class="card-title text-center">Valor de Propiedad vs. Monto de Préstamo</h5>
@@ -205,7 +205,7 @@
                                 </div>
                             </div>
 
-                            <div >
+                            <div>
                                 <div class="card shadow h-100 container-grafico-card">
                                     <div class="card-header py-3">
                                         <h6 class="m-0 font-weight-bold text-primary">Cierres de Asesor por Mes (Tickets Finalizados)</h6>
@@ -231,7 +231,7 @@
                                 </div>
                             </div>
 
-                                    <div>
+                            <div>
                                 <div class="card shadow h-100 container-grafico-card">
                                     <div class="card-header py-3">
                                         <h6 class="m-0 font-weight-bold text-info">Financiamientos por Mes (Volumen Total $)</h6>
@@ -246,12 +246,170 @@
                         </div>
                     </div>
                     <div id="reportes_container" class="mt-3 w-100 px-4 d-none">
-                        reportes
+
+                        <div class="d-flex justify-content-end w-100 mb-3">
+                            <button id="btn_generar_reporte" class="btn btn-primary btn-sm px-4 shadow-sm" style="height: 38px;">
+                                Generar <i class="fas fa-sync ms-1"></i>
+                            </button>
+                        </div>
+
+                        <div class="d-flex flex-wrap justify-content-between w-100">
+                            <div class="statistics-filter" style="width: 250px; margin-bottom: 10px;" id="container_tipo_tabla">
+                                <div class="filtros-header d-flex flex-row justify-content-between w-100">
+                                    <div>Tipo de tabla <i class="fas fa-clipboard-list"></i></div>
+                                    <div><i class="filtro-icon-reportes material-icons">keyboard_arrow_down</i></div>
+                                </div>
+                                <div class="filtros-body-reportes d-none">
+                                    <div class="p-2 sticky-top bg-white border-bottom">
+                                        <input type="text" class="form-control form-control-sm busqueda-filtro" placeholder="Buscar tipo...">
+                                    </div>
+                                    <div class="options-list">
+                                        <div class="report-option-item bg-light border-bottom">
+                                            <input type="checkbox" class="me-2 check-all" value="all" checked onchange="changeBoardType(this)">
+                                            <span class="option-label fw-bold">Todos</span>
+                                        </div>
+                                        <?php foreach ($all_board_types as $bt) : ?>
+                                            <div class="report-option-item">
+                                                <input type="checkbox" class="me-2" value="<?php echo $bt['board_type'] ?>" checked onchange="changeBoardType(this)">
+                                                <span class="option-label text-truncate"><?php echo $bt['board_type'] == "gestion_clientes" ? "Refinanciamientos" : $bt['board_type']; ?></span>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="statistics-filter" style="width: 250px; margin-bottom: 10px;" id="container_tablas">
+                                <div class="filtros-header d-flex flex-row justify-content-between w-100">
+                                    <div>Tablas <i class="fas fa-clipboard"></i></div>
+                                    <div><i class="filtro-icon-reportes material-icons">keyboard_arrow_down</i></div>
+                                </div>
+                                <div class="filtros-body-reportes d-none">
+                                    <div class="p-2 sticky-top bg-white border-bottom">
+                                        <input type="text" class="form-control form-control-sm busqueda-filtro" placeholder="Buscar tabla...">
+                                    </div>
+                                    <div class="options-list">
+                                        <div class="report-option-item bg-light border-bottom">
+                                            <input type="checkbox" class="me-2 check-all" value="all" checked data-relation="all">
+                                            <span class="option-label fw-bold">Todos</span>
+                                        </div>
+                                        <?php foreach ($boards as $b) : ?>
+                                            <div class="report-option-item">
+                                                <input type="checkbox" class="me-2" value="<?php echo $b['id_board'] ?>" data-relation="<?php echo $b['board_type'] ?>" checked>
+                                                <span class="option-label text-truncate"><?php echo $b['name'] ?></span>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="statistics-filter" style="width: 250px; margin-bottom: 10px;" id="container_agentes">
+                                <div class="filtros-header d-flex flex-row justify-content-between w-100">
+                                    <div>Agentes <i class="fas fa-users-cog"></i></div>
+                                    <div><i class="filtro-icon-reportes material-icons">keyboard_arrow_down</i></div>
+                                </div>
+                                <div class="filtros-body-reportes d-none">
+                                    <div class="p-2 sticky-top bg-white border-bottom">
+                                        <input type="text" class="form-control form-control-sm busqueda-filtro" placeholder="Buscar agente...">
+                                    </div>
+                                    <div class="options-list">
+                                        <div class="report-option-item bg-light border-bottom">
+                                            <input type="checkbox" class="me-2 check-all" value="all" checked data-relation="all">
+                                            <span class="option-label fw-bold">Todos</span>
+                                        </div>
+                                        <?php foreach ($users as $u) : if ($u['relaciones_completas'] != null) { ?>
+                                                <div class="report-option-item">
+                                                    <input type="checkbox" class="me-2" data-relation="<?php echo $u['relaciones_completas']; ?>" value="<?php echo $u['user_id'] ?>" checked>
+                                                    <span class="option-label text-truncate"><?php echo $u['name'] . " " . $u['last_name'] ?></span>
+                                                </div>
+                                        <?php }
+                                        endforeach; ?>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="statistics-filter" style="width: 250px; margin-bottom: 10px;" id="container_estado">
+                                <div class="filtros-header d-flex flex-row justify-content-between w-100">
+                                    <div>Estado <i class="fas fa-exchange-alt"></i></div>
+                                    <div><i class="filtro-icon-reportes material-icons">keyboard_arrow_down</i></div>
+                                </div>
+                                <div class="filtros-body-reportes d-none">
+                                    <div class="p-2 sticky-top bg-white border-bottom">
+                                        <input type="text" class="form-control form-control-sm busqueda-filtro" placeholder="Buscar estado...">
+                                    </div>
+                                    <div class="options-list">
+                                        <div class="report-option-item bg-light border-bottom">
+                                            <input type="checkbox" class="me-2 check-all" value="all" checked>
+                                            <span class="option-label fw-bold">Todos</span>
+                                        </div>
+                                        <?php foreach ($all_etapas as $e) : ?>
+                                            <div class="report-option-item">
+                                                <input type="checkbox" class="me-2" data-relation="<?php echo $e['id_board']; ?>" value="<?php echo $e['etapa_actual'] ?>" checked>
+                                                <span class="option-label text-truncate"><?php echo $e['etapa_actual'] ?></span>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="statistics-filter" style="width: 250px; margin-bottom: 10px;" id="container_clientes">
+                                <div class="filtros-header d-flex flex-row justify-content-between w-100">
+                                    <div>Clientes <i class="fas fa-users"></i></div>
+                                    <div><i class="filtro-icon-reportes material-icons">keyboard_arrow_down</i></div>
+                                </div>
+                                <div class="filtros-body-reportes d-none">
+                                    <div class="p-2 sticky-top bg-white border-bottom">
+                                        <input type="text" class="form-control form-control-sm busqueda-filtro" placeholder="Buscar cliente...">
+                                    </div>
+                                    <div class="options-list">
+                                        <div class="report-option-item bg-light border-bottom">
+                                            <input type="checkbox" class="me-2 check-all" value="all" checked>
+                                            <span class="option-label fw-bold">Todos</span>
+                                        </div>
+                                        <?php foreach ($clients_tickets as $c) : ?>
+                                            <div class="report-option-item">
+                                                <input type="checkbox" class="me-2" data-relation="<?php echo $c['tablas_presente'] ?>" value="<?php echo $c['client_id'] ?>" checked>
+                                                <span class="option-label text-truncate"><?php echo $c['name'] . " " . $c['last_name'] ?></span>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="statistics-filter" style="width: 280px; margin-bottom: 10px;">
+                                <div class="filtros-header d-flex flex-row justify-content-between w-100">
+                                    <div>Fechas <i class="fas fa-calendar-alt"></i></div>
+                                    <div><i class="filtro-icon-reportes material-icons">keyboard_arrow_down</i></div>
+                                </div>
+                                <div class="filtros-body-reportes d-none p-2">
+                                    <div class="d-flex flex-column gap-2">
+                                        <div>
+                                            <label class="small text-muted">Inicio:</label>
+                                            <input id="rep_fecha_inicio" class="form-control form-control-sm" type="date">
+                                        </div>
+                                        <div>
+                                            <label class="small text-muted">Fin:</label>
+                                            <input id="rep_fecha_fin" class="form-control form-control-sm" type="date">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="w-100 mt-3 d-flex justify-content-between">
+                            <div style="width: 80%" id="report_preview"></div>
+                            <div style="width: 15%" class="d-none mt-5" id="report_preview_buttons">
+                                <button class="btn btn-danger" id="btn_export_pdf">Exportar a PDF <i class="fas fa-file-pdf"></i></button>
+                                <button class="btn btn-success mt-4" id="btn_export_excel">Exportar a Excel <i class="fas fa-file-excel"></i></button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </main>
         </div>
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
     <script src="vista/js/scripts.js"></script>
@@ -260,6 +418,9 @@
     <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
     <script src="vista/js/datatables-simple-demo.js"></script>
     <script src="vista/js/main_stadistics.js"></script>
+    <?php if ($_SESSION['user_role'] == "admin") { ?>
+        <script src="vista/js/main_reports.js"></script>
+    <?php } ?>
 </body>
 
 </html>

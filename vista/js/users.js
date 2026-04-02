@@ -71,48 +71,61 @@ function edit(btn) {
 }
 
 
-function delete_client(btn) {
-    // 1. Obtenemos la fila y las celdas de texto
+async function delete_client(btn) {
     const row = btn.closest('tr');
-    const cells = row.getElementsByTagName('td');
-
-    // 2. Extraemos los valores del texto plano (ya no son inputs)
-    const firstName = cells[0].innerText.trim();
-    const lastName = cells[1].innerText.trim();
-
-    // 3. Obtenemos el ID del usuario (recomendado usar data-id o la primera clase)
+    const firstName = row.getElementsByTagName('td')[0].innerText.trim();
+    const lastName = row.getElementsByTagName('td')[1].innerText.trim();
     const userId = btn.getAttribute('data-id') || btn.classList[0];
 
+    // 1. Obtener lista de agentes disponibles
+    const response = await fetch(`index.php?c=users&a=get_available_agents&exclude_id=${userId}`);
+    const agentes = await response.json();
+
+    if (agentes.length === 0) {
+        Swal.fire('Atención', 'No hay otros agentes activos para reasignar los tickets. Crea otro usuario antes de eliminar este.', 'warning');
+        return;
+    }
+
+    // 2. Crear las opciones para el datalist
+    let optionsHtml = agentes.map(a => `<option data-id="${a.user_id}" value="${a.name} ${a.last_name}"></option>`).join('');
+
+    // 3. Modal de confirmación y reasignación
     Swal.fire({
-        title: '¿Está seguro de eliminar este registro?',
-        text: `Estás por eliminar al usuario ${firstName} ${lastName}. Si lo borras, se perderá la información de las pizarras y gestiones relacionadas.`,
+        title: `Eliminar a ${firstName}`,
+        html: `
+            <p class="small text-muted">Todos los tickets de ${firstName} se reasignarán al agente que selecciones:</p>
+            <input list="agentes_list" id="new_agent_input" class="form-control" placeholder="Escribe el nombre del agente receptor...">
+            <datalist id="agentes_list">${optionsHtml}</datalist>
+        `,
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Sí, eliminar',
-        cancelButtonText: 'Cancelar'
+        confirmButtonText: 'Confirmar y Eliminar',
+        preConfirm: () => {
+            const val = document.getElementById('new_agent_input').value;
+            const option = document.querySelector(`#agentes_list option[value="${val}"]`);
+            if (!option) {
+                Swal.showValidationMessage('Debes seleccionar un agente válido de la lista');
+                return false;
+            }
+            return option.getAttribute('data-id'); // Retornamos el ID del agente seleccionado
+        }
     }).then((result) => {
         if (result.isConfirmed) {
+            const newAgentId = result.value;
+
             $.ajax({
                 type: "POST",
                 url: "index.php?c=users&a=delete",
                 data: {
                     "user_id": userId,
+                    "new_agent_id": newAgentId
                 }
-            }).done(function (result) {
-                if (result == 1 || result == true) {
-                    Swal.fire(
-                        'Eliminado',
-                        `El usuario ${firstName} ${lastName} ha sido eliminado exitosamente.`,
-                        'success'
-                    );
-                    setTimeout(() => {
-                        location.reload();
-                    }, 1000);
+            }).done(function (res) {
+                if (res == 1 || res == true) {
+                    Swal.fire('Éxito', 'Usuario eliminado y tickets reasignados.', 'success');
+                    setTimeout(() => location.reload(), 1000);
                 } else {
-                    console.error("Error en la respuesta del servidor:", result);
-                    Swal.fire('Error', 'No se pudo eliminar el registro.', 'error');
+                    Swal.fire('Error', res, 'error');
                 }
             });
         }
