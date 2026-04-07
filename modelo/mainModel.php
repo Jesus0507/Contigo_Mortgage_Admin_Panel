@@ -158,9 +158,9 @@ class main_model
 	public function get_todas_las_etapas()
 	{
 		// Usamos UNION para juntar los resultados de ambas tablas y DISTINCT de forma implícita
-		$query = "SELECT etapa_actual, id_board FROM compras 
+		$query = "SELECT etapa_actual, id_board, 'compras' as board_type FROM compras 
               UNION 
-              SELECT etapa_actual, id_board FROM gestion";
+              SELECT etapa_actual, id_board, 'gestion_clientes' as board_type FROM gestion";
 
 		try {
 			$etapas = [];
