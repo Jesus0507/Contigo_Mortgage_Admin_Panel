@@ -222,7 +222,8 @@ function changeBoardType(el) {
     var is_checked = el.checked;
 
     change_filters_visibility(is_checked, "container_tablas", tipo_tabla == "all", tipo_tabla, "relation", false);
-    change_filters_visibility(is_checked, "container_agentes", tipo_tabla == "all", tipo_tabla, "relation", true);
+    change_filters_visibility(is_checked, "container_estado", tipo_tabla == "all", tipo_tabla, "typeboard", false);
+    change_user_filter_visibility(tipo_tabla);
 
 }
 
@@ -236,16 +237,16 @@ function change_filters_visibility(visibility, container, is_all, tipo_tabla, da
         console.log(el_checkbox.dataset[dataset_info]);
         var compare_dataset = el_checkbox.dataset[dataset_info];
 
-        if (is_array_info) {
-            var array_datasets = el_checkbox.dataset[dataset_info].split(",");
-            array_datasets.forEach((arr_data) => {
-                console.log(arr_data.split("-")[0], " - ", tipo_tabla);
-                if (arr_data.split("-")[0] == tipo_tabla) {
-                    compare_dataset = tipo_tabla;
-                }
-            })
+        // if (is_array_info) {
+        //     var array_datasets = el_checkbox.dataset[dataset_info].split(",");
+        //     array_datasets.forEach((arr_data) => {
+        //         console.log(arr_data.split("-")[0], " - ", tipo_tabla);
+        //         if (arr_data.split("-")[0] == tipo_tabla) {
+        //             compare_dataset = tipo_tabla;
+        //         }
+        //     })
 
-        }
+        // }
         if (is_all || tipo_tabla == compare_dataset) {
             el_checkbox.checked = visibility;
             visibility ? el_checkbox.parentElement.classList.remove("d-none") : el_checkbox.parentElement.classList.add("d-none");
@@ -254,12 +255,52 @@ function change_filters_visibility(visibility, container, is_all, tipo_tabla, da
 
 }
 
+function change_user_filter_visibility() {
+    var filter_content = document.getElementById("container_agentes");
+    var all_checkbox = filter_content.querySelectorAll('input[type="checkbox"]');
+    var filter_content_boards = document.getElementById("container_tablas");
+    var all_checkbox_boards = filter_content_boards.querySelectorAll('input[type="checkbox"]');
+    var all_active_boards = [];
+
+
+    Array.from(all_checkbox_boards).forEach((b_check) => {
+        if (b_check.checked == true) all_active_boards.push(b_check);
+    })
+
+
+    Array.from(all_checkbox).forEach((el_checkbox) => {
+        if (el_checkbox != all_checkbox[0]) {
+            el_checkbox.checked = false;
+            el_checkbox.parentElement.classList.add("d-none");
+        }
+    })
+
+    Array.from(all_checkbox).forEach((el_checkbox) => {
+        if (el_checkbox != all_checkbox[0]) {
+
+            var array_datasets = el_checkbox.dataset["relation"].split(",");
+            array_datasets.forEach((arr_data) => {
+                all_active_boards.forEach((act) => {
+                    if (arr_data.split("-")[1] == act.value && arr_data.split("-")[0] == act.dataset['relation']) {
+                        el_checkbox.checked = true;
+                        el_checkbox.parentElement.classList.remove("d-none");
+                    }
+                })
+            })
+
+
+        }
+    })
+
+
+
+}
 // --- EXPORTAR A EXCEL ---
 const btnExcel = document.getElementById("btn_export_excel"); // Asegúrate de que este sea el ID de tu botón
 if (btnExcel) {
-    btnExcel.addEventListener("click", function() {
+    btnExcel.addEventListener("click", function () {
         const tabla = document.querySelector("#report_preview table");
-        
+
         if (!tabla) {
             Swal.fire('Error', 'No hay datos para exportar. Genera el reporte primero.', 'error');
             return;
@@ -267,7 +308,7 @@ if (btnExcel) {
 
         // Crear libro de trabajo y hoja
         const wb = XLSX.utils.table_to_book(tabla, { sheet: "Reporte Contigo" });
-        
+
         // Descargar el archivo
         XLSX.writeFile(wb, `Reporte_Contigo_${new Date()}.xlsx`);
     });
@@ -276,9 +317,9 @@ if (btnExcel) {
 // --- EXPORTAR A PDF ---
 const btnPdf = document.getElementById("btn_export_pdf"); // Asegúrate de que este sea el ID de tu botón
 if (btnPdf) {
-    btnPdf.addEventListener("click", function() {
+    btnPdf.addEventListener("click", function () {
         const tabla = document.querySelector("#report_preview table");
-        
+
         if (!tabla) {
             Swal.fire('Error', 'No hay datos para exportar. Genera el reporte primero.', 'error');
             return;

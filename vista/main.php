@@ -343,7 +343,7 @@
                                         </div>
                                         <?php foreach ($all_etapas as $e) : ?>
                                             <div class="report-option-item">
-                                                <input type="checkbox" class="me-2" data-relation="<?php echo $e['id_board']; ?>" value="<?php echo $e['etapa_actual'] ?>" checked>
+                                                <input type="checkbox" class="me-2" data-typeboard ="<?php echo $e['board_type'];?>" data-relation="<?php echo $e['id_board']; ?>" value="<?php echo $e['etapa_actual'] ?>" checked>
                                                 <span class="option-label text-truncate"><?php echo $e['etapa_actual'] ?></span>
                                             </div>
                                         <?php endforeach; ?>
