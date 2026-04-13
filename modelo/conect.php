@@ -33,17 +33,18 @@ class base_datos extends PDO
 	}
 
 
-	// public function decoding($string)
-	// {
-	// 	$string  = base64_decode(base64_decode($string));
-    //     $string  = base64_decode($string);
-    //     $string  = explode("~", $string);
+	public function decoding($string)
+	{
+		$string  = base64_decode(base64_decode($string));
+        $string  = base64_decode($string);
+        $string  = explode("~", $string);
+		$decodec = "";
 
-    //     foreach ($string as $str) {
-    //         $decodec = $decodec . base64_decode($str);
-    //     }
-    //     return $decodec;
-	// }
+        foreach ($string as $str) {
+            $decodec = $decodec . base64_decode($str);
+        }
+        return $decodec;
+	}
 
 
 
