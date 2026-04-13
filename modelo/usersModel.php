@@ -90,6 +90,30 @@ class users_model
 		}
 	}
 
+
+	public function update_user_profile($name,$last_name,$email,$psw, $security_questions, $custom_security_question, $id){
+		$query = "UPDATE users SET name = '$name', last_name = '$last_name', email = '$email', psw = '$psw', security_questions = '$security_questions', custom_security_question = '$custom_security_question'  WHERE user_id = $id";
+		try {
+			$resultado = $this->conexion->prepare($query);
+			$resultado->execute();
+			return true;
+		} catch (PDOException $e) {
+			return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
+		}
+	}
+
+		public function update_user_security($psw, $security_questions, $custom_security_question, $id)
+	{
+		$query = "UPDATE users SET psw = '$psw', security_questions = '$security_questions', custom_security_question = '$custom_security_question', first_login = 1  WHERE user_id = $id";
+		try {
+			$resultado = $this->conexion->prepare($query);
+			$resultado->execute();
+			return true;
+		} catch (PDOException $e) {
+			return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
+		}
+	}
+
 	public function delete_user($user_id)
 	{
 		$query = "DELETE FROM users WHERE user_id = $user_id";

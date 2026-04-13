@@ -3,7 +3,7 @@ var input_psw = document.getElementById("inputPassword");
 var email_label = document.getElementById("emailLabel");
 var psw_label = document.getElementById("pswLabel");
 var login_btn = document.getElementById("loginBtn");
-setTimeout(()=>{input_email.focus()}, 1500);
+setTimeout(() => { input_email.focus() }, 1500);
 
 
 
@@ -58,10 +58,7 @@ function search_user() {
         }
     }).done(function (result) {
         console.log(result);
-        if (result == 1) {
-            location.href = "index.php?c=main&a=main_view";
-        }
-        else {
+        if (result == 0) {
             email_label.style.color = "red";
             email_label.style.fontWeight = "bold";
             email_label.innerText = "Correo o contraseña incorrectos, intenta nuevamente";
@@ -71,6 +68,10 @@ function search_user() {
                 email_label.style.fontWeight = "400";
                 email_label.innerText = "Correo electrónico";
             }, 5000)
+
+        }
+        else {
+            location.href = result;
         }
     })
 }

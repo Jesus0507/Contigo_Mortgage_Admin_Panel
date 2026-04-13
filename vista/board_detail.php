@@ -33,7 +33,7 @@
                             <div><button class="btn btn-dark mx-2" id="add_column"><i class="far fa-plus-square"></i> Nueva columna</button></div>
                             <div>
                                 <div class="d-flex gap-3 mb-4 flex-wrap">
-
+                                    <?php if ($_SESSION['user_role'] == "admin"){ ?>
                                     <div class="dropdown">
                                         <button class="btn btn-dark dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
                                             <i class="fas fa-filter me-2"></i> Filtro
@@ -113,6 +113,7 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <?php } ?>
 
                                 </div>
                             </div>

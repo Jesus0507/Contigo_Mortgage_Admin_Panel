@@ -6,6 +6,7 @@ class usersController
     public function __construct()
     {
         require_once "modelo/usersModel.php";
+        require_once "modelo/conect.php";
     }
 
     public function index()
@@ -61,6 +62,48 @@ class usersController
     {
         $modelo = new users_model();
         echo $modelo->update_user($_POST['name'], $_POST['last_name'], strtolower($_POST['email']), $_POST['user_id']);
+    }
+
+    public function update_security()
+    {
+        session_start();
+        if (!isset($_SESSION['user_id'])) {
+            echo "error_session";
+            return;
+        }
+
+        $modelo = new users_model();
+        $modelo_conect = new base_datos();
+        $user_id = $_SESSION['user_id'];
+
+        // 1. Verificar la contraseña actual primero
+        $pass_actual = $modelo_conect->encoding($_POST['pass_actual']);
+
+        // Asumiendo que usas password_hash() para guardar tus contraseñas
+        if ($pass_actual != $_SESSION['psw']) {
+            echo "error_password"; // Esto lo capturará el AJAX
+            return;
+        }
+
+        // 2. Preparar los datos para el modelo
+
+
+        $new_psw = $modelo_conect->encoding($_POST['pass_nueva']);
+        $security_questions = strtolower($_POST['p_mascota']) . "/" . strtolower($_POST['p_color']) . "/" . strtolower($_POST['p_personaje']);
+        $custom_questions = $_POST['p_custom'] . "/" . strtolower($_POST['r_custom']);
+
+        // 3. Llamar al modelo
+        $resultado = $modelo->update_user_security($new_psw, $modelo_conect->encoding($security_questions), $modelo_conect->encoding($custom_questions), $user_id);
+
+        if ($resultado === true) {
+            $_SESSION['first_login'] = 1;
+            $_SESSION['security_questions'] = $modelo_conect->encoding($security_questions);
+            $_SESSION['custom_questions'] = $modelo_conect->encoding($custom_questions);
+            echo 1; // Éxito
+
+        } else {
+            echo $resultado; // Mensaje de error del modelo
+        }
     }
 
     // public function delete()

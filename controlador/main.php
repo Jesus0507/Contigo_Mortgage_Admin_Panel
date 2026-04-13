@@ -20,14 +20,21 @@ class mainController
 			$modelo->set_user(strtolower($_POST['usuario']), $_POST['clave']);
 			$resultado = $modelo->get_inicio();
 			if (count($resultado) > 0) {
-				$resp = 1;
 				session_start();
 				$_SESSION['username'] = $resultado[0]['name'] . " " . $resultado[0]['last_name'];
 				$_SESSION['user_role'] = $resultado[0]['role'];
 				$_SESSION['user_id'] = $resultado[0]['user_id'];
+				$_SESSION['first_login'] = $resultado[0]['first_login'];
+				$_SESSION['email'] = $resultado[0]['email'];
+				$_SESSION['psw'] = $resultado[0]['psw'];
+				$_SESSION['security_questions'] = $resultado[0]['security_questions'];
+				$_SESSION['custom_questions'] = $resultado[0]['custom_security_question'];
+				$resp =  $resultado[0]['role'] == "admin" ? "index.php?c=main&a=main_view" : "index.php?c=boards&a=index";
 			}
 		} else {
-			$resp = 1;
+			session_start();
+			$resp = $_SESSION['user_role'] == "admin" ? "index.php?c=main&a=main_view" : "index.php?c=boards&a=index";
+
 		}
 
 
