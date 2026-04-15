@@ -74,7 +74,7 @@
                     </div>
 
                     <div id="graficos_container" class="mt-3 w-100 px-4">
-                        <div class="mb-3 d-flex flex-row w-75 mx-auto justify-content-end">
+                        <div class="mb-3 d-flex flex-row w-75 mx-auto justify-content-between">
                             <div id="multi_select_filter" class="statistics-filter">
                                 <div id="filtros_header" class="filtros-header d-flex flex-row justify-content-between w-100">
                                     <div>Filtros <i class="fas fa-filter"></i></div>
@@ -131,6 +131,8 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="d-flex flex-row">
+                                <div style="color: green; font-weight: bold;">Meta Mensual <?php echo $monto_mensual[0]['mes']."  /  ".$monto_mensual[0]['anio']."  :" ?></div><div><input disabled style="height:30px" class="form-control" id="meta_mensual_input" placeholder="Meta mensual" value="<?php echo $monto_mensual[0]['monto_meta'] ?>"></div><div><button id="monto_max_btn" class="btn btn-primary" style="height: 30px; padding-top: 3px !important"><i class="fas fa-pencil-alt"></i></button></div></div>
                         </div>
                         <div id="graficos_section_container" class="graficos-section-container" style="position: relative; bottom: 0px;">
                             <div class="container-grafico-card">
@@ -420,6 +422,7 @@
     <script src="vista/js/main_stadistics.js"></script>
     <?php if ($_SESSION['user_role'] == "admin") { ?>
         <script src="vista/js/main_reports.js"></script>
+        <script src="vista/js/main_monto_max.js"></script>
     <?php } ?>
 </body>
 

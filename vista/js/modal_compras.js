@@ -43,6 +43,10 @@ var asesor_asignado = document.getElementById("asesor_name_compras");
 var asesor_asignado_label = document.getElementById("asesor_asignado_label");
 var current_user_asigned = false;
 
+var realtor_name = document.getElementById("realtor_name");
+var realtor_tlf = document.getElementById("realtor_tlf");
+var realtor_email = document.getElementById("realtor_email");
+
 loan_amount.disabled = true;
 
 
@@ -184,6 +188,24 @@ function fields_validation() {
     });
     // Bloquear teclas que no sean números (opcional, por seguridad extra)
     client_phone.addEventListener('keypress', function (event) {
+        if (!/[0-9]/.test(event.key)) {
+            event.preventDefault();
+        }
+    });
+
+    realtor_tlf.maxLength = 14; // (000) 000-0000 tiene 14 caracteres
+    realtor_tlf.addEventListener('input', function (e) {
+        // 1. Eliminar todo lo que no sea número
+        let x = e.target.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,4})/);
+
+        // 2. Construir el formato dinámicamente
+        // x[1] es el área, x[2] el prefijo, x[3] el número
+        e.target.value = !x[2]
+            ? x[1]
+            : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
+    });
+    // Bloquear teclas que no sean números (opcional, por seguridad extra)
+    realtor_tlf.addEventListener('keypress', function (event) {
         if (!/[0-9]/.test(event.key)) {
             event.preventDefault();
         }
@@ -546,6 +568,9 @@ function registerInfo() {
             "programa_aplica": document.getElementById("programa_aplica").value,
             "comments": unsaved_comments,
             "board": document.getElementById("board_id").innerHTML,
+            "realtor_name": realtor_name.value,
+            "realtor_tlf": realtor_tlf.value,
+            "realtor_email": realtor_email.value,
             "user_asigned": current_user_asigned,
 
             // --- NUEVOS CAMPOS DE INCOME ---
@@ -665,6 +690,9 @@ function updateInfo(reload) {
             "monto_max": monto_max.value,
             "condiciones": conditions.value,
             "total_requerido": document.getElementById("total_requerido").value,
+            "realtor_name": realtor_name.value,
+            "realtor_tlf": realtor_tlf.value,
+            "realtor_email": realtor_email.value,
             "user_asigned": current_user_asigned,
 
             // --- CAMPO RECIÉN AGREGADO ---
@@ -1372,7 +1400,7 @@ function actualizarDiccionario() {
     }
 
     // Opcional: imprimir en consola para debug
-  //  console.log("Diccionario Actualizado:", data);
+    //  console.log("Diccionario Actualizado:", data);
 
     // Si necesitas guardar esto en un input oculto para el form submit
     const inputOculto = document.getElementById('json_clientes_income');

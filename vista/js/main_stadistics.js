@@ -66,38 +66,38 @@ function filters_activation() {
 
                     break;
                 case "cartera total":
-                    check_input.checked == true? all_container_graficos[0].classList.remove('d-none') : all_container_graficos[0].classList.add('d-none');
-                break;
-                 case "distribucion de programas de préstamo":
-                    check_input.checked == true? all_container_graficos[1].classList.remove('d-none') : all_container_graficos[1].classList.add('d-none');
-                break;
-                 case "valor de propiedad vs monto de préstamo":
-                    check_input.checked == true? all_container_graficos[2].classList.remove('d-none') : all_container_graficos[2].classList.add('d-none');
-                break;
-                 case "meta de cierre mensual":
-                    check_input.checked == true? all_container_graficos[3].classList.remove('d-none') : all_container_graficos[3].classList.add('d-none');
-                break;
-                 case "productividad por agente":
-                    check_input.checked == true? all_container_graficos[4].classList.remove('d-none') : all_container_graficos[4].classList.add('d-none');
-                break;
-                 case "embudo de ventas":
-                    check_input.checked == true? all_container_graficos[5].classList.remove('d-none') : all_container_graficos[5].classList.add('d-none');
-                break;
-                 case "tiempo promedio de cierre":
-                    check_input.checked == true? all_container_graficos[6].classList.remove('d-none') : all_container_graficos[6].classList.add('d-none');
-                break;
-                 case "volumen por pizarra":
-                    check_input.checked == true? all_container_graficos[7].classList.remove('d-none') : all_container_graficos[7].classList.add('d-none');
-                break;
-                 case "cierres de asesor por mes":
-                    check_input.checked == true? all_container_graficos[8].classList.remove('d-none') : all_container_graficos[8].classList.add('d-none');
-                break;
-                 case "procesos iniciados por mes":
-                    check_input.checked == true? all_container_graficos[9].classList.remove('d-none') : all_container_graficos[9].classList.add('d-none');
-                break;
+                    check_input.checked == true ? all_container_graficos[0].classList.remove('d-none') : all_container_graficos[0].classList.add('d-none');
+                    break;
+                case "distribucion de programas de préstamo":
+                    check_input.checked == true ? all_container_graficos[1].classList.remove('d-none') : all_container_graficos[1].classList.add('d-none');
+                    break;
+                case "valor de propiedad vs monto de préstamo":
+                    check_input.checked == true ? all_container_graficos[2].classList.remove('d-none') : all_container_graficos[2].classList.add('d-none');
+                    break;
+                case "meta de cierre mensual":
+                    check_input.checked == true ? all_container_graficos[3].classList.remove('d-none') : all_container_graficos[3].classList.add('d-none');
+                    break;
+                case "productividad por agente":
+                    check_input.checked == true ? all_container_graficos[4].classList.remove('d-none') : all_container_graficos[4].classList.add('d-none');
+                    break;
+                case "embudo de ventas":
+                    check_input.checked == true ? all_container_graficos[5].classList.remove('d-none') : all_container_graficos[5].classList.add('d-none');
+                    break;
+                case "tiempo promedio de cierre":
+                    check_input.checked == true ? all_container_graficos[6].classList.remove('d-none') : all_container_graficos[6].classList.add('d-none');
+                    break;
+                case "volumen por pizarra":
+                    check_input.checked == true ? all_container_graficos[7].classList.remove('d-none') : all_container_graficos[7].classList.add('d-none');
+                    break;
+                case "cierres de asesor por mes":
+                    check_input.checked == true ? all_container_graficos[8].classList.remove('d-none') : all_container_graficos[8].classList.add('d-none');
+                    break;
+                case "procesos iniciados por mes":
+                    check_input.checked == true ? all_container_graficos[9].classList.remove('d-none') : all_container_graficos[9].classList.add('d-none');
+                    break;
                 default:
-                    check_input.checked == true? all_container_graficos[10].classList.remove('d-none') : all_container_graficos[10].classList.add('d-none');
-                break;
+                    check_input.checked == true ? all_container_graficos[10].classList.remove('d-none') : all_container_graficos[10].classList.add('d-none');
+                    break;
             }
 
 
@@ -189,7 +189,7 @@ function get_distribucion_prestamos() {
         url: "index.php?c=main&a=get_distribucion_prestamos",
         data: {},
     }).done(function (result) {
-      //  console.log(result);
+        //  console.log(result);
         const dataParsed = JSON.parse(result);
 
         new Chart(ctxPie, {
@@ -239,7 +239,7 @@ function get_comparativa_valores() {
         url: "index.php?c=main&a=get_comparativa_valores",
         data: {},
     }).done(function (result) {
-      //  console.log(result);
+        //  console.log(result);
         try {
             const dataParsed = JSON.parse(result);
 
@@ -286,7 +286,6 @@ function get_comparativa_valores() {
         }
     });
 }
-
 function get_meta_cierre_mensual() {
     const canvasElement = document.getElementById('graficoGauge');
     if (!canvasElement) return;
@@ -297,13 +296,22 @@ function get_meta_cierre_mensual() {
         type: "POST",
         url: "index.php?c=main&a=get_meta_cierre_mensual",
     }).done(function (result) {
-    //    console.log(result);
         try {
             const res = JSON.parse(result);
-            const alcanzado = parseFloat(res.actual) || 0;
-            const meta = parseFloat(res.meta) || 50000;
+            console.log(res.meta);
+
+            // CORRECCIÓN: Limpieza de formato europeo/latino (950.000,00 -> 950000.00)
+            // 1. Convertimos a string por seguridad
+            // 2. Quitamos todos los puntos (separadores de miles)
+            // 3. Cambiamos la coma por un punto (separador decimal para JS)
+            let metaRaw = res.meta.toString().replace(/\./g, '').replace(',', '.');
+            let actualRaw = res.actual.toString().replace(/\./g, '').replace(',', '.');
+
+            const alcanzado = parseFloat(actualRaw) || 0;
+            const meta = parseFloat(metaRaw) || 50000;
             const restante = (meta - alcanzado) > 0 ? (meta - alcanzado) : 0;
 
+            // Formateamos para la etiqueta visual (usando formato US para coherencia con el símbolo $)
             document.getElementById('gaugeText').innerText =
                 `$${alcanzado.toLocaleString('en-US')} / $${meta.toLocaleString('en-US')}`;
 
@@ -326,11 +334,18 @@ function get_meta_cierre_mensual() {
                     circumference: 180,
                     cutout: '80%',
                     responsive: true,
-                    maintainAspectRatio: true, // ¡IMPORTANTE! Cambiado a true
-                    aspectRatio: 2,           // ¡ESTO EVITA QUE SE ESTIRE!
+                    maintainAspectRatio: true,
+                    aspectRatio: 2,
                     plugins: {
                         legend: { display: false },
-                        tooltip: { enabled: true }
+                        tooltip: {
+                            enabled: true,
+                            callbacks: {
+                                label: function (context) {
+                                    return context.label + ': $' + context.raw.toLocaleString('en-US');
+                                }
+                            }
+                        }
                     }
                 }
             });
@@ -614,7 +629,7 @@ function get_carga_boards() {
         type: "POST",
         url: "index.php?c=main&a=get_carga_boards",
     }).done(function (result) {
-      //  console.log(result);
+        //  console.log(result);
         const d = JSON.parse(result);
         new Chart(document.getElementById('graficoCargaBoards'), {
             type: 'doughnut',

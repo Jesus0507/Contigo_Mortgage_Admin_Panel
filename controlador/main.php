@@ -41,6 +41,14 @@ class mainController
 		echo $resp;
 	}
 
+	public function change_monto_max(){
+		$new_monto_mensual = $_POST['new_monto'];
+		$modelo = new main_model();
+		$modelo->update_monto_max($new_monto_mensual);
+		echo true;
+
+	}
+
 	public function main_view()
 	{
 		session_start();
@@ -61,6 +69,7 @@ class mainController
 			$users = $modeloUsers->get_users();
 			$all_etapas = $modelo->get_todas_las_etapas();
 			$clients_tickets = $modelo->get_clientes_con_tickets();
+			$monto_mensual = $modelo->get_monto_mensual();
 			require_once "vista/main.php";
 		}
 	}

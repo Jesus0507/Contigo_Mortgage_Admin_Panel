@@ -35,6 +35,36 @@ class main_model
 		}
 	}
 
+	public function get_monto_mensual()
+	{
+		$query = "SELECT * FROM metas_mensuales";
+		try {
+			$resultado = $this->conexion->prepare($query);
+			$resultado->execute();
+			$resultado->setFetchMode(PDO::FETCH_ASSOC);
+			$respuesta_arreglo = $resultado->fetchAll(PDO::FETCH_ASSOC);
+			return $respuesta_arreglo;
+		} catch (PDOException $e) {
+			return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
+		}
+	}
+
+	public function update_monto_max($new_meta)
+	{
+		$mes_actual = date('n');
+		$anio_actual = date('Y');
+
+		$query = "UPDATE metas_mensuales SET monto_meta = '$new_meta', mes = '$mes_actual', anio = '$anio_actual' WHERE id_meta = 1";
+		try {
+			$resultado = $this->conexion->prepare($query);
+			$resultado->execute();
+			return true;
+		} catch (PDOException $e) {
+			return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
+		}
+	}
+
+
 	public function get_unique_board_types()
 	{
 		// Aplicamos el REPLACE para normalizar 'gestion_clientes' a 'refinanciamientos'
@@ -486,21 +516,26 @@ class main_model
 			$queryC->execute([':mes' => $mes_actual, ':anio' => $anio_actual]);
 			$total_c = $queryC->fetch(PDO::FETCH_ASSOC)['total'];
 
-			// 3. Obtener Meta
-			$sqlM = "SELECT COALESCE(monto_meta, 50000.00) as meta 
+			// 3. Obtener Meta (CORREGIDO: Limpiamos el formato '950.000,00' a nivel de SQL)
+			$sqlM = "SELECT COALESCE(
+                    REPLACE(REPLACE(monto_meta, '.', ''), ',', '.'), 
+                    '50000.00'
+                 ) as meta 
                  FROM metas_mensuales 
                  WHERE mes = :mes AND anio = :anio LIMIT 1";
 
 			$queryM = $this->conexion->prepare($sqlM);
 			$queryM->execute([':mes' => $mes_actual, ':anio' => $anio_actual]);
 			$meta_res = $queryM->fetch(PDO::FETCH_ASSOC);
+
+			// Si existe el resultado, meta ya viene como "950000.00" (string compatible con float)
 			$meta = $meta_res ? $meta_res['meta'] : 50000.00;
 
 			$actual = (float)$total_g + (float)$total_c;
 
 			return json_encode([
 				'actual' => $actual,
-				'meta' => (float)$meta
+				'meta' => (float)$meta // Ahora sí lo convertirá a 950000.0
 			]);
 		} catch (PDOException $e) {
 			return json_encode(["error" => $e->getMessage()]);
