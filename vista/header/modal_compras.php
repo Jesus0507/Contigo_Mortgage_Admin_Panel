@@ -207,6 +207,18 @@
                     <div class="d-none" style="color: #155408; font-weight: bold; font-size: 14px;">
                         Dinero requerido <span class="fas fa-money-bill"></span>: <span id="calculated_required_money">0,00</span>
                     </div>
+                    <div class="w-100 mt-2"> 
+                        <label>Realtor Asignado:</label>
+                        <input class="form-control" placeholder="Nombre y apellido" id="realtor_name" <?php if ($_SESSION['user_role'] != "admin") { ?> disabled <?php } ?>>
+                    </div>
+                    <div class="d-flex flex-row justify-content-between w-100 mt-2">
+                        <div style="width: 45%">
+                            <input class="form-control" placeholder="Teléfono" id="realtor_tlf" <?php if ($_SESSION['user_role'] != "admin") { ?> disabled <?php } ?>>
+                        </div>
+                        <div style="width: 45%">
+                            <input placeholder="Correo" class="form-control" id="realtor_email" <?php if ($_SESSION['user_role'] != "admin") { ?> disabled <?php } ?>></input>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="w-100 text-center btn-gestion-action">

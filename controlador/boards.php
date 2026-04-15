@@ -167,7 +167,10 @@ class boardsController
             $_POST['condiciones'],
             $_POST['call_detail'],
             $_POST['total_requerido'],
-            $_POST['programa_aplica']
+            $_POST['programa_aplica'],
+            $_POST['realtor_name'],
+            $_POST['realtor_tlf'],
+            $_POST['realtor_email']
         );
 
         $resp = $modelo_compra->registrar();
@@ -272,9 +275,12 @@ class boardsController
         $condiciones = empty($_POST['condiciones']) ? $gestion_info[0]['condiciones_notas'] : $_POST['condiciones'];
         $total_requerido = empty($_POST['total_requerido']) ? $gestion_info[0]['total_requerido'] : $_POST['total_requerido'];
         $programa_aplica = empty($_POST['programa_aplica']) ? $gestion_info[0]['programa_aplica'] : $_POST['programa_aplica'];
+        $realtor_name = empty($_POST['realtor_name']) ? $gestion_info[0]['realtor_name'] : $_POST['realtor_name'];
+        $realtor_tlf = empty($_POST['realtor_tlf']) ? $gestion_info[0]['realtor_tlf'] : $_POST['realtor_tlf'];
+        $realtor_email = empty($_POST['realtor_email']) ? $gestion_info[0]['realtor_email'] : $_POST['realtor_email'];
 
 
-        $modelo_compra->set_compra($_POST['board'], $check_client, $_POST['user_asigned'], $tipo_proceso, $primer_comprador, $forma_pago, $tiempo_pago_electronico, $disponibilidad_comprar, $credito_cliente, $estatus_legal, $interes_ofrecido, $gastos_cierre, $down_payment, $monto_max, $condiciones, $call_detail, $total_requerido, $programa_aplica);
+        $modelo_compra->set_compra($_POST['board'], $check_client, $_POST['user_asigned'], $tipo_proceso, $primer_comprador, $forma_pago, $tiempo_pago_electronico, $disponibilidad_comprar, $credito_cliente, $estatus_legal, $interes_ofrecido, $gastos_cierre, $down_payment, $monto_max, $condiciones, $call_detail, $total_requerido, $programa_aplica, $realtor_name, $realtor_tlf, $realtor_email);
         $resp = $modelo_compra->update_compra_info($id_compra);
 
 

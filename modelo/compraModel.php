@@ -22,6 +22,9 @@ class compra_model
     private $condiciones_notas;
     private $total_requerido;
     private $programa_aplica;
+    private $realtor_name;
+    private $realtor_tlf;
+    private $realtor_email;
     private $conexion;
 
     public function __construct()
@@ -29,7 +32,7 @@ class compra_model
         $this->conexion = new base_datos();
     }
 
-    public function set_compra($id_board, $client_id, $user_id, $tipo_proceso, $primer_comprador, $forma_pago, $tiempo_pago_electronico, $disponible_comprar, $credito_cliente, $estatus_legal, $interes_ofrecido, $gastos_cierre, $down_payment, $monto_max_aplicado, $condiciones_notas, $detalle_llamada, $total_requerido, $programa_aplica)
+    public function set_compra($id_board, $client_id, $user_id, $tipo_proceso, $primer_comprador, $forma_pago, $tiempo_pago_electronico, $disponible_comprar, $credito_cliente, $estatus_legal, $interes_ofrecido, $gastos_cierre, $down_payment, $monto_max_aplicado, $condiciones_notas, $detalle_llamada, $total_requerido, $programa_aplica,$realtor_name,$realtor_tlf,$realtor_email)
     {
         $this->id_board = $id_board;
         $this->client_id = $client_id;
@@ -49,6 +52,9 @@ class compra_model
         $this->detalle_llamada = $detalle_llamada;
         $this->total_requerido = $total_requerido;
         $this->programa_aplica = $programa_aplica;
+        $this->realtor_name = $realtor_name;
+        $this->realtor_tlf = $realtor_tlf;
+        $this->realtor_email = $realtor_email;
     }
 
 
@@ -59,12 +65,12 @@ class compra_model
         id_board, client_id, user_id, tipo_proceso, primer_comprador, 
         forma_pago, tiempo_pago_electronico, disponible_comprar, credito_cliente, 
         estatus_legal, interes_ofrecido, gastos_cierre, down_payment, 
-        monto_max_aplicado, programa_aplica, condiciones_notas, total_requerido, detalle_llamada, etapa_actual
+        monto_max_aplicado, programa_aplica, condiciones_notas, total_requerido, detalle_llamada, realtor_name, realtor_tlf, realtor_email,etapa_actual
     ) VALUES (
         $this->id_board, $this->client_id, $this->user_id, '$this->tipo_proceso', '$this->primer_comprador', 
         '$this->forma_pago', '$this->tiempo_pago_electronico', '$this->disponible_comprar', '$this->credito_cliente', 
         '$this->estatus_legal', '$this->interes_ofrecido', '$this->gastos_cierre', '$this->down_payment', 
-        '$this->monto_max_aplicado', '$this->programa_aplica', '$this->condiciones_notas', '$this->total_requerido', '$this->detalle_llamada', 'prospecto'
+        '$this->monto_max_aplicado', '$this->programa_aplica', '$this->condiciones_notas', '$this->total_requerido', '$this->detalle_llamada', '$this->realtor_name','$this->realtor_tlf','$this->realtor_email','prospecto'
     )";
 
         try {
@@ -162,6 +168,9 @@ class compra_model
                 condiciones_notas = '$this->condiciones_notas',
                 detalle_llamada = '$this->detalle_llamada',
                 programa_aplica = '$this->programa_aplica',
+                realtor_name = '$this->realtor_name',
+                realtor_tlf = '$this->realtor_tlf',
+                realtor_email = '$this->realtor_email',
                 total_requerido = '$this->total_requerido'
               WHERE id_compra = $id_compra";
 

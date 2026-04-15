@@ -221,7 +221,7 @@ function load_compras_modal_info(ev) {
             "id_compra": ev.target.querySelector("span").innerHTML
         }
     }).done(function (result) {
-        // console.log(result);
+      //  console.log(result);
         var resParsed = JSON.parse(result);
         var resultado = resParsed["gestion_info"][0];
         var notas = resParsed['notas'];
@@ -250,7 +250,10 @@ function load_compras_modal_info(ev) {
                                                 i == 8 ? resultado['interes_ofrecido'] :
                                                     i == 9 ? resultado['down_payment'] :
                                                         i == 10 ? resultado['gastos_cierre'] :
-                                                            i == 11 ? resultado['total_requerido'] : '';
+                                                            i == 11 ? resultado['total_requerido'] :
+                                                                i == 13 ? resultado['realtor_name'] :
+                                                                    i == 14 ? resultado['realtor_tlf'] :
+                                                                        i == 15 ? resultado['realtor_email'] : '';
         });
 
         // Asignar el valor al SELECT de formato
@@ -577,7 +580,7 @@ function load_gestion_modal_info(ev) {
             "id_gestion": ev.target.querySelector("span").innerHTML
         }
     }).done(function (result) {
-        
+
         var resultado = JSON.parse(result)["gestion_info"][0];
         var notas = JSON.parse(result)['notas'];
         var deudas = JSON.parse(result)['deudas']
@@ -622,7 +625,7 @@ function load_gestion_modal_info(ev) {
             i++;
         })
 
-          document.getElementById("asesor_name").value = resultado['user_name'] + " " + resultado['user_last_name'];
+        document.getElementById("asesor_name").value = resultado['user_name'] + " " + resultado['user_last_name'];
         console.log(document.getElementById("asesor_name").value);
         document.getElementById("ltv_percent_value").innerHTML = money_format(resultado['loan_amount']);
         document.getElementById("gastos_cierre_percent_value").innerHTML = money_format(parseFloat(resultado['property_value']) * parseFloat(resultado["gastos_cierre"]) / 100);
