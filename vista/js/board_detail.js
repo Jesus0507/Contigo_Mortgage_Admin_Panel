@@ -221,7 +221,7 @@ function load_compras_modal_info(ev) {
             "id_compra": ev.target.querySelector("span").innerHTML
         }
     }).done(function (result) {
-      //  console.log(result);
+        console.log(result);
         var resParsed = JSON.parse(result);
         var resultado = resParsed["gestion_info"][0];
         var notas = resParsed['notas'];
@@ -260,6 +260,9 @@ function load_compras_modal_info(ev) {
         if (document.getElementById("tiempo_pago_formato")) {
             document.getElementById("tiempo_pago_formato").value = formatoTiempo;
         }
+
+        document.getElementById("prioridad").value = resultado['prioridad'];
+        document.getElementById("prioridad").value == 1 ? document.getElementById("prioridad").style.color = "green" : document.getElementById("prioridad").value == 2? document.getElementById("prioridad").style.color = "#F5B027" : document.getElementById("prioridad").style.color = "red";
 
         // Limpiar y cargar áreas de historial y notas
         document.querySelector(".comments-area").innerHTML = "";
@@ -315,6 +318,10 @@ function load_compras_modal_info(ev) {
     });
 }
 
+  document.getElementById("prioridad").value = 2;
+document.getElementById("prioridad").onchange = function(){
+    document.getElementById("prioridad").value == 1? document.getElementById("prioridad").style.color = "green" : document.getElementById("prioridad").value == 2 ? document.getElementById("prioridad").style.color = "#F5B027" : document.getElementById("prioridad").style.color = "red";
+}
 
 function load_income_section(info, ingresos) {
     var purchase_val = document.getElementById("monto_max").value != "" ? parseMoneyAux(document.getElementById("monto_max").value) : 0;

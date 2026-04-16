@@ -296,6 +296,7 @@ close_btn.onclick = function () {
     // VALIDACIÓN DE EXISTENCIA: Si el elemento no existe (es null), isEditing será false.
     const updateEl = document.getElementById("property_update");
     const isEditing = updateEl ? !updateEl.classList.contains("d-none") : false;
+    document.getElementById("prioridad").value = 2;
 
     const isVisible = (el) => el && !el.closest('.d-none');
 
@@ -654,6 +655,7 @@ property_register_btn.onclick = function () {
             "prepayment_penalty": prepayment_penalty.value,
             "ltv": ltv_value.value,
             "deudas_adicionales": deudas_lista,
+            "prioridad": document.getElementById("prioridad").value,
             "comments": unsaved_comments,
             "user_id": current_user_asigned,
             "board": document.getElementById("board_id").innerHTML
@@ -690,6 +692,7 @@ function updateInfo(reload) {
             "condiciones_adicionales": condiciones_adicionales.value,
             "loan_amount": parseMoneyGestion(loan_amount.value),
             "cashout": parseMoneyGestion(cashout.value),
+            "prioridad": document.getElementById("prioridad").value,
             "user_id": current_user_asigned,
             "gestion_id": document.getElementById("modal_id_gestion").innerHTML
         }

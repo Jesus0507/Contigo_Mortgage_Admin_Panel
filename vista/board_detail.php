@@ -33,86 +33,86 @@
                             <div><button class="btn btn-dark mx-2" id="add_column"><i class="far fa-plus-square"></i> Nueva columna</button></div>
                             <div>
                                 <div class="d-flex gap-3 mb-4 flex-wrap">
-                                    <?php if ($_SESSION['user_role'] == "admin"){ ?>
-                                    <div class="dropdown">
-                                        <button class="btn btn-dark dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
-                                            <i class="fas fa-filter me-2"></i> Filtro
-                                        </button>
-                                        <div class="dropdown-menu shadow-lg p-0" style="width: 550px; border-radius: 8px; overflow: hidden;">
-                                            <div class="d-flex" style="min-height: 350px;">
+                                    <?php if ($_SESSION['user_role'] == "admin") { ?>
+                                        <div class="dropdown">
+                                            <button class="btn btn-dark dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+                                                <i class="fas fa-filter me-2"></i> Filtro
+                                            </button>
+                                            <div class="dropdown-menu shadow-lg p-0" style="width: 550px; border-radius: 8px; overflow: hidden;">
+                                                <div class="d-flex" style="min-height: 350px;">
 
-                                                <div class="bg-light border-end" style="width: 40%;">
-                                                    <div class="nav flex-column nav-pills p-2" id="v-pills-tab" role="tablist">
-                                                        <button class="nav-link active text-start mb-1" data-bs-toggle="pill" data-bs-target="#tab-agentes" type="button" role="tab">
-                                                            Persona asignada
-                                                        </button>
-                                                        <button class="nav-link text-start" data-bs-toggle="pill" data-bs-target="#tab-estados" type="button" role="tab">
-                                                            Estado
-                                                        </button>
-                                                    </div>
-                                                </div>
-
-                                                <div class="tab-content p-3" id="v-pills-tabContent" style="width: 60%;">
-
-                                                    <div class="tab-pane fade show active" id="tab-agentes" role="tabpanel">
-                                                        <div class="input-group mb-3">
-                                                            <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
-                                                            <input type="text" class="form-control border-start-0 filter-search" placeholder="Buscar persona asignada..." onkeyup="searchInTab(this)">
+                                                    <div class="bg-light border-end" style="width: 40%;">
+                                                        <div class="nav flex-column nav-pills p-2" id="v-pills-tab" role="tablist">
+                                                            <button class="nav-link active text-start mb-1" data-bs-toggle="pill" data-bs-target="#tab-agentes" type="button" role="tab">
+                                                                Persona asignada
+                                                            </button>
+                                                            <button class="nav-link text-start" data-bs-toggle="pill" data-bs-target="#tab-estados" type="button" role="tab">
+                                                                Estado
+                                                            </button>
                                                         </div>
-                                                        <div class="options-list" style="max-height: 250px; overflow-y: auto;">
-                                                            <?php
-                                                            $ids_con_gestion = array_column($all_gestions, 'user_id');
+                                                    </div>
 
-                                                            foreach ($usuarios as $user) {
-                                                                if (in_array($user['user_id'], $ids_con_gestion)) {
-                                                            ?>
+                                                    <div class="tab-content p-3" id="v-pills-tabContent" style="width: 60%;">
+
+                                                        <div class="tab-pane fade show active" id="tab-agentes" role="tabpanel">
+                                                            <div class="input-group mb-3">
+                                                                <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
+                                                                <input type="text" class="form-control border-start-0 filter-search" placeholder="Buscar persona asignada..." onkeyup="searchInTab(this)">
+                                                            </div>
+                                                            <div class="options-list" style="max-height: 250px; overflow-y: auto;">
+                                                                <?php
+                                                                $ids_con_gestion = array_column($all_gestions, 'user_id');
+
+                                                                foreach ($usuarios as $user) {
+                                                                    if (in_array($user['user_id'], $ids_con_gestion)) {
+                                                                ?>
+                                                                        <div class="form-check dropdown-item py-1">
+                                                                            <input class="form-check-input filter-check-agent"
+                                                                                type="checkbox"
+                                                                                value="<?php echo $user['user_id']; ?>"
+                                                                                id="u<?php echo $user['user_id']; ?>"
+                                                                                onchange="applyBoardFilters()">
+                                                                            <label class="form-check-label w-100" for="u<?php echo $user['user_id']; ?>">
+                                                                                <?php echo $user['name'] . " " . $user['last_name']; ?>
+                                                                            </label>
+                                                                        </div>
+                                                                <?php
+                                                                    }
+                                                                }
+                                                                ?>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="tab-pane fade" id="tab-estados" role="tabpanel">
+                                                            <div class="input-group mb-3">
+                                                                <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
+                                                                <input type="text" class="form-control border-start-0 filter-search" placeholder="Buscar estado..." onkeyup="searchInTab(this)">
+                                                            </div>
+                                                            <div class="options-list" style="max-height: 250px; overflow-y: auto;">
+                                                                <?php
+                                                                $etapas_unicas = array_unique(array_column($all_gestions, 'etapa_actual'));
+
+                                                                foreach ($etapas_unicas as $index => $etapa) {
+                                                                    $etapa_label = strtoupper($etapa);
+                                                                ?>
                                                                     <div class="form-check dropdown-item py-1">
-                                                                        <input class="form-check-input filter-check-agent"
+                                                                        <input class="form-check-input filter-check-status"
                                                                             type="checkbox"
-                                                                            value="<?php echo $user['user_id']; ?>"
-                                                                            id="u<?php echo $user['user_id']; ?>"
+                                                                            value="<?php echo $etapa_label ?>"
+                                                                            id="status_<?php echo $index; ?>"
                                                                             onchange="applyBoardFilters()">
-                                                                        <label class="form-check-label w-100" for="u<?php echo $user['user_id']; ?>">
-                                                                            <?php echo $user['name'] . " " . $user['last_name']; ?>
+                                                                        <label class="form-check-label w-100" for="status_<?php echo $index; ?>">
+                                                                            <?php echo $etapa_label ?>
                                                                         </label>
                                                                     </div>
-                                                            <?php
-                                                                }
-                                                            }
-                                                            ?>
+                                                                <?php } ?>
+                                                            </div>
                                                         </div>
+
                                                     </div>
-
-                                                    <div class="tab-pane fade" id="tab-estados" role="tabpanel">
-                                                        <div class="input-group mb-3">
-                                                            <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
-                                                            <input type="text" class="form-control border-start-0 filter-search" placeholder="Buscar estado..." onkeyup="searchInTab(this)">
-                                                        </div>
-                                                        <div class="options-list" style="max-height: 250px; overflow-y: auto;">
-                                                            <?php
-                                                            $etapas_unicas = array_unique(array_column($all_gestions, 'etapa_actual'));
-
-                                                            foreach ($etapas_unicas as $index => $etapa) {
-                                                                $etapa_label = strtoupper($etapa);
-                                                            ?>
-                                                                <div class="form-check dropdown-item py-1">
-                                                                    <input class="form-check-input filter-check-status"
-                                                                        type="checkbox"
-                                                                        value="<?php echo $etapa_label ?>"
-                                                                        id="status_<?php echo $index; ?>"
-                                                                        onchange="applyBoardFilters()">
-                                                                    <label class="form-check-label w-100" for="status_<?php echo $index; ?>">
-                                                                        <?php echo $etapa_label ?>
-                                                                    </label>
-                                                                </div>
-                                                            <?php } ?>
-                                                        </div>
-                                                    </div>
-
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
                                     <?php } ?>
 
                                 </div>
@@ -154,7 +154,7 @@
                                     <div class="opt-item opt-clickeable">Eliminar columna</div>
 
                                 </div><?php } ?>
-                            
+
                             <ul class="tasks">
                                 <?php
                                 if (isset($all_gestions) && is_array($all_gestions)) {
@@ -164,18 +164,20 @@
                                             <li class="task task-container"
                                                 <?php if (strtolower($gestion['etapa_actual']) != "finalizado" || $_SESSION['user_role'] == 'admin') { ?>
                                                 draggable="true"
-                                                <?php } else{?>
+                                                <?php } else { ?>
                                                 draggable="false"
-                                                <?php }?>
+                                                <?php } ?>
                                                 data-user-id="<?php echo $gestion['user_id']; ?>"
                                                 data-status="<?php echo strtoupper($gestion['etapa_actual']); ?>"
-                                                data-user-type ="<?php echo $_SESSION['user_role'];?>"
-                                                >
+                                                data-user-type="<?php echo $_SESSION['user_role']; ?>">
 
                                                 <?php echo ucfirst($gestion['name']) . " " . ucfirst($gestion['last_name']); ?>
                                                 <span class="gestion-id d-none">
                                                     <?php echo $board_info[0]['board_type'] == "gestion_clientes" ? $gestion['id_gestion'] : $gestion['id_compra'] ?>
                                                 </span>
+                                                <i class="fas fa-square" style="color: <?php
+                                                                                        echo ($gestion['prioridad'] == 1) ? 'green' : (($gestion['prioridad'] == 2) ? '#F5B027' : 'red');
+                                                                                        ?>"></i>
                                             </li>
                                 <?php
                                         }
