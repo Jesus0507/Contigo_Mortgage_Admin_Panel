@@ -572,6 +572,7 @@ function registerInfo() {
             "realtor_tlf": realtor_tlf.value,
             "realtor_email": realtor_email.value,
             "user_asigned": current_user_asigned,
+            "prioridad": document.getElementById("prioridad").value,
 
             // --- NUEVOS CAMPOS DE INCOME ---
             // Enviamos el array completo de objetos convertido a JSON string
@@ -626,6 +627,7 @@ close_btn.onclick = function () {
             document.querySelector(".programa_container").classList.add("d-none");
             document.getElementById("total_requerido_label").parentElement.classList.remove("d-none");
             document.getElementById("conditions").value = "";
+            document.getElementById("prioridad").value = 2;
 
             // Reset de selectores y variables de UI
             tipo_proceso.value = "";
@@ -694,6 +696,7 @@ function updateInfo(reload) {
             "realtor_tlf": realtor_tlf.value,
             "realtor_email": realtor_email.value,
             "user_asigned": current_user_asigned,
+            "prioridad": document.getElementById("prioridad").value,
 
             // --- CAMPO RECIÉN AGREGADO ---
             "programa_aplica": document.getElementById("programa_aplica").value,

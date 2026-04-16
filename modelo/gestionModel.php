@@ -23,6 +23,7 @@ class gestion_model
     private $loan_amount;
     private $mortgage_estimado;
     private $cashout;
+    private $prioridad;
     private $conexion;
 
     public function __construct()
@@ -30,7 +31,7 @@ class gestion_model
         $this->conexion = new base_datos();
     }
 
-    public function set_gestion($id_board, $client_id, $user_id, $property_address, $property_value, $interes_actual, $mortgage, $occupancy, $detalle_llamada, $ltv, $interes_estimado, $prepayment_penalty, $gastos_cierre, $tipo_prestamo, $condiciones_adicionales, $loan_amount, $cashout, $mortgage_estimado)
+    public function set_gestion($id_board, $client_id, $user_id, $property_address, $property_value, $interes_actual, $mortgage, $occupancy, $detalle_llamada, $ltv, $interes_estimado, $prepayment_penalty, $gastos_cierre, $tipo_prestamo, $condiciones_adicionales, $loan_amount, $cashout, $mortgage_estimado, $prioridad)
     {
         $this->id_board = $id_board;
         $this->client_id = $client_id;
@@ -50,12 +51,13 @@ class gestion_model
         $this->loan_amount = $loan_amount;
         $this->cashout = $cashout;
         $this->mortgage_estimado = $mortgage_estimado;
+        $this->prioridad = $prioridad;
     }
 
 
     public function registrar()
     {
-        $query = "INSERT INTO gestion (id_board, client_id, user_id, property_address, property_value, interes_actual, mortgage, occupancy, detalle_llamada,ltv, interes_estimado, prepayment_penalty, gastos_cierre, tipo_prestamo, condiciones_adicionales, loan_amount, cash_out, etapa_actual, mortgage_estimado) VALUES ('$this->id_board','$this->client_id', '$this->user_id', '$this->property_address', '$this->property_value', '$this->interes_actual', '$this->mortgage', '$this->occupancy', '$this->detalle_llamada','$this->ltv','$this->interes_estimado','$this->prepayment_penalty','$this->gastos_cierre','$this->tipo_prestamo','$this->condiciones_adicionales','$this->loan_amount','$this->cashout','prospecto', '$this->mortgage_estimado')";
+        $query = "INSERT INTO gestion (id_board, client_id, user_id, property_address, property_value, interes_actual, mortgage, occupancy, detalle_llamada,ltv, interes_estimado, prepayment_penalty, gastos_cierre, tipo_prestamo, condiciones_adicionales, loan_amount, cash_out, etapa_actual, mortgage_estimado, prioridad) VALUES ('$this->id_board','$this->client_id', '$this->user_id', '$this->property_address', '$this->property_value', '$this->interes_actual', '$this->mortgage', '$this->occupancy', '$this->detalle_llamada','$this->ltv','$this->interes_estimado','$this->prepayment_penalty','$this->gastos_cierre','$this->tipo_prestamo','$this->condiciones_adicionales','$this->loan_amount','$this->cashout','prospecto', '$this->mortgage_estimado', $this->prioridad)";
         try {
             $resultado = $this->conexion->prepare($query);
             $resultado->execute();
@@ -80,7 +82,7 @@ class gestion_model
 
     public function update_gestion_info($id_gestion)
     {
-        $query = "UPDATE gestion SET client_id = '$this->client_id', user_id = '$this->user_id', property_address = '$this->property_address', property_value = '$this->property_value', interes_actual = '$this->interes_actual', mortgage = '$this->mortgage', occupancy = '$this->occupancy', detalle_llamada = '$this->detalle_llamada',ltv = '$this->ltv', interes_estimado = '$this->interes_estimado', prepayment_penalty = '$this->prepayment_penalty', gastos_cierre = '$this->gastos_cierre', tipo_prestamo = '$this->tipo_prestamo', condiciones_adicionales = '$this->condiciones_adicionales', loan_amount = '$this->loan_amount', cash_out = '$this->cashout', mortgage_estimado = '$this->mortgage_estimado'  WHERE id_gestion = $id_gestion";
+        $query = "UPDATE gestion SET client_id = '$this->client_id', user_id = '$this->user_id', property_address = '$this->property_address', property_value = '$this->property_value', interes_actual = '$this->interes_actual', mortgage = '$this->mortgage', occupancy = '$this->occupancy', detalle_llamada = '$this->detalle_llamada',ltv = '$this->ltv', interes_estimado = '$this->interes_estimado', prepayment_penalty = '$this->prepayment_penalty', gastos_cierre = '$this->gastos_cierre', tipo_prestamo = '$this->tipo_prestamo', condiciones_adicionales = '$this->condiciones_adicionales', loan_amount = '$this->loan_amount', cash_out = '$this->cashout', mortgage_estimado = '$this->mortgage_estimado', prioridad = $this->prioridad  WHERE id_gestion = $id_gestion";
         try {
             $resultado = $this->conexion->prepare($query);
             $resultado->execute();

@@ -116,7 +116,7 @@ class boardsController
         if (!$check_client) {
             $check_client = $modelo->add_client(strtolower($_POST['client_name']), strtolower($_POST['client_last_name']), $_POST['client_phone']);
         }
-        $modelo_gestion->set_gestion($_POST['board'], $check_client, $_POST['user_id'], $_POST['property_address'], $_POST['property_value'], $_POST['interes_actual'], $_POST['mortgage'], $_POST['occupancy'], $_POST['call_detail'], $_POST['ltv'], $_POST['interes_estimado'], $_POST['prepayment_penalty'], $_POST['gastos_cierre'], $_POST['tipo_prestamo'], $_POST['condiciones_adicionales'], $_POST['loan_amount'], $_POST['cashout'], $_POST['mortgage_estimado']);
+        $modelo_gestion->set_gestion($_POST['board'], $check_client, $_POST['user_id'], $_POST['property_address'], $_POST['property_value'], $_POST['interes_actual'], $_POST['mortgage'], $_POST['occupancy'], $_POST['call_detail'], $_POST['ltv'], $_POST['interes_estimado'], $_POST['prepayment_penalty'], $_POST['gastos_cierre'], $_POST['tipo_prestamo'], $_POST['condiciones_adicionales'], $_POST['loan_amount'], $_POST['cashout'], $_POST['mortgage_estimado'], $_POST['prioridad']);
         $resp = $modelo_gestion->registrar();
         $last_gestion = $modelo_gestion->get_last_gestion();
         if (isset($_POST['comments'])) {
@@ -170,7 +170,8 @@ class boardsController
             $_POST['programa_aplica'],
             $_POST['realtor_name'],
             $_POST['realtor_tlf'],
-            $_POST['realtor_email']
+            $_POST['realtor_email'],
+            $_POST['prioridad']
         );
 
         $resp = $modelo_compra->registrar();
@@ -280,7 +281,7 @@ class boardsController
         $realtor_email = empty($_POST['realtor_email']) ? $gestion_info[0]['realtor_email'] : $_POST['realtor_email'];
 
 
-        $modelo_compra->set_compra($_POST['board'], $check_client, $_POST['user_asigned'], $tipo_proceso, $primer_comprador, $forma_pago, $tiempo_pago_electronico, $disponibilidad_comprar, $credito_cliente, $estatus_legal, $interes_ofrecido, $gastos_cierre, $down_payment, $monto_max, $condiciones, $call_detail, $total_requerido, $programa_aplica, $realtor_name, $realtor_tlf, $realtor_email);
+        $modelo_compra->set_compra($_POST['board'], $check_client, $_POST['user_asigned'], $tipo_proceso, $primer_comprador, $forma_pago, $tiempo_pago_electronico, $disponibilidad_comprar, $credito_cliente, $estatus_legal, $interes_ofrecido, $gastos_cierre, $down_payment, $monto_max, $condiciones, $call_detail, $total_requerido, $programa_aplica, $realtor_name, $realtor_tlf, $realtor_email, $_POST['prioridad']);
         $resp = $modelo_compra->update_compra_info($id_compra);
 
 
@@ -383,7 +384,7 @@ class boardsController
 
 
 
-        $modelo_gestion->set_gestion($_POST['board'], $check_client, $_POST['user_id'], $property_address, $property_value, $interes_actual, $mortgage, $occupancy, $call_detail, $ltv, $interes_estimado, $prepayment_penalty, $gastos_cierre, $tipo_prestamo, $condiciones_adicionales, $loan_amount, $cashout, $mortgage_estimado);
+        $modelo_gestion->set_gestion($_POST['board'], $check_client, $_POST['user_id'], $property_address, $property_value, $interes_actual, $mortgage, $occupancy, $call_detail, $ltv, $interes_estimado, $prepayment_penalty, $gastos_cierre, $tipo_prestamo, $condiciones_adicionales, $loan_amount, $cashout, $mortgage_estimado, $_POST['prioridad']);
         $resp = $modelo_gestion->update_gestion_info($_POST['gestion_id']);
         $accion = "El usuario " . $_SESSION['username'] . " ha modificado información de la gestión";
         $tipo_accion = "modificacion";

@@ -13,16 +13,23 @@
                 <div class="w-50 text-center active" id="gestion_tab">Gestión</div>
                 <div class="w-50 text-center" id="seguimiento_tab">Seguimiento</div>
             </div>
-            <div id="hidden_users_list" class="d-none"><?php echo json_encode($usuarios)?></div>
-            <div style="font-weight: bold" class="d-flex flex-row <?php if($_SESSION['user_role'] != 'admin'){ ?> d-none <?php }?>">
-                <div id="asesor_asignado_label">Asesor:</div>
-                <div><input class="form-control" style="width: 80%; margin-left: 10px; height: 25px;" id="asesor_name_compras" list="users_datalist" placeholder="Asignar a ..." <?php if($_SESSION['user_role'] != "admin") { ?> value="<?php echo $_SESSION['username'] ?>" <?php }?>>
+            <div id="hidden_users_list" class="d-none"><?php echo json_encode($usuarios) ?></div>
+
+            <div style="font-weight: bold" class="d-flex flex-row">
+                <div class="<?php if ($_SESSION['user_role'] != 'admin') { ?> d-none <?php } ?>" id="asesor_asignado_label">Asesor:</div>
+                <div class="<?php if ($_SESSION['user_role'] != 'admin') { ?> d-none <?php } ?>"><input class="form-control" style="width: 80%; margin-left: 10px; height: 25px;" id="asesor_name_compras" list="users_datalist" placeholder="Asignar a ..." <?php if ($_SESSION['user_role'] != "admin") { ?> value="<?php echo $_SESSION['username'] ?>" <?php } ?>>
                     <datalist id="users_datalist">
                         <?php foreach ($usuarios as $user) { ?>
-                            <option value="<?php echo $user['name']." ".$user['last_name'] ?>"><?php echo $user['email']; ?></option>
-                            <?php } ?>
+                            <option value="<?php echo $user['name'] . " " . $user['last_name'] ?>"><?php echo $user['email']; ?></option>
+                        <?php } ?>
                     </datalist>
                 </div>
+                <div>Prioridad:</div>
+                <div><select id="prioridad" class="form-select" style="height:27px; padding-top: 0 !important; font-weight: bold; color: #F5B027">
+                    <option value="1" style="font-weight:bold;color: green">Alta</option>
+                    <option value="2" style="font-weight:bold;color: #F5B027">Media</option>
+                    <option value="3" style="font-weight:bold;color: red">Baja</option>
+                </select></div>
             </div>
         </div>
     </div>
@@ -207,7 +214,7 @@
                     <div class="d-none" style="color: #155408; font-weight: bold; font-size: 14px;">
                         Dinero requerido <span class="fas fa-money-bill"></span>: <span id="calculated_required_money">0,00</span>
                     </div>
-                    <div class="w-100 mt-2"> 
+                    <div class="w-100 mt-2">
                         <label>Realtor Asignado:</label>
                         <input class="form-control" placeholder="Nombre y apellido" id="realtor_name" <?php if ($_SESSION['user_role'] != "admin") { ?> disabled <?php } ?>>
                     </div>
