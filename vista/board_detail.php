@@ -142,6 +142,7 @@
                                     <div><span class="task_cant"><?php echo $cant; ?></span></div>
 
                                 </div>
+                                <?php if ($ticket == 'finalizado') { ?> <div><button class="btn btn-success" style="padding-top: 0 !important; height: 25px" title="Exportar a excel" id="finished_excel"><i class="fas fa-file-excel"></i></button></div><?php } ?>
                                 <?php if ($ticket != $all_tickets[count($all_tickets) - 1]) { ?> <div class="ticket-options opt-clickeable points_clickeable"><span class="opt-clickeable">...</span></div><?php } ?>
                             </div>
                             <?php if ($ticket != $all_tickets[count($all_tickets) - 1]) { ?>
@@ -169,7 +170,9 @@
                                                 <?php } ?>
                                                 data-user-id="<?php echo $gestion['user_id']; ?>"
                                                 data-status="<?php echo strtoupper($gestion['etapa_actual']); ?>"
-                                                data-user-type="<?php echo $_SESSION['user_role']; ?>">
+                                                data-user-type="<?php echo $_SESSION['user_role']; ?>"
+                                                data-gestion-type="<?php echo $board_info[0]['board_type']; ?>"
+                                                data-gestion-id=" <?php echo $board_info[0]['board_type'] == "gestion_clientes" ? $gestion['id_gestion'] : $gestion['id_compra'] ?>">
 
                                                 <?php echo ucfirst($gestion['name']) . " " . ucfirst($gestion['last_name']); ?>
                                                 <span class="gestion-id d-none">
@@ -193,6 +196,7 @@
 
     </div>
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>

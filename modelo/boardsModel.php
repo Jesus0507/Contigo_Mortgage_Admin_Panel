@@ -78,6 +78,47 @@ class boards_model
 		}
 	}
 
+	public function get_excel_consult($type, $tickets)
+	{
+		// 1. Definimos tabla y columna ID según el tipo de board
+		$gestion = ($type == "gestion_clientes") ? "gestion" : "compras";
+		$id_column = ($type == "gestion_clientes") ? "id_gestion" : "id_compra";
+
+		// 2. Extraemos los IDs del arreglo recibido desde el JS
+		$ids = array_column($tickets, 'gestion_id');
+
+		if (empty($ids)) return [];
+
+		// 3. Creamos los placeholders (?) para el IN
+		$placeholders = implode(',', array_fill(0, count($ids), '?'));
+
+		// 4. Construimos la consulta con los JOINs a clientes y usuarios
+		$query = "SELECT b.*, 
+                     c.name as client_name, c.last_name as client_last_name, c.phone as client_phone, 
+                     u.name as user_name, u.last_name as user_last_name 
+              FROM $gestion as b
+              INNER JOIN clients as c ON b.client_id = c.client_id
+              INNER JOIN users as u ON b.user_id = u.user_id
+              WHERE b.$id_column IN ($placeholders)";
+
+		try {
+			$data = [];
+			$resultado = $this->conexion->prepare($query);
+
+			// Pasamos el arreglo de IDs directamente al execute
+			$resultado->execute($ids);
+
+			$resultado->setFetchMode(PDO::FETCH_ASSOC);
+
+			foreach ($resultado->fetchAll() as $v) {
+				$data[] = $v;
+			}
+
+			return $data;
+		} catch (PDOException $e) {
+			return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
+		}
+	}
 	public function get_all_boards_users($user_id)
 	{
 		$query = "SELECT * FROM users_boards WHERE user_id = $user_id";
@@ -188,7 +229,7 @@ class boards_model
 		$query = "SELECT u.user_id, u.name AS asesor, ub.id_board, (SELECT COUNT(*) FROM gestion g WHERE g.user_id = u.user_id AND g.id_board = ub.id_board) AS total_en_gestion,
      	(SELECT COUNT(*) FROM compras c WHERE c.user_id = u.user_id AND c.id_board = ub.id_board) AS total_en_compras FROM users u JOIN 
     	users_boards ub ON u.user_id = ub.user_id ORDER BY u.user_id ASC, ub.id_board ASC;";
-		
+
 		try {
 			$users = [];
 			$resultado = $this->conexion->prepare($query);

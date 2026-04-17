@@ -479,4 +479,11 @@ class boardsController
             echo true;
         }
     }
+
+    public function export_excel(){
+        $board_type = $_POST['type_board'];
+        $modelo = new boards_model();
+        $resp = $modelo->get_excel_consult($board_type,$_POST['tickets']);
+        echo json_encode($resp);
+    }
 }
