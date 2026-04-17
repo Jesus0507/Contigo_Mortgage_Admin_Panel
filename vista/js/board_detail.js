@@ -3,6 +3,7 @@ const tasks = document.querySelectorAll(".task");
 var all_options_btn = document.querySelectorAll(".ticket-options");
 var add_column = document.getElementById("add_column");
 var columns_options = Array.from(document.querySelectorAll(".opt-item"));
+var export_excel = document.getElementById("finished_excel");
 
 
 
@@ -262,7 +263,7 @@ function load_compras_modal_info(ev) {
         }
 
         document.getElementById("prioridad").value = resultado['prioridad'];
-        document.getElementById("prioridad").value == 1 ? document.getElementById("prioridad").style.color = "green" : document.getElementById("prioridad").value == 2? document.getElementById("prioridad").style.color = "#F5B027" : document.getElementById("prioridad").style.color = "red";
+        document.getElementById("prioridad").value == 1 ? document.getElementById("prioridad").style.color = "green" : document.getElementById("prioridad").value == 2 ? document.getElementById("prioridad").style.color = "#F5B027" : document.getElementById("prioridad").style.color = "red";
 
         // Limpiar y cargar áreas de historial y notas
         document.querySelector(".comments-area").innerHTML = "";
@@ -318,9 +319,9 @@ function load_compras_modal_info(ev) {
     });
 }
 
-  document.getElementById("prioridad").value = 2;
-document.getElementById("prioridad").onchange = function(){
-    document.getElementById("prioridad").value == 1? document.getElementById("prioridad").style.color = "green" : document.getElementById("prioridad").value == 2 ? document.getElementById("prioridad").style.color = "#F5B027" : document.getElementById("prioridad").style.color = "red";
+document.getElementById("prioridad").value = 2;
+document.getElementById("prioridad").onchange = function () {
+    document.getElementById("prioridad").value == 1 ? document.getElementById("prioridad").style.color = "green" : document.getElementById("prioridad").value == 2 ? document.getElementById("prioridad").style.color = "#F5B027" : document.getElementById("prioridad").style.color = "red";
 }
 
 function load_income_section(info, ingresos) {
@@ -1014,4 +1015,81 @@ function updateColumnCounters() {
             counterSpan.textContent = visibleTasks;
         }
     });
+}
+
+export_excel.onclick = function () {
+    var cant_tickets = export_excel.parentElement.parentElement.querySelector(".task_cant").innerHTML;
+    var ticket_type = "";
+    if (cant_tickets == "0") {
+        Swal.fire('Atención', 'No hay procesos finalizados', 'warning');
+    }
+    else {
+        var all_tickets = export_excel.parentElement.parentElement.parentElement.querySelectorAll(".task-container");
+        var tickets_ajax = [];
+        Array.from(all_tickets).forEach((t) => {
+            ticket_type = t.dataset.gestionType;
+            tickets_ajax.push(
+                {
+                    "user_id": t.dataset.userId,
+                    "gestion": t.dataset.gestionType,
+                    "gestion_id": t.dataset.gestionId
+                }
+            )
+        });
+        console.log(ticket_type);
+        $.ajax({
+            type: "POST",
+            url: "index.php?c=boards&a=export_excel",
+            data: {
+                "type_board": ticket_type,
+                "tickets": tickets_ajax,
+            }
+        }).done(function (result) {
+            // ... dentro del .done(function (result) {
+            try {
+                const data = JSON.parse(result);
+
+                if (data.length === 0) {
+                    Swal.fire('Atención', 'No se encontraron datos para exportar', 'info');
+                    return;
+                }
+
+                // 1. Mapeamos los datos para que el Excel solo tenga las columnas que pediste
+                const excelData = data.map(item => {
+                    return {
+                        "Nombre Cliente": item.client_name,
+                        "Apellido Cliente": item.client_last_name,
+                        "Teléfono Cliente": item.client_phone || 'N/A', // O el campo de teléfono del cliente si lo tienes
+                        "Detalle de Llamada": item.detalle_llamada,
+                        "Nombre Usuario": item.user_name,
+                        "Apellido Usuario": item.user_last_name,
+                        "Última Actualización": item.last_update
+                    };
+                });
+
+                // 2. Creamos el libro de trabajo (Worksheet)
+                const worksheet = XLSX.utils.json_to_sheet(excelData);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "Reporte");
+
+                // 3. (Opcional) Ajustar el ancho de las columnas para que se vea bien
+                const wscols = [
+                    { wch: 20 }, { wch: 20 }, { wch: 15 }, { wch: 30 }, { wch: 20 }, { wch: 20 }, { wch: 20 }
+                ];
+                worksheet['!cols'] = wscols;
+
+                // 4. Generamos el archivo y disparamos la descarga
+                const fileName = `Reporte_${ticket_type}_${new Date().getTime()}.xlsx`;
+                XLSX.writeFile(workbook, fileName);
+
+                Swal.fire('Éxito', 'El reporte se ha generado correctamente', 'success');
+
+            } catch (e) {
+                console.error("Error al generar Excel:", e);
+                Swal.fire('Error', 'No se pudo procesar la exportación', 'error');
+            }
+            // });
+        });
+
+    }
 }
