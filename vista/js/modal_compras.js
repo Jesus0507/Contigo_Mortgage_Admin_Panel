@@ -628,6 +628,7 @@ close_btn.onclick = function () {
             document.getElementById("total_requerido_label").parentElement.classList.remove("d-none");
             document.getElementById("conditions").value = "";
             document.getElementById("prioridad").value = 2;
+            document.getElementById("gestion_tab").click();
 
             // Reset de selectores y variables de UI
             tipo_proceso.value = "";
@@ -723,9 +724,7 @@ function info_validation() {
     current_user_asigned = false;
 
     users_list_parse.forEach((u) => {
-        var surname = u.name.toLowerCase() + " " + u.last_name.toLowerCase();
-        console.log(surname + " - " + asesor_asignado.value);
-        if (asesor_asignado.value.toLowerCase() == surname) {
+        if (asesor_asignado.value.toLowerCase() == u.email.toLowerCase()) {
             is_user_assigned = u.user_id;
             current_user_asigned = u.user_id;
         }

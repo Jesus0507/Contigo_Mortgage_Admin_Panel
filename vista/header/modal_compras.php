@@ -17,10 +17,10 @@
 
             <div style="font-weight: bold" class="d-flex flex-row">
                 <div class="<?php if ($_SESSION['user_role'] != 'admin') { ?> d-none <?php } ?>" id="asesor_asignado_label">Asesor:</div>
-                <div class="<?php if ($_SESSION['user_role'] != 'admin') { ?> d-none <?php } ?>"><input class="form-control" style="width: 80%; margin-left: 10px; height: 25px;" id="asesor_name_compras" list="users_datalist" placeholder="Asignar a ..." <?php if ($_SESSION['user_role'] != "admin") { ?> value="<?php echo $_SESSION['username'] ?>" <?php } ?>>
+                <div class="<?php if ($_SESSION['user_role'] != 'admin') { ?> d-none <?php } ?>"><input class="form-control" style="width: 80%; margin-left: 10px; height: 25px;" id="asesor_name_compras" list="users_datalist" placeholder="Asignar a ..." <?php if ($_SESSION['user_role'] != "admin") { ?> value="<?php echo $_SESSION['email'] ?>" <?php } ?>>
                     <datalist id="users_datalist">
                         <?php foreach ($usuarios as $user) { ?>
-                            <option value="<?php echo $user['name'] . " " . $user['last_name'] ?>"><?php echo $user['email']; ?></option>
+                            <option value="<?php echo $user['email']; ?>"><?php echo $user['name'] . " " . $user['last_name'] ?></option>
                         <?php } ?>
                     </datalist>
                 </div>

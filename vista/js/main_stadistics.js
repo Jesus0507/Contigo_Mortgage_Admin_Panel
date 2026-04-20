@@ -230,6 +230,137 @@ function get_distribucion_prestamos() {
     });
 }
 
+// 1. Declarar la variable fuera para que el botón de Excel pueda leerla
+var chartSeguimiento = null;
+
+function updateSeguimientoChart() {
+    const busqueda = document.getElementById('busquedaGlobal').value;
+    const ctx = document.getElementById('graficoSeguimiento'); // Obtenemos el elemento directamente
+    const wrapper = document.getElementById('chart-area-wrapper');
+
+    $.ajax({
+        type: "POST",
+        url: "index.php?c=main&a=get_clientes_sin_seguimiento",
+        data: { agente_id: busqueda },
+    }).done(function (result) {
+        const dataParsed = JSON.parse(result);
+        const numDataPoints = dataParsed.labels.length;
+
+        // 2. CORRECCIÓN DEL SCROLL: 
+        // Si no hay datos, ocultamos el wrapper o bajamos la altura a 0
+        if (numDataPoints === 0) {
+            wrapper.style.height = '0px';
+            if (chartSeguimiento) chartSeguimiento.destroy();
+            return; // Salimos para que el botón de exportar sepa que no hay nada
+        }
+
+        // Calculamos altura dinámica para mantener el scroll funcional
+        const dynamicHeight = Math.max(500, numDataPoints * 55);
+        wrapper.style.height = dynamicHeight + 'px';
+
+        // 3. Limpiar instancia previa antes de crear la nueva
+        if (chartSeguimiento) {
+            chartSeguimiento.destroy();
+        }
+
+        // 4. Crear el nuevo gráfico y asignarlo a la variable global
+        chartSeguimiento = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: dataParsed.labels,
+                datasets: [{
+                    label: 'Días desde el último seguimiento',
+                    data: dataParsed.data,
+                    backgroundColor: 'rgba(255, 99, 132, 0.8)',
+                    borderColor: 'rgb(255, 99, 132)',
+                    borderWidth: 1,
+                    barThickness: 25
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false, // Vital para que respete el dynamicHeight
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: true }
+                },
+                scales: {
+                    y: {
+                        ticks: {
+                            autoSkip: false,
+                            padding: 15,
+                            font: { size: 11 }
+                        }
+                    },
+                    x: {
+                        beginAtZero: true,
+                        position: 'top',
+                        title: {
+                            display: true,
+                            text: 'Días de inactividad'
+                        }
+                    }
+                },
+                layout: {
+                    padding: { left: 10, right: 30, bottom: 20 }
+                }
+            }
+        });
+    });
+}
+function exportarExcelSeguimiento() {
+    // Buscamos la instancia del gráfico directamente en el canvas
+    const chartInstance = Chart.getChart("graficoSeguimiento");
+
+    if (!chartInstance || chartInstance.data.labels.length === 0) {
+        Swal.fire({
+            title: 'Atención',
+            text: 'No hay datos visibles en el gráfico para exportar',
+            icon: 'warning',
+            confirmButtonColor: '#6777ef'
+        });
+        return;
+    }
+
+    const labels = chartInstance.data.labels;
+    const diasData = chartInstance.data.datasets[0].data;
+
+    // Mapeo de datos (Considerando que label puede ser array por el multilínea)
+    const excelData = labels.map((label, index) => {
+        let nombreC, agenteC;
+
+        if (Array.isArray(label)) {
+            nombreC = label[0];
+            agenteC = label[1] ? label[1].replace("Agente: ", "") : "N/A";
+        } else {
+            const partes = label.split(' (Agente: ');
+            nombreC = partes[0];
+            agenteC = partes[1] ? partes[1].replace(')', '') : 'N/A';
+        }
+
+        return {
+            "Nombre del Cliente": nombreC.toUpperCase(),
+            "Correo del Agente": agenteC,
+            "Días sin Seguimiento": diasData[index]
+        };
+    });
+
+    // Generación del archivo
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Seguimiento");
+
+    // Ajuste de columnas
+    worksheet['!cols'] = [{ wch: 40 }, { wch: 40 }, { wch: 20 }];
+
+    XLSX.writeFile(workbook, `Reporte_Seguimiento_Contigo.xlsx`);
+}
+// Carga inicial
+$(document).ready(function () {
+    updateSeguimientoChart();
+});
+
 function get_comparativa_valores() {
 
     const ctxArea = document.getElementById('graficoAreas').getContext('2d');

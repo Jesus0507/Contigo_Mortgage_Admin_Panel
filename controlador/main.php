@@ -34,19 +34,18 @@ class mainController
 		} else {
 			session_start();
 			$resp = $_SESSION['user_role'] == "admin" ? "index.php?c=main&a=main_view" : "index.php?c=boards&a=index";
-
 		}
 
 
 		echo $resp;
 	}
 
-	public function change_monto_max(){
+	public function change_monto_max()
+	{
 		$new_monto_mensual = $_POST['new_monto'];
 		$modelo = new main_model();
 		$modelo->update_monto_max($new_monto_mensual);
 		echo true;
-
 	}
 
 	public function main_view()
@@ -113,6 +112,21 @@ class mainController
 	{
 		$modelo = new main_model();
 		$estadisticas = $modelo->get_distribucion_prestamos();
+		echo $estadisticas;
+	}
+
+	public function get_clientes_sin_seguimiento()
+	{
+		// 1. Validamos si viene un agente_id específico desde el AJAX
+		// Si no viene, se pasa como null para traer todos los agentes
+		$agente_id = (isset($_POST['agente_id']) && $_POST['agente_id'] != "") ? $_POST['agente_id'] : null;
+
+		$modelo = new main_model();
+
+		// 2. Llamamos al método del modelo pasándole el ID del agente
+		$estadisticas = $modelo->get_clientes_sin_seguimiento($agente_id);
+
+		// 3. Retornamos el JSON al frontend
 		echo $estadisticas;
 	}
 
