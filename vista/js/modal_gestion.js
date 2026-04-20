@@ -391,6 +391,9 @@ function finalizeClose() {
     document.getElementById("ltv_percent_value").innerHTML = "0,00";
     document.getElementById("mortgage_estimado").value = "";
     document.getElementById("prepayment_penalty_percent_value").innerHTML = "0,00";
+    document.querySelector(".comments-area").innerHTML = "";
+    document.querySelector(".historial-container").innerHTML = "";
+    document.getElementById("gestion_tab").click();
 
     // Valores por defecto
     ltv_value.value = 75;
@@ -588,9 +591,7 @@ property_register_btn.onclick = function () {
     current_user_asigned = false;
 
     users_list_parse.forEach((u) => {
-        var surname = u.name.toLowerCase() + " " + u.last_name.toLowerCase();
-        console.log(surname + " - " + asesor_asignado.value);
-        if (asesor_asignado.value.toLowerCase() == surname) {
+        if (asesor_asignado.value.toLowerCase() == u.email) {
             is_user_assigned = u.user_id;
             current_user_asigned = u.user_id;
         }

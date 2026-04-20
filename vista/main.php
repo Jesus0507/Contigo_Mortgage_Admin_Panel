@@ -132,7 +132,10 @@
                                 </div>
                             </div>
                             <div class="d-flex flex-row">
-                                <div style="color: green; font-weight: bold;">Meta Mensual <?php echo $monto_mensual[0]['mes']."  /  ".$monto_mensual[0]['anio']."  :" ?></div><div><input disabled style="height:30px" class="form-control" id="meta_mensual_input" placeholder="Meta mensual" value="<?php echo $monto_mensual[0]['monto_meta'] ?>"></div><div><button id="monto_max_btn" class="btn btn-primary" style="height: 30px; padding-top: 3px !important"><i class="fas fa-pencil-alt"></i></button></div></div>
+                                <div style="color: green; font-weight: bold;">Meta Mensual <?php echo $monto_mensual[0]['mes'] . "  /  " . $monto_mensual[0]['anio'] . "  :" ?></div>
+                                <div><input disabled style="height:30px" class="form-control" id="meta_mensual_input" placeholder="Meta mensual" value="<?php echo $monto_mensual[0]['monto_meta'] ?>"></div>
+                                <div><button id="monto_max_btn" class="btn btn-primary" style="height: 30px; padding-top: 3px !important"><i class="fas fa-pencil-alt"></i></button></div>
+                            </div>
                         </div>
                         <div id="graficos_section_container" class="graficos-section-container" style="position: relative; bottom: 0px;">
                             <div class="container-grafico-card">
@@ -245,6 +248,30 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="card" style="width: 100%; max-width: 900px; margin: 20px auto;">
+                                <div class="card-body w-100" >
+                                    <h5 class="card-title text-center">Clientes sin Seguimiento (> 7 días)</h5>
+
+                                    <div class="w-100 d-flex flex-row">
+                                        <div class="w-75">
+                                            <input type="text" id="busquedaGlobal" class="form-control"
+                                                placeholder="Buscar por nombre de cliente, agente o correo..."
+                                                onkeyup="updateSeguimientoChart()">
+                                        </div>
+                                        <div class="w-25">
+                                            <button onclick="exportarExcelSeguimiento()" class="btn btn-success">
+                                                <i class="fas fa-file-excel"></i> 
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div id="container-scroll" style="width:100% !important;height:200px; overflow-y: auto; overflow-x: hidden; border: 1px solid #eee;">
+                                        <div id="chart-area-wrapper" style="min-height: 200px;">
+                                            <canvas id="graficoSeguimiento"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div id="reportes_container" class="mt-3 w-100 px-4 d-none">
@@ -345,7 +372,7 @@
                                         </div>
                                         <?php foreach ($all_etapas as $e) : ?>
                                             <div class="report-option-item">
-                                                <input type="checkbox" class="me-2" data-typeboard ="<?php echo $e['board_type'];?>" data-relation="<?php echo $e['id_board']; ?>" value="<?php echo $e['etapa_actual'] ?>" checked>
+                                                <input type="checkbox" class="me-2" data-typeboard="<?php echo $e['board_type']; ?>" data-relation="<?php echo $e['id_board']; ?>" value="<?php echo $e['etapa_actual'] ?>" checked>
                                                 <span class="option-label text-truncate"><?php echo $e['etapa_actual'] ?></span>
                                             </div>
                                         <?php endforeach; ?>
@@ -408,6 +435,7 @@
             </main>
         </div>
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>

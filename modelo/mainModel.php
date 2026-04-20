@@ -717,4 +717,53 @@ class main_model
 			return json_encode(["error" => $e->getMessage()]);
 		}
 	}
+
+	public function get_clientes_sin_seguimiento($busqueda = null)
+	{
+		// Preparamos el término de búsqueda para SQL
+		$filtro = $busqueda ? "%$busqueda%" : null;
+
+		$sql = "SELECT 
+                CONCAT(c.name, ' ', c.last_name) as cliente,
+                u.email as agente_email,
+                CONCAT(u.name, ' ', u.last_name) as agente_nombre,
+                DATEDIFF(NOW(), COALESCE(MAX(n.fecha_creacion), t.date_created)) as dias_sin_accion
+            FROM (
+                SELECT id_gestion as id, user_id, client_id, date_created, 'gestion' as tipo FROM gestion
+                UNION ALL
+                SELECT id_compra as id, user_id, client_id, date_created, 'compra' as tipo FROM compras
+            ) t
+            INNER JOIN clients c ON t.client_id = c.client_id
+            INNER JOIN users u ON t.user_id = u.user_id
+            LEFT JOIN notas n ON t.id = n.gestion_id AND t.tipo = n.tipo_nota
+            WHERE t.id IS NOT NULL";
+
+		// Si hay búsqueda, filtramos por cliente, agente o email
+		if ($filtro) {
+			$sql .= " AND (c.name LIKE :f OR c.last_name LIKE :f OR u.name LIKE :f OR u.email LIKE :f)";
+		}
+
+		$sql .= " GROUP BY t.id, t.tipo
+              HAVING dias_sin_accion > 7
+              ORDER BY dias_sin_accion DESC";
+
+		try {
+			$resultado = $this->conexion->prepare($sql);
+			if ($filtro) $resultado->bindParam(':f', $filtro);
+			$resultado->execute();
+
+			$labels = [];
+			$data = [];
+
+			foreach ($resultado->fetchAll(PDO::FETCH_ASSOC) as $fila) {
+				// Creamos una etiqueta que incluya el nombre del cliente y el correo del agente debajo
+				$labels[] = [$fila['cliente'], "Agente: " . $fila['agente_email']];
+				$data[] = $fila['dias_sin_accion'];
+			}
+
+			return json_encode(['labels' => $labels, 'data' => $data]);
+		} catch (PDOException $e) {
+			return json_encode(["error" => $e->getMessage()]);
+		}
+	}
 }
