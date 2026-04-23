@@ -162,7 +162,7 @@
                                     foreach ($all_gestions as $gestion) {
                                         if ($gestion['etapa_actual'] == $ticket && ($_SESSION['user_role'] == 'admin' || $_SESSION['user_id'] == $gestion['user_id'])) {
                                 ?>
-                                            <li class="task task-container"
+                                            <li class="task task-container d-flex flex-row justify-content-between"
                                                 <?php if (strtolower($gestion['etapa_actual']) != "finalizado" || $_SESSION['user_role'] == 'admin') { ?>
                                                 draggable="true"
                                                 <?php } else { ?>
@@ -173,7 +173,7 @@
                                                 data-user-type="<?php echo $_SESSION['user_role']; ?>"
                                                 data-gestion-type="<?php echo $board_info[0]['board_type']; ?>"
                                                 data-gestion-id=" <?php echo $board_info[0]['board_type'] == "gestion_clientes" ? $gestion['id_gestion'] : $gestion['id_compra'] ?>">
-
+                                                <div>
                                                 <?php echo ucfirst($gestion['name']) . " " . ucfirst($gestion['last_name']); ?>
                                                 <span class="gestion-id d-none">
                                                     <?php echo $board_info[0]['board_type'] == "gestion_clientes" ? $gestion['id_gestion'] : $gestion['id_compra'] ?>
@@ -181,6 +181,10 @@
                                                 <i class="fas fa-square" style="color: <?php
                                                                                         echo ($gestion['prioridad'] == 1) ? 'green' : (($gestion['prioridad'] == 2) ? '#F5B027' : 'red');
                                                                                         ?>"></i>
+                                                                                        </div>
+                                                <?php if ($_SESSION['user_role'] == 'admin') { ?>
+                                                   <div> <i class="fas fa-trash-alt" style="color:#D92300; cursor:pointer;" onclick='delete_gestion(this)'></i></div>
+                                                <?php } ?>
                                             </li>
                                 <?php
                                         }

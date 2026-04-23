@@ -129,6 +129,10 @@
                                         <input type="checkbox" checked name="financiamientos_mes" value="financiamientos_mes">
                                         <label class="mx-2 label-filtros" for="financiamientos_mes">Financiamientos por mes</label>
                                     </div>
+                                    <div>
+                                        <input type="checkbox" checked name="seguimientos_semana" value="seguimientos_semana">
+                                        <label class="mx-2 label-filtros" for="seguimientos_semana">Procesos sin seguimiento</label>
+                                    </div>
                                 </div>
                             </div>
                             <div class="d-flex flex-row">
@@ -248,19 +252,19 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="card" style="width: 100%; max-width: 900px; margin: 20px auto;">
-                                <div class="card-body w-100" >
+                            <div class="card container-grafico-card" style="width: 100%; max-width: 900px; margin: 20px auto;">
+                                <div class="card-body w-100">
                                     <h5 class="card-title text-center">Clientes sin Seguimiento (> 7 días)</h5>
 
-                                    <div class="w-100 d-flex flex-row">
+                                    <div class="w-100 d-flex flex-row mb-3">
                                         <div class="w-75">
                                             <input type="text" id="busquedaGlobal" class="form-control"
                                                 placeholder="Buscar por nombre de cliente, agente o correo..."
                                                 onkeyup="updateSeguimientoChart()">
                                         </div>
-                                        <div class="w-25">
+                                        <div class="w-25 mx-3">
                                             <button onclick="exportarExcelSeguimiento()" class="btn btn-success">
-                                                <i class="fas fa-file-excel"></i> 
+                                                <i class="fas fa-file-excel"></i>
                                             </button>
                                         </div>
                                     </div>

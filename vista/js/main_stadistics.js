@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById("filtros_header").onclick = function () {
         if (document.getElementById("filtros_body").classList.contains("d-none")) {
             document.getElementById("filtros_body").classList.remove("d-none");
-            document.getElementById("graficos_section_container").style.bottom = "336px";
+            document.getElementById("graficos_section_container").style.bottom = "363px";
             document.getElementById("filter_icon").innerHTML = "keyboard_arrow_up";
         }
         else {
@@ -94,6 +94,9 @@ function filters_activation() {
                     break;
                 case "procesos iniciados por mes":
                     check_input.checked == true ? all_container_graficos[9].classList.remove('d-none') : all_container_graficos[9].classList.add('d-none');
+                    break;
+                case "procesos sin seguimiento":
+                    check_input.checked == true ? all_container_graficos[11].classList.remove('d-none') : all_container_graficos[11].classList.add('d-none');
                     break;
                 default:
                     check_input.checked == true ? all_container_graficos[10].classList.remove('d-none') : all_container_graficos[10].classList.add('d-none');
