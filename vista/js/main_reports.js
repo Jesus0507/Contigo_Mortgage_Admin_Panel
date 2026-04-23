@@ -16,13 +16,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             });
 
-            const isHidden = body.classList.contains("d-none");
+            const isHidden = body?.classList.contains("d-none");
             if (isHidden) {
                 body.classList.remove("d-none");
                 icon.innerHTML = "keyboard_arrow_up";
             } else {
-                body.classList.add("d-none");
-                icon.innerHTML = "keyboard_arrow_down";
+                body?.classList.add("d-none");
+                if(icon) icon.innerHTML = "keyboard_arrow_down";
             }
         });
     });

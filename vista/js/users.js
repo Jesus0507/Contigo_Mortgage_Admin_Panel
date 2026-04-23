@@ -74,60 +74,88 @@ function edit(btn) {
 async function delete_client(btn) {
     const row = btn.closest('tr');
     const firstName = row.getElementsByTagName('td')[0].innerText.trim();
-    const lastName = row.getElementsByTagName('td')[1].innerText.trim();
-    const userId = btn.getAttribute('data-id') || btn.classList[0];
+    const userId = btn.getAttribute('data-id');
 
-    // 1. Obtener lista de agentes disponibles
+    // 1. Obtener agentes disponibles
     const response = await fetch(`index.php?c=users&a=get_available_agents&exclude_id=${userId}`);
     const agentes = await response.json();
 
     if (agentes.length === 0) {
-        Swal.fire('Atención', 'No hay otros agentes activos para reasignar los tickets. Crea otro usuario antes de eliminar este.', 'warning');
+        Swal.fire('Atención', 'No hay otros agentes activos.', 'warning');
         return;
     }
 
-    // 2. Crear las opciones para el datalist
-    let optionsHtml = agentes.map(a => `<option data-id="${a.user_id}" value="${a.name} ${a.last_name}"></option>`).join('');
+    // 2. Construir el HTML con el Buscador y la Lista
+    let listHtml = `
+        <p class="small text-muted">Selecciona los agentes receptores para redistribución equitativa:</p>
+        
+        <input type="text" id="searchAgentModal" class="form-control mb-3" 
+               placeholder="🔍 Buscar por nombre o correo..." 
+               oninput="filterAgentsInModal()">
 
-    // 3. Modal de confirmación y reasignación
+        <div id="agentes-container" style="max-height: 200px; overflow-y: auto; text-align: left; border: 1px solid #eee; padding: 10px; border-radius: 5px;">
+    `;
+
+    agentes.forEach(a => {
+        console.log(a);
+        // Guardamos nombre y correo en un atributo data para facilitar la búsqueda
+        const searchTerms = `${a.name} ${a.last_name} ${a.email}`.toLowerCase();
+        listHtml += `
+            <div class="form-check mb-2 agent-item" data-search="${searchTerms}">
+                <input class="form-check-input agent-checkbox" type="checkbox" value="${a.user_id}" id="agent_${a.user_id}">
+                <label class="form-check-label" for="agent_${a.user_id}">
+                    <strong>${a.name} ${a.last_name}</strong><br>
+                    <span class="text-muted small">${a.email}</span>
+                </label>
+            </div>
+        `;
+    });
+    listHtml += `</div>`;
+
+    // 3. Lanzar SweetAlert
     Swal.fire({
-        title: `Eliminar a ${firstName}`,
-        html: `
-            <p class="small text-muted">Todos los tickets de ${firstName} se reasignarán al agente que selecciones:</p>
-            <input list="agentes_list" id="new_agent_input" class="form-control" placeholder="Escribe el nombre del agente receptor...">
-            <datalist id="agentes_list">${optionsHtml}</datalist>
-        `,
+        title: `Redistribuir clientes de ${firstName}`,
+        html: listHtml,
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonText: 'Confirmar y Eliminar',
+        confirmButtonText: 'Confirmar y Repartir',
         preConfirm: () => {
-            const val = document.getElementById('new_agent_input').value;
-            const option = document.querySelector(`#agentes_list option[value="${val}"]`);
-            if (!option) {
-                Swal.showValidationMessage('Debes seleccionar un agente válido de la lista');
+            const selected = Array.from(document.querySelectorAll('.agent-checkbox:checked')).map(cb => cb.value);
+            if (selected.length === 0) {
+                Swal.showValidationMessage('Debes seleccionar al menos un agente');
                 return false;
             }
-            return option.getAttribute('data-id'); // Retornamos el ID del agente seleccionado
+            return selected;
         }
     }).then((result) => {
         if (result.isConfirmed) {
-            const newAgentId = result.value;
-
             $.ajax({
                 type: "POST",
                 url: "index.php?c=users&a=delete",
-                data: {
-                    "user_id": userId,
-                    "new_agent_id": newAgentId
-                }
-            }).done(function (res) {
+                data: { "user_id": userId, "new_agents_ids": result.value }
+            }).done(res => {
                 if (res == 1 || res == true) {
-                    Swal.fire('Éxito', 'Usuario eliminado y tickets reasignados.', 'success');
+                    Swal.fire('Éxito', 'Clientes repartidos correctamente.', 'success');
                     setTimeout(() => location.reload(), 1000);
                 } else {
                     Swal.fire('Error', res, 'error');
                 }
             });
+        }
+    });
+}
+
+// 4. Función de filtrado (puedes ponerla global o dentro del script)
+function filterAgentsInModal() {
+    const searchText = document.getElementById('searchAgentModal').value.toLowerCase();
+    const items = document.querySelectorAll('.agent-item');
+
+    items.forEach(item => {
+        const text = item.getAttribute('data-search');
+        if (text.includes(searchText)) {
+            item.style.display = 'block';
+        } else {
+            item.style.display = 'none';
         }
     });
 }

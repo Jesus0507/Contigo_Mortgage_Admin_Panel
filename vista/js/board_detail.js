@@ -580,7 +580,7 @@ function agregarAnioImpuestoDetail(idTrabajo, anio = "", monto = "") {
 
 
 function load_gestion_modal_info(ev) {
-
+    
     $.ajax({
         type: "POST",
         url: "index.php?c=gestion&a=get_gestion_info",
@@ -1092,4 +1092,9 @@ export_excel.onclick = function () {
         });
 
     }
+}
+
+
+function delete_gestion(el){
+    console.log(el);
 }

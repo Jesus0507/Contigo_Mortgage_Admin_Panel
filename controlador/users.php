@@ -120,8 +120,16 @@ class usersController
 
     public function delete()
     {
+        $user_id = $_POST['user_id'];
+        $new_agents_ids = $_POST['new_agents_ids']; // Esto ya es un array de IDs
+
+        if (empty($new_agents_ids)) {
+            echo "Error: Debe seleccionar al menos un agente para la redistribución.";
+            return;
+        }
+
         $modelo = new users_model();
-        // Recibimos ambos IDs por POST
-        echo $modelo->delete_user_with_reassign($_POST['user_id'], $_POST['new_agent_id']);
+        // Llamamos al nuevo método de redistribución
+        echo $modelo->delete_user_with_redistribute($user_id, $new_agents_ids);
     }
 }
