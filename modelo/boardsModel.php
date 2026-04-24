@@ -364,4 +364,9 @@ class boards_model
 			return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
 		}
 	}
+
+	public function get_conexion()
+	{
+		return $this->conexion;
+	}
 }

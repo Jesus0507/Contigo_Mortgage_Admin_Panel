@@ -69,6 +69,9 @@ class mainController
 			$all_etapas = $modelo->get_todas_las_etapas();
 			$clients_tickets = $modelo->get_clientes_con_tickets();
 			$monto_mensual = $modelo->get_monto_mensual();
+			$clients = $modeloClients->get_clients();
+			$res_sin_seguimiento = json_decode($modelo->get_clientes_sin_seguimiento_stats(), true);
+			$clientes_sin_seguimiento = ($res_sin_seguimiento['status'] == 'success') ? $res_sin_seguimiento['data'] : [];
 			require_once "vista/main.php";
 		}
 	}

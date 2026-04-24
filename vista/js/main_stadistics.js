@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     document.getElementById("filtros_header").onclick = function () {
-        if (document.getElementById("filtros_body").classList.contains("d-none")) {
+        if (document.getElementById("filtros_body").claincludes("d-none")) {
             document.getElementById("filtros_body").classList.remove("d-none");
             document.getElementById("graficos_section_container").style.bottom = "363px";
             document.getElementById("filter_icon").innerHTML = "keyboard_arrow_up";
@@ -95,9 +95,9 @@ function filters_activation() {
                 case "procesos iniciados por mes":
                     check_input.checked == true ? all_container_graficos[9].classList.remove('d-none') : all_container_graficos[9].classList.add('d-none');
                     break;
-                case "procesos sin seguimiento":
-                    check_input.checked == true ? all_container_graficos[11].classList.remove('d-none') : all_container_graficos[11].classList.add('d-none');
-                    break;
+                // case "procesos sin seguimiento":
+                //     check_input.checked == true ? all_container_graficos[11].classList.remove('d-none') : all_container_graficos[11].classList.add('d-none');
+                //     break;
                 default:
                     check_input.checked == true ? all_container_graficos[10].classList.remove('d-none') : all_container_graficos[10].classList.add('d-none');
                     break;
@@ -780,4 +780,45 @@ function get_carga_boards() {
             }
         });
     });
+}
+
+function checkdiv(el) {
+
+    el.querySelector("input").checked = !el.querySelector("input").checked;
+    if (el.querySelector(".item-div-text").innerHTML.toLowerCase() == 'todos') {
+        var items = Array.from(el.parentElement.querySelectorAll(".check-div-item"));
+        for (var i = 1; i < items.length; i++) {
+            items[i].querySelector("input").checked = el.querySelector("input").checked;
+        }
+    }
+}
+
+function filterList(el) {
+    var val = el.value;
+    var items = Array.from(el.parentElement.querySelectorAll(".check-div-item"));
+    for (var i = 1; i < items.length; i++) {
+        var item_text = items[i].querySelector(".item-div-text").innerHTML;
+        console.log(item_text);
+        item_text.toLowerCase().includes(val.toLowerCase()) ? items[i].classList.remove("d-none") : items[i].classList.add("d-none");
+    }
+}
+
+function resetFilters() {
+    var all_input_text = Array.from(document.querySelectorAll(".item-div-input"));
+    var items = Array.from(document.querySelectorAll(".check-div-item"));
+    all_input_text.forEach((inp) => { inp.value = ""; })
+    items.forEach((item) => { item.classList.remove("d-none"); item.querySelector("input").checked = true; })
+}
+
+
+function applyFilters() {
+    var items = Array.from(document.querySelectorAll(".check-div-item"));
+    var active_items = items
+        .filter(it => !it.classList.contains("d-none")) // Solo los visibles
+        .filter(it => it.querySelector("input").checked);
+    var active_clients = active_items.filter(it => it.classList.contains("clients-items-div"));
+    var active_users = active_items.filter(it => it.classList.contains("users-items-div"));
+    var active_etapas = active_items.filter(it => it.classList.contains("etapas-items-div"));
+
+    console.log(active_clients);
 }

@@ -33,7 +33,7 @@ class compra_model
         $this->conexion = new base_datos();
     }
 
-    public function set_compra($id_board, $client_id, $user_id, $tipo_proceso, $primer_comprador, $forma_pago, $tiempo_pago_electronico, $disponible_comprar, $credito_cliente, $estatus_legal, $interes_ofrecido, $gastos_cierre, $down_payment, $monto_max_aplicado, $condiciones_notas, $detalle_llamada, $total_requerido, $programa_aplica,$realtor_name,$realtor_tlf,$realtor_email, $prioridad)
+    public function set_compra($id_board, $client_id, $user_id, $tipo_proceso, $primer_comprador, $forma_pago, $tiempo_pago_electronico, $disponible_comprar, $credito_cliente, $estatus_legal, $interes_ofrecido, $gastos_cierre, $down_payment, $monto_max_aplicado, $condiciones_notas, $detalle_llamada, $total_requerido, $programa_aplica, $realtor_name, $realtor_tlf, $realtor_email, $prioridad)
     {
         $this->id_board = $id_board;
         $this->client_id = $client_id;
@@ -100,7 +100,7 @@ class compra_model
 
     public function get_full_gestion_info($id_compra)
     {
-        $query = "SELECT co.*, c.*, u.name as user_name, u.last_name as user_last_name 
+        $query = "SELECT co.*, c.*, u.name as user_name, u.last_name as user_last_name , u.email as user_email
               FROM compras co 
               JOIN clients c ON co.client_id = c.client_id 
               JOIN users u ON co.user_id = u.user_id 
@@ -319,5 +319,11 @@ class compra_model
         } catch (PDOException $e) {
             return "Error en línea " . $e->getLine() . ": " . $e->getMessage();
         }
+    }
+
+
+    public function get_conexion()
+    {
+        return $this->conexion;
     }
 }

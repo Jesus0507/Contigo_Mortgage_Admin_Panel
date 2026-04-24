@@ -96,7 +96,7 @@ class gestion_model
 
     public function get_gestion_info($id_gestion)
     {
-        $query = "SELECT g.*, c.*, u.name as user_name, u.last_name as user_last_name FROM gestion g, clients c, users u WHERE g.id_gestion = $id_gestion AND g.client_id = c.client_id AND g.user_id = u.user_id";
+        $query = "SELECT g.*, c.*, u.name as user_name, u.last_name as user_last_name, u.email as user_email FROM gestion g, clients c, users u WHERE g.id_gestion = $id_gestion AND g.client_id = c.client_id AND g.user_id = u.user_id";
         try {
             $users = [];
             $resultado = $this->conexion->prepare($query);
@@ -215,5 +215,11 @@ class gestion_model
         } catch (PDOException $e) {
             return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
         }
+    }
+
+
+    public function get_conexion()
+    {
+        return $this->conexion;
     }
 }

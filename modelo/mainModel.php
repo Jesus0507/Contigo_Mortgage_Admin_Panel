@@ -766,4 +766,63 @@ class main_model
 			return json_encode(["error" => $e->getMessage()]);
 		}
 	}
+
+	public function get_clientes_sin_seguimiento_stats($filters = [])
+	{
+		try {
+			// Construcción de filtros dinámicos
+			$where = "";
+			$params = [];
+
+			if (!empty($filters['clients'])) {
+				$placeholders = implode(',', array_fill(0, count($filters['clients']), '?'));
+				$where .= " AND c.client_id IN ($placeholders)";
+				$params = array_merge($params, $filters['clients']);
+			}
+			if (!empty($filters['agents'])) {
+				$placeholders = implode(',', array_fill(0, count($filters['agents']), '?'));
+				$where .= " AND u.user_id IN ($placeholders)";
+				$params = array_merge($params, $filters['agents']);
+			}
+			if (!empty($filters['etapas'])) {
+				$placeholders = implode(',', array_fill(0, count($filters['etapas']), '?'));
+				$where .= " AND universo.etapa_actual IN ($placeholders)";
+				$params = array_merge($params, $filters['etapas']);
+			}
+
+			$sql = "SELECT 
+                    CONCAT(c.name, ' ', c.last_name) as cliente,
+                    CONCAT(u.name, ' ', u.last_name) as agente,
+                    universo.tipo_proceso,
+                    universo.etapa_actual,
+                    universo.date_created,
+                    universo.last_update,
+                    -- Cálculo de días: Diferencia entre hoy y la nota más reciente (o creación si no hay notas)
+                    DATEDIFF(NOW(), IFNULL(MAX(n.fecha_creacion), universo.date_created)) as dias_sin_seguimiento
+                FROM (
+                    SELECT id_gestion as ref_id, client_id, user_id, 'gestión' as tipo_proceso, etapa_actual, date_created, last_update FROM gestion
+                    UNION ALL
+                    SELECT id_compra as ref_id, client_id, user_id, 'compra' as tipo_proceso, etapa_actual, date_created, last_update FROM compras
+                ) as universo
+                INNER JOIN clients c ON universo.client_id = c.client_id
+                INNER JOIN users u ON universo.user_id = u.user_id
+                -- Unión con notas validando el tipo y el ID correspondiente
+                LEFT JOIN notas n ON (universo.ref_id = n.gestion_id AND n.tipo_nota = universo.tipo_proceso)
+                WHERE 1=1 $where
+                GROUP BY universo.tipo_proceso, universo.ref_id
+                HAVING dias_sin_seguimiento > 0
+                ORDER BY dias_sin_seguimiento DESC";
+
+			$query = $this->conexion->prepare($sql);
+			$query->execute($params);
+			$res = $query->fetchAll(PDO::FETCH_ASSOC);
+
+			return json_encode([
+				'status' => 'success',
+				'data' => $res
+			]);
+		} catch (PDOException $e) {
+			return json_encode(["error" => $e->getMessage()]);
+		}
+	}
 }

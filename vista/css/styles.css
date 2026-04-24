@@ -13296,7 +13296,7 @@ button i {
   display: grid;
   grid-template-columns: auto auto;
   
-  div{
+  .container-grafico-card{
     width: 90% !important;
   }
 }

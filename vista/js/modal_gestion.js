@@ -255,9 +255,7 @@ if (document.getElementById("property_update")) {
         current_user_asigned = false;
 
         users_list_parse.forEach((u) => {
-            var surname = u.name.toLowerCase() + " " + u.last_name.toLowerCase();
-            console.log(surname + " - " + asesor_asignado.value);
-            if (asesor_asignado.value.toLowerCase() == surname) {
+            if (asesor_asignado.value.toLowerCase() == u.email.toLowerCase()) {
                 is_user_assigned = u.user_id;
                 current_user_asigned = u.user_id;
             }
@@ -441,6 +439,9 @@ add_new_deuda.onclick = function () {
         }
         input_amount.style.border = "none";
 
+        // BLOQUEO DE DEFENSA: Deshabilitar el check mientras se procesa
+        btn_aply.disabled = true;
+
         var main_container = document.createElement("div");
         main_container.className = "d-flex flex-row justify-content-between w-100 px-4 mx-auto border-bottom py-2";
 
@@ -456,6 +457,8 @@ add_new_deuda.onclick = function () {
 
         close_button_25.onclick = function () {
             if (property_register_btn.classList.contains("d-none")) {
+                // BLOQUEO DE DEFENSA en eliminación
+                close_button_25.disabled = true;
                 $.ajax({
                     type: "POST",
                     url: "index.php?c=gestion&a=delete_deuda",
@@ -463,10 +466,17 @@ add_new_deuda.onclick = function () {
                         "id_deuda": close_button_25.id,
                         "id_gestion": document.getElementById("modal_id_gestion").innerHTML
                     }
+                }).done(function () {
+                    main_container.remove();
+                    run_calculations();
+                }).fail(function () {
+                    close_button_25.disabled = false;
+                    Swal.fire('Error', 'No se pudo eliminar la deuda del servidor', 'error');
                 });
+            } else {
+                main_container.remove();
+                run_calculations();
             }
-            main_container.remove();
-            run_calculations();
         };
 
         if (property_register_btn.classList.contains("d-none")) {
@@ -480,20 +490,28 @@ add_new_deuda.onclick = function () {
                 }
             }).done(function (result) {
                 close_button_25.id = result;
+                // Solo agregamos visualmente si el servidor respondió OK
+                renderizarNuevaDeuda();
+            }).fail(function () {
+                btn_aply.disabled = false;
+                Swal.fire('Error', 'Error al guardar deuda (500)', 'error');
             });
+        } else {
+            renderizarNuevaDeuda();
         }
 
-        container_25.append(close_button_25);
-        main_container.append(container_75, container_25);
-        document.getElementById("deudas_data").append(main_container);
-        container.removeChild(div);
-        run_calculations();
+        function renderizarNuevaDeuda() {
+            container_25.append(close_button_25);
+            main_container.append(container_75, container_25);
+            document.getElementById("deudas_data").append(main_container);
+            if (container.contains(div)) container.removeChild(div);
+            run_calculations();
+        }
     };
 
     div.append(input_description, input_amount, btn_deny, btn_aply);
     container.append(div);
 };
-
 /* ==========================================================================
    GESTIÓN DE COMENTARIOS Y EDITOR
    ========================================================================== */
@@ -513,6 +531,9 @@ document.getElementById("btn_cancel_comment").onclick = function () {
 save_comment_btn.onclick = function () {
     let editor = document.getElementById("editor");
     if (editor.innerHTML.trim() != "") {
+        const btn = save_comment_btn;
+        btn.disabled = true; // DEFENSA
+
         if (property_register_btn.classList.contains("d-none")) {
             $.ajax({
                 type: "POST",
@@ -521,27 +542,35 @@ save_comment_btn.onclick = function () {
                     "id_gestion": document.getElementById("modal_id_gestion").innerHTML,
                     "contenido": editor.innerHTML
                 }
+            }).done(function () {
+                finalizarComentario();
+            }).fail(function () {
+                btn.disabled = false;
+                Swal.fire('Error', 'Error al guardar comentario', 'error');
             });
         } else {
             unsaved_comments.push(editor.innerHTML);
+            finalizarComentario();
         }
 
-        // Renderizado visual inmediato del comentario
-        var name = document.getElementById("hidden_user_name").innerHTML;
-        var iniciales = name.split(" ");
-        var tag = iniciales[0][0].toUpperCase() + (iniciales[1] ? iniciales[1][0].toUpperCase() : "");
+        function finalizarComentario() {
+            var name = document.getElementById("hidden_user_name").innerHTML;
+            var iniciales = name.split(" ");
+            var tag = iniciales[0][0].toUpperCase() + (iniciales[1] ? iniciales[1][0].toUpperCase() : "");
 
-        var new_comment_div = document.createElement("div");
-        new_comment_div.className = "d-flex flex-row w-100 px-3 my-4";
-        new_comment_div.innerHTML = `
-            <div class='comment-picture'>${tag}</div>
-            <div class='mx-3'>
-                <div class='comments-name'>${name}</div>
-                <div class='comments-date'>Hace unos segundos</div>
-                <div class='comments-comment'>${editor.innerHTML}</div>
-            </div>`;
-        document.querySelector(".comments-area").append(new_comment_div);
-        document.getElementById("btn_cancel_comment").click();
+            var new_comment_div = document.createElement("div");
+            new_comment_div.className = "d-flex flex-row w-100 px-3 my-4";
+            new_comment_div.innerHTML = `
+                <div class='comment-picture'>${tag}</div>
+                <div class='mx-3'>
+                    <div class='comments-name'>${name}</div>
+                    <div class='comments-date'>Hace unos segundos</div>
+                    <div class='comments-comment'>${editor.innerHTML}</div>
+                </div>`;
+            document.querySelector(".comments-area").append(new_comment_div);
+            document.getElementById("btn_cancel_comment").click();
+            btn.disabled = false; // REHABILITAR
+        }
     }
 };
 
@@ -584,7 +613,8 @@ function fields_validation() {
    ========================================================================== */
 
 property_register_btn.onclick = function () {
-    // Validación rápida de campos requeridos
+    const btn = property_register_btn;
+    if (btn.disabled) return;
 
     var users_list_parse = JSON.parse(users_list.innerHTML);
     var is_user_assigned = false;
@@ -596,8 +626,6 @@ property_register_btn.onclick = function () {
             current_user_asigned = u.user_id;
         }
     })
-
-
     if (is_user_assigned == false) {
         asesor_asignado_label.style.color = "red";
         var msg_asesor = "";
@@ -614,7 +642,6 @@ property_register_btn.onclick = function () {
 
 
 
-
     let fields = [client_name, client_last_name, client_phone, detalle_llamada, property_address, property_value, occupancy];
     let isValid = true;
     fields.forEach(f => {
@@ -624,14 +651,14 @@ property_register_btn.onclick = function () {
 
     if (!isValid) return;
 
+    btn.disabled = true; // DEFENSA
+    Swal.fire({ title: 'Procesando...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+
     let deudas_lista = [];
     document.querySelectorAll(".deudas-info-data").forEach(item => {
         let spans = item.querySelectorAll("span");
         deudas_lista.push({ descripcion: spans[0].innerText, monto: spans[1].innerText });
     });
-
-    console.log(deudas_lista);
-
 
     $.ajax({
         type: "POST",
@@ -663,13 +690,17 @@ property_register_btn.onclick = function () {
         }
     }).done(function () {
         location.reload();
+    }).fail(function () {
+        btn.disabled = false;
+        Swal.fire('Error', 'No se pudo crear la gestión (Error 500)', 'error');
     });
 };
 
-
-
 function updateInfo(reload) {
-    console.log("modificando info")
+    const btn = document.getElementById("property_update");
+    if (btn.disabled) return;
+    btn.disabled = true;
+
     $.ajax({
         type: "POST",
         url: "index.php?c=boards&a=update_gestion_info",
@@ -698,14 +729,17 @@ function updateInfo(reload) {
             "gestion_id": document.getElementById("modal_id_gestion").innerHTML
         }
     }).done(function (result) {
-
-        console.log(result);
-        if (!reload) return;
+        if (!reload) {
+            btn.disabled = false;
+            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Actualizado', showConfirmButton: false, timer: 1500 });
+            return;
+        }
         location.href = "index.php?c=boards&a=detail&info=" + document.getElementById("board_id").innerHTML;
-    })
+    }).fail(function () {
+        btn.disabled = false;
+        Swal.fire('Error', 'No se pudo actualizar la información', 'error');
+    });
 }
-
-
 /* ==========================================================================
    INICIALIZACIÓN FINAL
    ========================================================================== */

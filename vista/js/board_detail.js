@@ -53,18 +53,19 @@ columns.forEach((column) => {
         event.preventDefault();
 
         const draggedTask = document.getElementById("dragged-task");
-        // CORRECCIÓN: Buscamos el elemento <ul> con clase .tasks para hacer el append
         const tasksContainer = column.querySelector(".tasks");
 
         if (draggedTask && tasksContainer) {
+            // --- PROTECCIÓN: Evitar movimientos visuales si ya se está procesando ---
+            if (draggedTask.dataset.processing === "true") return;
+            draggedTask.dataset.processing = "true";
+            draggedTask.style.opacity = "0.5";
+
             tasksContainer.appendChild(draggedTask);
 
-            // Obtenemos los datos para la base de datos de forma segura
             const newEtapa = column.querySelector(".task-title-text").innerText;
             const idGestion = draggedTask.querySelector(".gestion-id").innerHTML;
 
-            console.log("Moviendo a:", newEtapa);
-            console.log("ID Gestión:", idGestion);
             $.ajax({
                 type: "POST",
                 url: "index.php?c=boards&a=update_gestion",
@@ -72,6 +73,11 @@ columns.forEach((column) => {
                     "new_etapa": newEtapa,
                     "id_gestion": idGestion,
                     "tipo_gestion": document.getElementById("hidden_board_type").innerHTML
+                },
+                complete: function () {
+                    // Restaurar estado para permitir futuros movimientos
+                    draggedTask.dataset.processing = "false";
+                    draggedTask.style.opacity = "1";
                 }
             }).done(function (result) {
                 console.log("Resultado servidor:", result);
@@ -168,6 +174,10 @@ function add_new_column_val(input) {
         input.focus();
     }
     else {
+        // --- LÍNEA DE DEFENSA: Deshabilitar para evitar múltiples columnas idénticas ---
+        const btnAceptar = input.parentElement.querySelector("button");
+        if (btnAceptar) btnAceptar.disabled = true;
+
         input.style.border = "none";
         var new_etapa = input.value;
         var all_etapas = document.querySelector(".container-tasks").children;
@@ -189,16 +199,15 @@ function add_new_column_val(input) {
             data: {
                 "order_etapas": new_etapas_order,
                 "id_board": document.getElementById("board_id").innerHTML
+            },
+            error: function () {
+                if (btnAceptar) btnAceptar.disabled = false;
             }
         }).done(function (result) {
             if (result) {
                 location.reload();
             }
-            else {
-                console.log("Resultado servidor:", result);
-            }
         });
-
     }
 }
 
@@ -215,11 +224,21 @@ Array.from(tasks).forEach((task) => {
 
 
 function load_compras_modal_info(ev) {
+    // --- LÍNEA DE DEFENSA: Evitar múltiples clics mientras carga el modal pesado ---
+    const taskElement = ev.currentTarget;
+    if (taskElement.dataset.loading === "true") return;
+    taskElement.dataset.loading = "true";
+    taskElement.style.cursor = "wait";
+
     $.ajax({
         type: "POST",
         url: "index.php?c=compra&a=get_compras_info",
         data: {
             "id_compra": ev.target.querySelector("span").innerHTML
+        },
+        complete: function () {
+            taskElement.dataset.loading = "false";
+            taskElement.style.cursor = "pointer";
         }
     }).done(function (result) {
         console.log(result);
@@ -240,7 +259,7 @@ function load_compras_modal_info(ev) {
         // Mapeo de inputs (Modificado el índice 3 que corresponde al tiempo)
         all_inputs.forEach((input, i) => {
             input.value =
-                i == 0 ? resultado['user_name'] + " " + resultado['user_last_name'] :
+                i == 0 ? resultado['user_email']:
                     i == 1 ? resultado['name'].replace(/\b\w/g, l => l.toUpperCase()) :
                         i == 2 ? resultado['last_name'].replace(/\b\w/g, l => l.toUpperCase()) :
                             i == 3 ? resultado['phone'] :
@@ -580,7 +599,7 @@ function agregarAnioImpuestoDetail(idTrabajo, anio = "", monto = "") {
 
 
 function load_gestion_modal_info(ev) {
-    
+
     $.ajax({
         type: "POST",
         url: "index.php?c=gestion&a=get_gestion_info",
@@ -615,7 +634,7 @@ function load_gestion_modal_info(ev) {
         var all_inputs = Array.from(document.querySelector(".custom-modal").querySelectorAll("input"));
         var i = 0;
         all_inputs.forEach((input) => {
-            i == 0 ? resultado['user_name'] + " " + resultado['user_last_name'] :
+            i == 0 ? resultado['user_email'] :
                 input.value = i == 1 ?
                     resultado['name'].replace(/\b\w/g, l => l.toUpperCase()) : i == 2 ?
                         resultado['last_name'].replace(/\b\w/g, l => l.toUpperCase()) : i == 3 ?
@@ -633,7 +652,7 @@ function load_gestion_modal_info(ev) {
             i++;
         })
 
-        document.getElementById("asesor_name").value = resultado['user_name'] + " " + resultado['user_last_name'];
+        document.getElementById("asesor_name").value = resultado['user_email'];
         console.log(document.getElementById("asesor_name").value);
         document.getElementById("ltv_percent_value").innerHTML = money_format(resultado['loan_amount']);
         document.getElementById("gastos_cierre_percent_value").innerHTML = money_format(parseFloat(resultado['property_value']) * parseFloat(resultado["gastos_cierre"]) / 100);
@@ -1095,6 +1114,6 @@ export_excel.onclick = function () {
 }
 
 
-function delete_gestion(el){
+function delete_gestion(el) {
     console.log(el);
 }

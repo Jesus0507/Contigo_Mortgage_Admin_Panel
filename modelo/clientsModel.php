@@ -34,7 +34,7 @@ class clients_model
 		}
 	}
 
-		public function delete_client($phone)
+	public function delete_client($phone)
 	{
 		$query = "DELETE FROM clients WHERE phone = '$phone'";
 		try {
@@ -64,6 +64,26 @@ class clients_model
 		}
 	}
 
+	public function get_clients_by_user($user_id)
+	{
+		// Agrupamos por client_id para que no se repitan
+		$query = "SELECT c.* FROM clients c
+              LEFT JOIN compras co ON c.client_id = co.client_id
+              LEFT JOIN gestion g ON c.client_id = g.client_id
+              WHERE co.user_id = :user_id OR g.user_id = :user_id
+              GROUP BY c.client_id";
+
+		try {
+			$clients = [];
+			$resultado = $this->conexion->prepare($query);
+			$resultado->bindValue(':user_id', $user_id, PDO::PARAM_INT);
+			$resultado->execute();
+
+			return $resultado->fetchAll(PDO::FETCH_ASSOC);
+		} catch (PDOException $e) {
+			return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
+		}
+	}
 
 	public function search_client($phone)
 	{

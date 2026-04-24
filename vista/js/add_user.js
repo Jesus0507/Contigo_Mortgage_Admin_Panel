@@ -50,7 +50,15 @@ input_eye_btn.onclick = function () {
     }
 }
 
+// ... (mismo código de variables y eventos onclick)
+
 function registrar_usuario() {
+    // --- LÍNEA DE DEFENSA: Bloqueo de botón y feedback ---
+    const originalText = form_btn.innerHTML;
+    form_btn.disabled = true;
+    form_btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando...';
+    // ----------------------------------------------------
+
     $.ajax({
         type: "POST",
         url: "index.php?c=users&a=add_user",
@@ -59,31 +67,43 @@ function registrar_usuario() {
             "last_name": form_inputs[1].value,
             "email": form_inputs[2].value,
             "psw": form_inputs[3].value
+        },
+        error: function () {
+            // Restaurar en caso de fallo crítico de red o error 500
+            form_btn.disabled = false;
+            form_btn.innerHTML = originalText;
         }
     }).done(function (result) {
-        switch(result){
+        switch (result) {
             case 'already registered':
+                // Restaurar botón para que el usuario corrija el correo
+                form_btn.disabled = false;
+                form_btn.innerHTML = originalText;
+
                 document.getElementById("label_warnings").innerHTML = "<b>Ya existe un usuario registrado con este correo.</b>";
                 document.getElementById("label_warnings").classList.remove("d-none");
-                setTimeout(()=> {
-                     document.getElementById("label_warnings").classList.add("d-none")
+                setTimeout(() => {
+                    document.getElementById("label_warnings").classList.add("d-none")
                 }, 3000)
-
                 break;
+
             case 'registered successfully':
                 document.getElementById("label_warnings").innerHTML = "<b>Usuario registrado exitosamente.</b>";
                 document.getElementById("label_warnings").style.color = "green";
                 document.getElementById("label_warnings").classList.remove("d-none");
-                setTimeout(()=> {
-                     document.getElementById("label_warnings").classList.add("d-none");
-                     location.href="index.php?c=users&a=index";
+                setTimeout(() => {
+                    document.getElementById("label_warnings").classList.add("d-none");
+                    location.href = "index.php?c=users&a=index";
                 }, 3000)
                 break;
+
             default:
+                // Restaurar en cualquier otro caso no contemplado para no bloquear la UI
+                form_btn.disabled = false;
+                form_btn.innerHTML = originalText;
                 console.log(result);
                 break;
         }
-
     })
 }
 

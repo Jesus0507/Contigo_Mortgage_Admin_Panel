@@ -49,7 +49,7 @@
 
                                         <tr>
                                             <td><?php echo $board['name'] ?><span class="d-none hidden-id"><?php echo $board['id_board'] ?></span></td>
-                                            <td><?php echo $board['board_type'] ?><span class="d-none hidden-id"><?php echo $board['id_board'] ?></span></td>
+                                            <td><?php echo $board['board_type'] == "gestion_clientes" ? "refinances" : "compras"; ?><span class="d-none hidden-id"><?php echo $board['id_board'] ?></span></td>
                                             <td>
                                                 <?php
                                                 if ($_SESSION['user_role'] == "admin") {

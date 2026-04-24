@@ -105,8 +105,14 @@ function applyInputMask(inputElement) {
 
 save_comment_btn.onclick = function () {
     if (document.getElementById("editor").innerHTML != "" && document.getElementById("editor").innerHTML != null) {
+
+        // Referencia al botón para bloquearlo
+        const btn = save_comment_btn;
+
         if (property_register_btn.classList.contains("d-none")) {
-            console.log(document.getElementById("modal_id_gestion").innerHTML);
+            // BLOQUEO DE DEFENSA
+            btn.disabled = true;
+
             $.ajax({
                 type: "POST",
                 url: "index.php?c=compra&a=add_new_comment",
@@ -116,13 +122,22 @@ save_comment_btn.onclick = function () {
                 }
             }).done(function (result) {
                 console.log(result);
+                // Si necesitas hacer algo tras el éxito, va aquí
+            }).fail(function (jqXHR, textStatus) {
+                console.error("Error 500 al guardar comentario:", textStatus);
+                Swal.fire('Error', 'No se pudo guardar el comentario en el servidor.', 'error');
+            }).always(function () {
+                // REHABILITAR SIEMPRE
+                btn.disabled = false;
             });
         }
         else {
             unsaved_comments.push(document.getElementById("editor").innerHTML);
         }
+
+        // Lógica visual (se mantiene igual para no alterar funcionamiento)
         var iniciales = document.getElementById("hidden_user_name").innerHTML.split(" ");
-        iniciales = iniciales[0][0].toUpperCase() + iniciales[1][0].toUpperCase();
+        iniciales = iniciales[0][0].toUpperCase() + (iniciales[1] ? iniciales[1][0].toUpperCase() : "");
         var new_comment_div = document.createElement("div");
         new_comment_div.className = "d-flex flex-row w-100 px-3 my-4";
         new_comment_div.innerHTML = "<div class='comment-picture'>" + iniciales + "</div>";
@@ -537,10 +552,20 @@ function resetField(element) {
 
 
 function registerInfo() {
-    // Validamos primero que la información básica sea correcta
     if (!info_validation()) return;
 
-    // Extraemos los totales del resumen global para guardarlos en la tabla principal de compras si es necesario
+    // BLOQUEO DE DEFENSA: Evitar múltiples registros
+    const btn = property_register_btn;
+    if (btn.disabled) return; // Si ya está procesando, abortar
+
+    btn.disabled = true;
+    Swal.fire({
+        title: 'Guardando...',
+        text: 'Por favor espere mientras procesamos el registro',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); }
+    });
+
     const totalIncomeGlobal = parseMoneyCompras(document.getElementById('resumen_global_ingresos').querySelector('.text-success').innerText);
     const totalDeudaGlobal = parseMoneyCompras(document.getElementById('resumen_global_ingresos').querySelector('.text-danger').innerText);
 
@@ -573,21 +598,16 @@ function registerInfo() {
             "realtor_email": realtor_email.value,
             "user_asigned": current_user_asigned,
             "prioridad": document.getElementById("prioridad").value,
-
-            // --- NUEVOS CAMPOS DE INCOME ---
-            // Enviamos el array completo de objetos convertido a JSON string
             "detalle_ingresos": JSON.stringify(diccionarioIngresos)
         }
     }).done(function (result) {
         console.log("Respuesta del servidor:", result);
-        // Redirección tras éxito
         location.href = "index.php?c=boards&a=detail&info=" + document.getElementById("board_id").innerHTML;
-    }).fail(function (jqXHR, textStatus, errorThrown) {
-        console.error("Error al guardar:", textStatus, errorThrown);
-        alert("Hubo un error al guardar la información. Por favor, intente de nuevo.");
+    }).fail(function (jqXHR, textStatus) {
+        btn.disabled = false;
+        Swal.fire('Error 500', 'Hubo un error crítico en el servidor al guardar.', 'error');
     });
 }
-
 close_btn.onclick = function () {
     Swal.fire({
         title: '¿Estás seguro?',
@@ -663,14 +683,17 @@ if (document.getElementById("property_update")) {
 }
 
 function updateInfo(reload) {
-    console.log("modificando info");
-
-    // Aseguramos que el diccionario tenga la última data capturada de los inputs
     if (typeof actualizarDiccionario === "function") {
         actualizarDiccionario();
     }
 
-    console.log(JSON.stringify(diccionarioIngresos));
+    const btn = document.getElementById("property_update");
+    if (btn.disabled) return;
+
+    btn.disabled = true;
+    // Feedback visual sutil para actualización
+    const originalText = btn.innerHTML;
+    btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i>";
 
     $.ajax({
         type: "POST",
@@ -698,25 +721,25 @@ function updateInfo(reload) {
             "realtor_email": realtor_email.value,
             "user_asigned": current_user_asigned,
             "prioridad": document.getElementById("prioridad").value,
-
-            // --- CAMPO RECIÉN AGREGADO ---
             "programa_aplica": document.getElementById("programa_aplica").value,
-
             "board": document.getElementById("board_id").innerHTML,
             "gestion_id": document.getElementById("modal_id_gestion").innerHTML,
-
-            // --- BLOQUE DE INGRESOS ---
             "detalle_ingresos": JSON.stringify(diccionarioIngresos)
         }
     }).done(function (result) {
-        console.log("Respuesta actualización:", result);
-        if (!reload) return;
+        if (!reload) {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Info actualizada', showConfirmButton: false, timer: 2000 });
+            return;
+        }
         location.href = "index.php?c=boards&a=detail&info=" + document.getElementById("board_id").innerHTML;
     }).fail(function (error) {
-        console.error("Error al actualizar:", error);
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+        Swal.fire('Error', 'No se pudieron actualizar los datos (Error 500)', 'error');
     });
 }
-
 function info_validation() {
     // Función auxiliar para saber si un elemento está oculto
     var users_list_parse = JSON.parse(users_list.innerHTML);

@@ -129,10 +129,10 @@
                                         <input type="checkbox" checked name="financiamientos_mes" value="financiamientos_mes">
                                         <label class="mx-2 label-filtros" for="financiamientos_mes">Financiamientos por mes</label>
                                     </div>
-                                    <div>
+                                    <!-- <div>
                                         <input type="checkbox" checked name="seguimientos_semana" value="seguimientos_semana">
                                         <label class="mx-2 label-filtros" for="seguimientos_semana">Procesos sin seguimiento</label>
-                                    </div>
+                                    </div> -->
                                 </div>
                             </div>
                             <div class="d-flex flex-row">
@@ -252,7 +252,118 @@
                                     </div>
                                 </div>
                             </div>
+
                             <div class="card container-grafico-card" style="width: 100%; max-width: 900px; margin: 20px auto;">
+                                <h5 class="card-title text-center mt-3">Seguimiento de clientes</h5>
+                                <div class="w-100 d-flex flex-row justify-content-between" style="width: 100% !important">
+                                    <div style="width: 50% !important" class="text-center justify-content-center">
+                                        <div class="dropdown">
+                                            <button class="btn btn-dark dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+                                                <i class="fas fa-filter me-2"></i> Filtro
+                                            </button>
+                                            <div class="dropdown-menu p-0" style="width: 500px !important; border-radius: 8px; overflow: hidden;">
+                                                <div class="d-flex">
+                                                    <div class="bg-light border-end" style="width: 180px;">
+                                                        <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                                                            <button class="nav-link active text-start rounded-0 border-bottom" data-bs-toggle="pill" data-bs-target="#tab-clientes" type="button">Clientes</button>
+                                                            <button class="nav-link text-start rounded-0 border-bottom" data-bs-toggle="pill" data-bs-target="#tab-agentes" type="button">Agentes</button>
+                                                            <button class="nav-link text-start rounded-0 border-bottom" data-bs-toggle="pill" data-bs-target="#tab-fechas" type="button">Rango de fechas</button>
+                                                            <button class="nav-link text-start rounded-0" data-bs-toggle="pill" data-bs-target="#tab-etapas" type="button">Etapas</button>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="tab-content flex-grow-1 p-3" id="v-pills-tabContent">
+                                                        <div class="tab-pane fade show active" style="height:fit-content; max-height: 300px; overflow-y: auto; width: 100% important;" id="tab-clientes">
+                                                            <input type="text" class="form-control form-control-sm mb-2 item-div-input" placeholder="Buscar cliente..." onkeyup="filterList(this)">
+                                                            <div class="d-flex flex-row w-100 mb-2 check-div-item" onclick="checkdiv(this)" style="cursor: pointer;" onmouseover="this.style.background = '#EBEBEB'" onmouseout="this.style.background='white'">
+                                                                <div style="width: 30px!important"><input type="checkbox" checked style="pointer-events: none;"></div>
+                                                                <div class="item-div-text">Todos</div>
+                                                            </div>
+                                                            <?php foreach ($clients as $c) { ?>
+                                                                <div class="d-flex flex-row w-100 mb-2 check-div-item clients-items-div" onclick="checkdiv(this)" style="cursor: pointer;" onmouseover="this.style.background = '#EBEBEB'" onmouseout="this.style.background='white'">
+                                                                    <div style="width: 30px!important"><input type="checkbox" checked style="pointer-events: none;"></div>
+                                                                    <div class="item-div-text"><?php echo $c['name'] . " " . $c['last_name']; ?></div>
+                                                                </div>
+                                                            <?php } ?>
+                                                        </div>
+
+                                                        <div class="tab-pane fade" id="tab-agentes" style="height:fit-content; max-height: 300px; overflow-y: auto; width: 100% important;">
+                                                            <input type="text" class="form-control form-control-sm mb-2 item-div-input" placeholder="Buscar agente..." onkeyup="filterList(this)">
+                                                            <div class="d-flex flex-row w-100 mb-2 check-div-item" onclick="checkdiv(this)" style="cursor: pointer;" onmouseover="this.style.background = '#EBEBEB'" onmouseout="this.style.background='white'">
+                                                                <div style="width: 30px!important"><input type="checkbox" checked style="pointer-events: none;"></div>
+                                                                <div class="item-div-text">Todos</div>
+                                                            </div>
+                                                            <?php foreach ($users as $u) { ?>
+                                                                <div class="d-flex flex-row w-100 mb-2 check-div-item users-items-div" onclick="checkdiv(this)" style="cursor: pointer;" onmouseover="this.style.background = '#EBEBEB'" onmouseout="this.style.background='white'">
+                                                                    <div style="width: 30px!important"><input type="checkbox" checked style="pointer-events: none;"></div>
+                                                                    <div class="item-div-text"><?php echo $u['name'] . " " . $u['last_name']; ?></div>
+                                                                </div>
+                                                            <?php } ?>
+                                                        </div>
+
+                                                        <div class="tab-pane fade" id="tab-fechas">
+                                                            <label class="small fw-bold">Desde:</label>
+                                                            <input type="date" id="filter-date-start" class="form-control form-control-sm mb-2">
+                                                            <label class="small fw-bold">Hasta:</label>
+                                                            <input type="date" id="filter-date-end" class="form-control form-control-sm">
+                                                        </div>
+
+                                                        <div class="tab-pane fade" id="tab-etapas">
+                                                            <input type="text" class="form-control form-control-sm mb-2 item-div-input" placeholder="Buscar etapa..." onkeyup="filterList(this)">
+                                                            <div class="d-flex flex-row w-100 mb-2 check-div-item" onclick="checkdiv(this)" style="cursor: pointer;" onmouseover="this.style.background = '#EBEBEB'" onmouseout="this.style.background='white'">
+                                                                <div style="width: 30px!important"><input type="checkbox" checked style="pointer-events: none;"></div>
+                                                                <div class="item-div-text">Todos</div>
+                                                            </div>
+                                                            <?php foreach ($all_etapas as $e) { ?>
+                                                                <div class="d-flex flex-row w-100 mb-2 check-div-item etapas-items-div" onclick="checkdiv(this)" style="cursor: pointer;" onmouseover="this.style.background = '#EBEBEB'" onmouseout="this.style.background='white'">
+                                                                    <div style="width: 30px!important"><input type="checkbox" checked style="pointer-events: none;"></div>
+                                                                    <div><?php echo $e['etapa_actual'] ?></div>
+                                                                </div>
+                                                            <?php } ?>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="bg-light p-2 border-top text-end">
+                                                    <button class="btn btn-sm btn-outline-secondary" onclick="resetFilters()">Limpiar filtros</button>
+                                                    <button class="btn btn-sm btn-primary" onclick="applyFilters()">Aplicar Filtro</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style="width: 50% !important" class="text-center justify-content-center"><button class="btn btn-success">Exportar <i class="fas fa-file-excel mx-2"></i></button></div>
+                                </div>
+                                <div class="card-body w-100" style="height:fit-content; max-height: 600px; overflow-y: auto;">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover table-sm small">
+                                            <thead class="table-dark">
+                                                <tr>
+                                                    <th>Cliente</th>
+                                                    <th>Agente</th>
+                                                    <th>Tipo</th>
+                                                    <th class="text-center">Días Inactivo</th>
+                                                    <th>Etapa</th>
+                                                    <th>Creación</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php foreach ($clientes_sin_seguimiento as $item): ?>
+                                                    <tr>
+                                                        <td><?= $item['cliente'] ?></td>
+                                                        <td><?= $item['agente'] ?></td>
+                                                        <td><span class="badge bg-secondary"><?= ucfirst($item['tipo_proceso']) ?></span></td>
+                                                        <td class="text-center <?= ($item['dias_sin_seguimiento'] > 5) ? 'text-danger fw-bold' : '' ?>">
+                                                            <?= $item['dias_sin_seguimiento'] ?> días
+                                                        </td>
+                                                        <td><?= $item['etapa_actual'] ?></td>
+                                                        <td><?= date('d/m/Y', strtotime($item['date_created'])) ?></td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- <div class="card container-grafico-card" style="width: 100%; max-width: 900px; margin: 20px auto;">
                                 <div class="card-body w-100">
                                     <h5 class="card-title text-center">Clientes sin Seguimiento (> 7 días)</h5>
 
@@ -275,7 +386,7 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                     <div id="reportes_container" class="mt-3 w-100 px-4 d-none">

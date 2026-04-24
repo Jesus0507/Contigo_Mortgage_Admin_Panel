@@ -22,8 +22,8 @@ function open_modal(id) {
             board_name_access.value = info['board_info'][0]['name'];
             document.getElementById("cant_users_span_access").innerHTML = info['board_users'].length;
             document.getElementById("users_boards_info_access").innerHTML = JSON.stringify(info['board_users']);
-            document.querySelector(".input-enabled-access").checked = info['board_info'][0]['enabled'] == 1? true : false;
-            Array.from(document.querySelectorAll(".check-user-access")).forEach((el)=>{
+            document.querySelector(".input-enabled-access").checked = info['board_info'][0]['enabled'] == 1 ? true : false;
+            Array.from(document.querySelectorAll(".check-user-access")).forEach((el) => {
                 var user_id = el.id.split("_")[0];
                 info['board_users'].includes(parseInt(user_id)) ? el.checked = true : el.checked = false;
             })
@@ -74,8 +74,8 @@ search_users_access.onkeyup = function () {
     } else {
         all_users.forEach((user_item) => {
             var fields = Array.from(user_item.querySelectorAll(".w-25"));
-            if (!fields[0].innerHTML.toLowerCase().includes(search_users_access.value.toLowerCase()) && 
-                !fields[1].innerHTML.toLowerCase().includes(search_users_access.value.toLowerCase()) && 
+            if (!fields[0].innerHTML.toLowerCase().includes(search_users_access.value.toLowerCase()) &&
+                !fields[1].innerHTML.toLowerCase().includes(search_users_access.value.toLowerCase()) &&
                 !fields[2].innerHTML.toLowerCase().includes(search_users_access.value.toLowerCase())) {
                 user_item.classList.add("d-none");
             } else {
@@ -98,6 +98,13 @@ btn_crear_access.onclick = function () {
         board_name_access.style.border = "1px red solid";
     } else {
         board_name_access.style.border = "none";
+
+        // --- LÍNEA DE DEFENSA: Deshabilitar botón ---
+        btn_crear_access.disabled = true;
+        const originalText = btn_crear_access.innerHTML;
+        btn_crear_access.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando...';
+        // --------------------------------------------
+
         var selected = [];
         selected_users_access.forEach((s_user) => {
             if (s_user.checked) {
@@ -112,7 +119,13 @@ btn_crear_access.onclick = function () {
                 "board_id": btn_crear_access.getAttribute("data-id") || document.getElementById("board_id").innerHTML,
                 "name": board_name_access.value,
                 "users_selected": selected,
-                "board_enabled" : document.querySelector(".input-enabled-access").checked
+                "board_enabled": document.querySelector(".input-enabled-access").checked
+            },
+            // Si el servidor responde con error, rehabilitamos el botón para reintentar
+            error: function () {
+                btn_crear_access.disabled = false;
+                btn_crear_access.innerHTML = originalText;
+                Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
             }
         }).done(function (result) {
             Swal.fire({
