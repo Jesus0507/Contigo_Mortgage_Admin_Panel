@@ -12,7 +12,7 @@
             <div style="width: 20%;" class="text-center">
                 <div>Habilitada:</div>
                 <div class="form-check form-switch text-center d-flex justify-content-center mt-2">
-                    <input class="form-check-input input-enabled-access" type="checkbox" role="switch" id="flexSwitchCheckChecked" <?php if(isset($board_info) && $board_info[0]['enabled'] == 1){ ?>checked <?php } ?>>
+                    <input class="form-check-input input-enabled-access" type="checkbox" role="switch" id="flexSwitchCheckChecked" <?php if (isset($board_info) && $board_info[0]['enabled'] == 1) { ?>checked <?php } ?>>
                 </div>
             </div>
         </div>
@@ -25,8 +25,17 @@
                 <input class="form-control" placeholder="Buscar usuario..." style="height: 30px;" id="search_modal_user_access">
             </div>
         </div>
+        <div style="background: rgb(173, 190, 196);" class="w-100 d-flex flex-row justify-content-between py-2">
+            <div class="w-25 text-center">Todos</div>
+            <div class="w-25 text-center"></div>
+            <div class="w-25 text-center"></div>
+            <div class="w-25 text-center">
+                <input class="form-check-input" type="checkbox" onchange="all_clicked(this)">
+            </div>
+        </div>
         <div class="users-list">
             <div class="d-none" id="users_boards_info_access"><?php echo json_encode($boards_users); ?></div>
+
             <?php foreach ($usuarios as $user) { ?>
                 <div class="w-100 d-flex flex-row justify-content-between py-2 users-modal-item">
                     <div class="w-25 text-center"><?php echo ucfirst($user['name']) ?></div>

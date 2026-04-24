@@ -87,7 +87,11 @@ search_users_access.onkeyup = function () {
 
 selected_users_access.forEach((item) => {
     item.onchange = function (ev) {
-        ev.target.checked ? cant_checked_access++ : cant_checked_access--;
+        cant_checked_access = 0;
+        var all_users = Array.from(document.querySelectorAll(".access-custom-modal .users-modal-item"));
+        all_users.forEach((user) => {
+            if (user.querySelector("input").checked == true) cant_checked_access++;
+        })
         document.getElementById("cant_users_span_access").innerHTML = cant_checked_access;
     }
 })
@@ -134,4 +138,17 @@ btn_crear_access.onclick = function () {
             setTimeout(() => { location.reload(); }, 2500);
         })
     }
+}
+
+
+function all_clicked(el) {
+    var all_users = Array.from(document.querySelectorAll(".access-custom-modal .users-modal-item"));
+    all_users.forEach((user) => {
+        user.querySelector("input").checked = el.checked;
+    })
+    cant_checked_access = 0;
+    all_users.forEach((user) => {
+        if (user.querySelector("input").checked == true) cant_checked_access++;
+    })
+    document.getElementById("cant_users_span_access").innerHTML = cant_checked_access;
 }
