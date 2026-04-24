@@ -609,70 +609,131 @@ function registerInfo() {
     });
 }
 close_btn.onclick = function () {
-    Swal.fire({
-        title: '¿Estás seguro?',
-        text: "Se perderán los cambios que no hayas guardado.",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Sí, cerrar',
-        cancelButtonText: 'Cancelar',
-        reverseButtons: true // Pone el botón de cancelar a la izquierda
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // --- TODA TU LÓGICA DE LIMPIEZA AQUÍ ---
-            document.getElementById("property_register").classList.remove("d-none");
-            if (document.getElementById("property_update")) {
-                document.getElementById("property_update").classList.add("d-none");
-            }
+    const updateEl = document.getElementById("property_update");
+    const isEditing = updateEl ? !updateEl.classList.contains("d-none") : false;
+    const isVisible = (el) => el && !el.closest('.d-none');
+    const camposVisibles = Array.from(document.querySelectorAll(".modal-compras input, .modal-compras select, .modal-compras textarea")).filter(el => isVisible(el));
+    let tieneCambios = false;
 
-            $(".modal-gestion").fadeOut();
+    if (isEditing) {
+        const oldInfoEl = document.getElementById("old_info_gestion");
+        const old_info_raw = oldInfoEl ? oldInfoEl.innerHTML : "";
+        if (old_info_raw.trim() !== "") {
+            const old = JSON.parse(old_info_raw);
+            console.log(old);
+            const hasChanged = (current, original) => {
+                console.log(current.trim().toLowerCase(), " - ", original.trim().toLowerCase())
+                return current.trim().toLowerCase() !== original.trim().toLowerCase();
+            };
 
-            var all_inputs = document.querySelector(".modal-gestion").querySelectorAll("input");
-            Array.from(all_inputs).forEach((input_content) => {
-                input_content.value = "";
-            });
+            // tieneCambios =
+            //     hasChanged(document.getElementById("prioridad").value.toString(), old.prioridad.toString()) ||
+            //     hasChanged(client_name.value, old.name) ||
+            //     hasChanged(client_last_name.value, old.last_name) ||
+            //     hasChanged(client_phone.value, old.phone) ||
+            //     hasChanged(detalle_llamada.value, old.detalle_llamada) ||
+            //     hasChanged(tipo_proceso.value, old.tipo_proceso) ||
+            //     hasChanged(condiciones_adicionales.value, old.condiciones_adicionales);
 
-            // Limpieza de campos específicos
-            document.getElementById("call_detail").value = "";
-            document.querySelector(".comments-area").innerHTML = "";
-            document.querySelector(".historial-container").innerHTML = "";
-            document.getElementById("down_payment_label_percent").innerHTML = "0,00";
-            document.getElementById("gastos_cierre_percent_label").innerHTML = "0,00";
-            document.getElementById("calculated_required_money").innerHTML = "0,00";
-            document.getElementById("calculated_required_money").parentElement.classList.add("d-none");
-            document.getElementById("modal_gestion_title").innerHTML = "Nueva compra";
-            document.getElementById("programa_aplica").value = "";
-            document.querySelector(".programa_container").classList.add("d-none");
-            document.getElementById("total_requerido_label").parentElement.classList.remove("d-none");
-            document.getElementById("conditions").value = "";
-            document.getElementById("prioridad").value = 2;
-            document.getElementById("gestion_tab").click();
-
-            // Reset de selectores y variables de UI
-            tipo_proceso.value = "";
-            estatus_legal.value = "";
-            forma_pago.value = "";
-            tiempo_pago_formato.value = "dias";
-            primer_comprador_field.classList.add("d-none");
-            forma_pago_container.classList.add("d-none");
-            gastos_cierre.value = 8;
-
-            setTimeout(() => {
-                document.getElementById("layoutSidenav").classList.remove("opacity-body");
-                // Extraer nombre del asesor de forma limpia
-                const footerContent = document.querySelector(".sb-sidenav-footer").innerText;
-                //    document.getElementById("asesor_name").innerHTML = "Asesor: " + footerContent;
-
-                // Reset de la sección de ingresos (importante para el diccionario)
-                resetIncomeSection();
-                document.getElementById("tabla_income_info").classList.add("d-none");
-            }, 600);
+            //      "tipo_proceso": tipo_proceso.value,
+            // "estatus_legal": estatus_legal.value,
+            // "primer_comprador": primer_comprador.value,
+            // "forma_pago": forma_pago.value,
+            // "tiempo_pago_electronico": forma_pago.value == "medio_electronico" ? (tiempo_pago.value + " " + tiempo_pago_formato.value) : null,
+            // "disponibilidad_comprar": disponible_comprar.value,
+            // "credito_cliente": credito_cliente.value,
+            // "interes_ofrecido": interes_ofrecido.value,
+            // "gastos_cierre": gastos_cierre.value,
+            // "down_payment": down_payment.value,
+            // "monto_max": monto_max.value,
+            // "condiciones": conditions.value,
+            // "total_requerido": document.getElementById("total_requerido").value,
+            // "programa_aplica": document.getElementById("programa_aplica").value,
+            // "comments": unsaved_comments,
+            // "board": document.getElementById("board_id").innerHTML,
+            // "realtor_name": realtor_name.value,
+            // "realtor_tlf": realtor_tlf.value,
+            // "realtor_email": realtor_email.value,
+            // "user_asigned": current_user_asigned,
+            // "prioridad": document.getElementById("prioridad").value,
+            // "detalle_ingresos": JSON.stringify(diccionarioIngresos)
         }
-    });
+    }
+    else {
+        tieneCambios = camposVisibles.some(el => {
+            if (el === monto_max || el === gastos_cierre || el == total_requerido || el == loan_amount) return false;
+            return el.value.trim() !== "" && el.value !== "Seleccionar";
+        });
+    }
+    // Swal.fire({
+    //     title: '¿Estás seguro?',
+    //     text: "Se perderán los cambios que no hayas guardado.",
+    //     icon: 'warning',
+    //     showCancelButton: true,
+    //     confirmButtonColor: '#3085d6',
+    //     cancelButtonColor: '#d33',
+    //     confirmButtonText: 'Sí, cerrar',
+    //     cancelButtonText: 'Cancelar',
+    //     reverseButtons: true // Pone el botón de cancelar a la izquierda
+    // }).then((result) => {
+    //     if (result.isConfirmed) {
+    //         finalizeClose();
+    //     }
+    // });
+    finalizeClose();
 }
 
+
+function finalizeClose() {
+    // --- TODA TU LÓGICA DE LIMPIEZA AQUÍ ---
+    document.getElementById("property_register").classList.remove("d-none");
+    if (document.getElementById("property_update")) {
+        document.getElementById("property_update").classList.add("d-none");
+    }
+
+    $(".modal-gestion").fadeOut();
+
+    var all_inputs = document.querySelector(".modal-gestion").querySelectorAll("input");
+    Array.from(all_inputs).forEach((input_content) => {
+        input_content.value = "";
+    });
+
+    // Limpieza de campos específicos
+    document.getElementById("call_detail").value = "";
+    document.querySelector(".comments-area").innerHTML = "";
+    document.querySelector(".historial-container").innerHTML = "";
+    document.getElementById("down_payment_label_percent").innerHTML = "0,00";
+    document.getElementById("gastos_cierre_percent_label").innerHTML = "0,00";
+    document.getElementById("calculated_required_money").innerHTML = "0,00";
+    document.getElementById("calculated_required_money").parentElement.classList.add("d-none");
+    document.getElementById("modal_gestion_title").innerHTML = "Nueva compra";
+    document.getElementById("programa_aplica").value = "";
+    document.querySelector(".programa_container").classList.add("d-none");
+    document.getElementById("total_requerido_label").parentElement.classList.remove("d-none");
+    document.getElementById("conditions").value = "";
+    document.getElementById("prioridad").value = 2;
+    document.getElementById("gestion_tab").click();
+
+    // Reset de selectores y variables de UI
+    tipo_proceso.value = "";
+    estatus_legal.value = "";
+    forma_pago.value = "";
+    tiempo_pago_formato.value = "dias";
+    primer_comprador_field.classList.add("d-none");
+    forma_pago_container.classList.add("d-none");
+    gastos_cierre.value = 8;
+
+    setTimeout(() => {
+        document.getElementById("layoutSidenav").classList.remove("opacity-body");
+        // Extraer nombre del asesor de forma limpia
+        const footerContent = document.querySelector(".sb-sidenav-footer").innerText;
+        //    document.getElementById("asesor_name").innerHTML = "Asesor: " + footerContent;
+
+        // Reset de la sección de ingresos (importante para el diccionario)
+        resetIncomeSection();
+        document.getElementById("tabla_income_info").classList.add("d-none");
+    }, 600);
+}
 
 if (document.getElementById("property_update")) {
     document.getElementById("property_update").onclick = function () {

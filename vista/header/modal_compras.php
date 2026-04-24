@@ -1,5 +1,6 @@
 <div class="custom-modal modal-gestion modal-compras">
     <span class="d-none" id="hidden_user_name"><?php echo $_SESSION['username'] ?></span>
+    <div id="old_info_gestion" class="d-none"></div>
     <div class="custom-modal-header d-flex flex-row justify-content-between">
         <div id="modal_gestion_title">Nueva compra</div>
         <span id="modal_id_gestion" class="d-none"></span>
@@ -26,10 +27,10 @@
                 </div>
                 <div>Prioridad:</div>
                 <div><select id="prioridad" class="form-select" style="height:27px; padding-top: 0 !important; font-weight: bold; color: #F5B027">
-                    <option value="1" style="font-weight:bold;color: green">Alta</option>
-                    <option value="2" style="font-weight:bold;color: #F5B027">Media</option>
-                    <option value="3" style="font-weight:bold;color: red">Baja</option>
-                </select></div>
+                        <option value="1" style="font-weight:bold;color: green">Alta</option>
+                        <option value="2" style="font-weight:bold;color: #F5B027">Media</option>
+                        <option value="3" style="font-weight:bold;color: red">Baja</option>
+                    </select></div>
             </div>
         </div>
     </div>
@@ -230,9 +231,7 @@
             </div>
             <div class="w-100 text-center btn-gestion-action">
                 <div class="btn btn-primary mx-2" title="Guardar registro" id="property_register">Guardar <span class="fas fa-save"></span></div>
-                <?php if ($_SESSION['user_role'] != "user") { ?>
-                    <div class="btn btn-primary mx-2 d-none" id="property_update">Actualizar <span class="fas fa-edit"></span></div>
-                <?php } ?>
+                <div class="btn btn-primary mx-2 d-none" id="property_update">Actualizar <span class="fas fa-edit"></span></div>
             </div>
         </div>
         <div class="gestion-tabs d-none" id="seguimiento_container">

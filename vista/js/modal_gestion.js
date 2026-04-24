@@ -294,7 +294,6 @@ close_btn.onclick = function () {
     // VALIDACIÓN DE EXISTENCIA: Si el elemento no existe (es null), isEditing será false.
     const updateEl = document.getElementById("property_update");
     const isEditing = updateEl ? !updateEl.classList.contains("d-none") : false;
-    document.getElementById("prioridad").value = 2;
 
     const isVisible = (el) => el && !el.closest('.d-none');
 
@@ -311,21 +310,22 @@ close_btn.onclick = function () {
 
         if (old_info_raw.trim() !== "") {
             const old = JSON.parse(old_info_raw);
+            console.log(old);
             const hasChanged = (current, original) => {
-                let curr = (current || "").toString().trim().toLowerCase();
-                let orig = (original || "").toString().trim().toLowerCase();
-                return curr !== orig;
+                console.log(current.trim().toLowerCase(), " - ", original.trim().toLowerCase())
+                return current.trim().toLowerCase() !== original.trim().toLowerCase();
             };
 
             tieneCambios =
+                hasChanged(document.getElementById("prioridad").value.toString(), old.prioridad.toString()) ||
                 hasChanged(client_name.value, old.name) ||
                 hasChanged(client_last_name.value, old.last_name) ||
                 hasChanged(client_phone.value, old.phone) ||
                 hasChanged(detalle_llamada.value, old.detalle_llamada) ||
                 hasChanged(property_address.value, old.property_address) ||
-                hasChanged(property_value.value, old.property_value) ||
-                hasChanged(mortgage.value, old.mortgage) ||
-                hasChanged(ltv_value.value, old.ltv) ||
+                hasChanged(property_value.value, money_format(old.property_value)) ||
+                hasChanged(mortgage.value, money_format(old.mortgage)) ||
+                hasChanged(ltv_value.value, old.ltv.toString()) ||
                 hasChanged(occupancy.value, old.occupancy) ||
                 hasChanged(tipo_prestamo.value, old.tipo_prestamo) ||
                 hasChanged(condiciones_adicionales.value, old.condiciones_adicionales);
@@ -392,6 +392,7 @@ function finalizeClose() {
     document.querySelector(".comments-area").innerHTML = "";
     document.querySelector(".historial-container").innerHTML = "";
     document.getElementById("gestion_tab").click();
+    document.getElementById("prioridad").value = 2;
 
     // Valores por defecto
     ltv_value.value = 75;

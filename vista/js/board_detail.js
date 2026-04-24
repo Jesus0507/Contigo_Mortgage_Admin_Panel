@@ -248,6 +248,7 @@ function load_compras_modal_info(ev) {
         var historial = resParsed['historial'];
 
         document.getElementById("modal_id_gestion").innerHTML = resultado['id_compra'];
+        document.getElementById("old_info_gestion").innerHTML = JSON.stringify(JSON.parse(result)["gestion_info"][0]);
 
         // Procesar el tiempo de pago (Separar "12 meses" en ["12", "meses"])
         var tiempoArray = resultado['tiempo_pago_electronico'] ? resultado['tiempo_pago_electronico'].split(" ") : ["", "meses"];
@@ -259,7 +260,7 @@ function load_compras_modal_info(ev) {
         // Mapeo de inputs (Modificado el índice 3 que corresponde al tiempo)
         all_inputs.forEach((input, i) => {
             input.value =
-                i == 0 ? resultado['user_email']:
+                i == 0 ? resultado['user_email'] :
                     i == 1 ? resultado['name'].replace(/\b\w/g, l => l.toUpperCase()) :
                         i == 2 ? resultado['last_name'].replace(/\b\w/g, l => l.toUpperCase()) :
                             i == 3 ? resultado['phone'] :
@@ -653,6 +654,9 @@ function load_gestion_modal_info(ev) {
         })
 
         document.getElementById("asesor_name").value = resultado['user_email'];
+        document.getElementById("prioridad").value = resultado['prioridad'];
+        document.getElementById("prioridad").value == 1 ? document.getElementById("prioridad").style.color = "green" : document.getElementById("prioridad").value == 2 ? document.getElementById("prioridad").style.color = "#F5B027" : document.getElementById("prioridad").style.color = "red";
+
         console.log(document.getElementById("asesor_name").value);
         document.getElementById("ltv_percent_value").innerHTML = money_format(resultado['loan_amount']);
         document.getElementById("gastos_cierre_percent_value").innerHTML = money_format(parseFloat(resultado['property_value']) * parseFloat(resultado["gastos_cierre"]) / 100);
