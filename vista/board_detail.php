@@ -174,16 +174,16 @@
                                                 data-gestion-type="<?php echo $board_info[0]['board_type']; ?>"
                                                 data-gestion-id=" <?php echo $board_info[0]['board_type'] == "gestion_clientes" ? $gestion['id_gestion'] : $gestion['id_compra'] ?>">
                                                 <div>
-                                                <?php echo ucfirst($gestion['name']) . " " . ucfirst($gestion['last_name']); ?>
-                                                <span class="gestion-id d-none">
-                                                    <?php echo $board_info[0]['board_type'] == "gestion_clientes" ? $gestion['id_gestion'] : $gestion['id_compra'] ?>
-                                                </span>
-                                                <i class="fas fa-square" style="color: <?php
-                                                                                        echo ($gestion['prioridad'] == 1) ? 'green' : (($gestion['prioridad'] == 2) ? '#F5B027' : 'red');
-                                                                                        ?>; pointer-events: none"></i>
-                                                                                        </div>
+                                                    <?php echo ucfirst($gestion['name']) . " " . ucfirst($gestion['last_name']); ?>
+                                                    <span class="gestion-id d-none">
+                                                        <?php echo $board_info[0]['board_type'] == "gestion_clientes" ? $gestion['id_gestion'] : $gestion['id_compra'] ?>
+                                                    </span>
+                                                    <i class="fas fa-square" style="color: <?php
+                                                                                            echo ($gestion['prioridad'] == 1) ? 'green' : (($gestion['prioridad'] == 2) ? '#F5B027' : 'red');
+                                                                                            ?>; pointer-events: none"></i>
+                                                </div>
                                                 <?php if ($_SESSION['user_role'] == 'admin') { ?>
-                                                   <div> <i class="fas fa-trash-alt" style="color:#D92300; cursor:pointer;" onclick='delete_gestion(this)'></i></div>
+                                                    <div> <i class="fas fa-trash-alt" style="color:#D92300; cursor:pointer;" onclick='delete_gestion(this)'></i></div>
                                                 <?php } ?>
                                             </li>
                                 <?php
@@ -206,16 +206,19 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
-    <script src="vista/js/datatables-simple-demo.js"></script>
-    <script src="vista/js/scripts.js"></script>
-    <script src="vista/js/custom_modal.js"></script>
+
+    <script src="<?php echo v_asset('vista/js/datatables-simple-demo.js'); ?>"></script>
+    <script src="<?php echo v_asset('vista/js/scripts.js'); ?>"></script>
+    <script src="<?php echo v_asset('vista/js/custom_modal.js'); ?>"></script>
+
     <?php if ($board_info[0]['board_type'] == "gestion_clientes") { ?>
-        <script src="vista/js/modal_gestion.js"></script>
+        <script src="<?php echo v_asset('vista/js/modal_gestion.js'); ?>"></script>
     <?php } else { ?>
-        <script src="vista/js/modal_compras.js"></script>
+        <script src="<?php echo v_asset('vista/js/modal_compras.js'); ?>"></script>
     <?php } ?>
-    <script src="vista/js/access_modal.js"></script>
-    <script src="vista/js/board_detail.js"></script>
+
+    <script src="<?php echo v_asset('vista/js/access_modal.js'); ?>"></script>
+    <script src="<?php echo v_asset('vista/js/board_detail.js'); ?>"></script>
 </body>
 
 </html>

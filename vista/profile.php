@@ -26,7 +26,7 @@
                                         <h5 class="text-primary mb-4">Datos Generales</h5>
                                         <div class="mb-3">
                                             <label class="form-label">Nombre:</label>
-                                            <input type="text" id="perfil_nombre" name="nombre" class="form-control" value="<?php echo explode(" ",$_SESSION['username'])[0]; ?>" required>
+                                            <input type="text" id="perfil_nombre" name="nombre" class="form-control" value="<?php echo explode(" ", $_SESSION['username'])[0]; ?>" required>
                                         </div>
                                         <div class="mb-3">
                                             <label class="form-label">Apellido:</label>
@@ -36,11 +36,11 @@
                                             <label class="form-label">Correo Electrónico:</label>
                                             <input type="email" id="perfil_email" name="email" class="form-control" value="<?php echo $_SESSION['email']; ?>" required>
                                         </div>
-                                        
+
                                         <hr class="mt-5">
                                         <h5 class="text-danger mb-3">Cambiar Contraseña</h5>
                                         <p class="small text-muted italic">Deja en blanco si no deseas cambiarla.</p>
-                                        
+
                                         <div class="mb-3">
                                             <label class="form-label small">Nueva Contraseña:</label>
                                             <div class="input-group">
@@ -102,7 +102,9 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="vista/js/scripts.js"></script>
-    <script src="vista/js/edit_profile.js"></script>
+
+    <script src="<?php echo v_asset('vista/js/scripts.js'); ?>"></script>
+    <script src="<?php echo v_asset('vista/js/edit_profile.js'); ?>"></script>
 </body>
+
 </html>

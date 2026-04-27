@@ -557,15 +557,17 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-    <script src="vista/js/scripts.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
-    <script src="vista/js/datatables-simple-demo.js"></script>
-    <script src="vista/js/main_stadistics.js"></script>
+
+    <script src="<?php echo v_asset('vista/js/scripts.js'); ?>"></script>
+    <script src="<?php echo v_asset('vista/js/datatables-simple-demo.js'); ?>"></script>
+    <script src="<?php echo v_asset('vista/js/main_stadistics.js'); ?>"></script>
+
     <?php if ($_SESSION['user_role'] == "admin") { ?>
-        <script src="vista/js/main_reports.js"></script>
-        <script src="vista/js/main_monto_max.js"></script>
+        <script src="<?php echo v_asset('vista/js/main_reports.js'); ?>"></script>
+        <script src="<?php echo v_asset('vista/js/main_monto_max.js'); ?>"></script>
     <?php } ?>
 </body>
 

@@ -5,15 +5,18 @@
     <meta name="description" content="" />
     <meta name="author" content="" />
     <title>Contigo Mortgage - Admin Panel</title>
+
     <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
-    <link rel="icon" href="vista/images/favicon.png" type="image/x-icon">
-    <link href="vista/css/styles.css" rel="stylesheet" />
-    <link href="vista/css/modal.css" rel="stylesheet" />
-    <link href="vista/css/board_detail.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+
+    <link rel="icon" href="vista/images/favicon.png" type="image/x-icon">
+
+    <link href="<?php echo v_asset('vista/css/styles.css'); ?>" rel="stylesheet" />
+    <link href="<?php echo v_asset('vista/css/modal.css'); ?>" rel="stylesheet" />
+    <link href="<?php echo v_asset('vista/css/board_detail.css'); ?>" rel="stylesheet" />
     <?php if ($_SESSION['first_login'] == 0) { ?>
-        <script src="vista/js/first_login.js"></script>
+        <script src="<?php echo v_asset('vista/js/first_login.js') ?>"></script>
         <div class="modal fade" id="modalSeguridad" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content border-0 shadow-lg">
