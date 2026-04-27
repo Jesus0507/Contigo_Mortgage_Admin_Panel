@@ -467,4 +467,14 @@ class boardsController
         $resp = $modelo->get_excel_consult($board_type, $_POST['tickets']);
         echo json_encode($resp);
     }
+
+
+    public function delete_gestion_ticket()
+    {
+        $board_type = $_POST['type_gestion'];
+        $gestion_id = $_POST['id_gestion'];
+        $modelo = new boards_model();
+        $resp = $modelo->get_delete_gestion($board_type, $gestion_id);
+        echo $resp;
+    }
 }

@@ -369,4 +369,18 @@ class boards_model
 	{
 		return $this->conexion;
 	}
+
+	public function get_delete_gestion($b_type, $id)
+	{
+		$field = $b_type == "gestion_clientes" ? "id_gestion" : "id_compra";
+		$b_type = $b_type == "gestion_clientes" ? "gestion" : "compras";
+		$query = "DELETE FROM $b_type WHERE $field = $id";
+		try {
+			$resultado = $this->conexion->prepare($query);
+			$resultado->execute();
+			return true;
+		} catch (PDOException $e) {
+			return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
+		}
+	}
 }

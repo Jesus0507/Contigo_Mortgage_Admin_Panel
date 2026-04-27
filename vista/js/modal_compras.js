@@ -614,6 +614,7 @@ close_btn.onclick = function () {
     const isVisible = (el) => el && !el.closest('.d-none');
     const camposVisibles = Array.from(document.querySelectorAll(".modal-compras input, .modal-compras select, .modal-compras textarea")).filter(el => isVisible(el));
     let tieneCambios = false;
+    // console.log(camposVisibles);
 
     if (isEditing) {
         const oldInfoEl = document.getElementById("old_info_gestion");
@@ -622,35 +623,40 @@ close_btn.onclick = function () {
             const old = JSON.parse(old_info_raw);
             console.log(old);
             const hasChanged = (current, original) => {
-                console.log(current.trim().toLowerCase(), " - ", original.trim().toLowerCase())
-                return current.trim().toLowerCase() !== original.trim().toLowerCase();
+                var crnt = typeof current == "number" ? current.toString() : current;
+                var ognl = typeof original == "number" ? original.toString() : original;
+                console.log(crnt, " - ", ognl)
+                ognl = ognl != "" ? ognl.trim().toLowerCase() : "";
+                crnt = crnt != "" ? crnt.trim().toLowerCase() : "";
+                return crnt !== ognl;
             };
 
-            // tieneCambios =
-            //     hasChanged(document.getElementById("prioridad").value.toString(), old.prioridad.toString()) ||
-            //     hasChanged(client_name.value, old.name) ||
-            //     hasChanged(client_last_name.value, old.last_name) ||
-            //     hasChanged(client_phone.value, old.phone) ||
-            //     hasChanged(detalle_llamada.value, old.detalle_llamada) ||
-            //     hasChanged(tipo_proceso.value, old.tipo_proceso) ||
-            //     hasChanged(condiciones_adicionales.value, old.condiciones_adicionales);
+            tieneCambios =
+                hasChanged(document.getElementById("prioridad").value.toString(), old.prioridad.toString()) ||
+                hasChanged(client_name.value, old.name) ||
+                hasChanged(client_last_name.value, old.last_name) ||
+                hasChanged(client_phone.value, old.phone) ||
+                hasChanged(detalle_llamada.value, old.detalle_llamada) ||
+                hasChanged(primer_comprador.value, old.primer_comprador) ||
+                hasChanged(forma_pago.value, old.forma_pago) ||
+                hasChanged(disponible_comprar.value, old.disponible_comprar) ||
+                hasChanged(credito_cliente.value, old.credito_cliente) ||
+                hasChanged(interes_ofrecido.value, old.interes_ofrecido) ||
+                hasChanged(gastos_cierre.value, old.gastos_cierre) ||
+                hasChanged(down_payment.value, old.down_payment) ||
+                hasChanged(monto_max.value, old.monto_max_aplicado) ||
+                hasChanged(conditions.value, old.condiciones_notas) ||
+                hasChanged(document.getElementById("total_requerido").value, old.total_requerido) ||
+                hasChanged(document.getElementById("programa_aplica").value, old.programa_aplica) ||
+                hasChanged(programa_aplica.value, old.programa_aplica) ||
+                hasChanged(realtor_name.value, old.realtor_name) ||
+                hasChanged(realtor_tlf.value, old.realtor_tlf) ||
+                hasChanged(realtor_email.value, old.realtor_email) ||
+                hasChanged(realtor_tlf.value, old.realtor_tlf) ||
+                hasChanged(realtor_email.value, old.realtor_email) ||
+                hasChanged(document.getElementById("prioridad").value, old.prioridad) ||
+                hasChanged(estatus_legal.value, old.estatus_legal);
 
-            //      "tipo_proceso": tipo_proceso.value,
-            // "estatus_legal": estatus_legal.value,
-            // "primer_comprador": primer_comprador.value,
-            // "forma_pago": forma_pago.value,
-            // "tiempo_pago_electronico": forma_pago.value == "medio_electronico" ? (tiempo_pago.value + " " + tiempo_pago_formato.value) : null,
-            // "disponibilidad_comprar": disponible_comprar.value,
-            // "credito_cliente": credito_cliente.value,
-            // "interes_ofrecido": interes_ofrecido.value,
-            // "gastos_cierre": gastos_cierre.value,
-            // "down_payment": down_payment.value,
-            // "monto_max": monto_max.value,
-            // "condiciones": conditions.value,
-            // "total_requerido": document.getElementById("total_requerido").value,
-            // "programa_aplica": document.getElementById("programa_aplica").value,
-            // "comments": unsaved_comments,
-            // "board": document.getElementById("board_id").innerHTML,
             // "realtor_name": realtor_name.value,
             // "realtor_tlf": realtor_tlf.value,
             // "realtor_email": realtor_email.value,
@@ -660,27 +666,38 @@ close_btn.onclick = function () {
         }
     }
     else {
+        console.log(tieneCambios)
         tieneCambios = camposVisibles.some(el => {
-            if (el === monto_max || el === gastos_cierre || el == total_requerido || el == loan_amount) return false;
+            // console.log(el);
+            if (el === monto_max || el === gastos_cierre || el == document.getElementById("total_requerido") || el == loan_amount || el == document.getElementById("prioridad")) return false;
+            console.log(el);
             return el.value.trim() !== "" && el.value !== "Seleccionar";
         });
+        console.log(tieneCambios);
     }
-    // Swal.fire({
-    //     title: '¿Estás seguro?',
-    //     text: "Se perderán los cambios que no hayas guardado.",
-    //     icon: 'warning',
-    //     showCancelButton: true,
-    //     confirmButtonColor: '#3085d6',
-    //     cancelButtonColor: '#d33',
-    //     confirmButtonText: 'Sí, cerrar',
-    //     cancelButtonText: 'Cancelar',
-    //     reverseButtons: true // Pone el botón de cancelar a la izquierda
-    // }).then((result) => {
-    //     if (result.isConfirmed) {
-    //         finalizeClose();
-    //     }
-    // });
-    finalizeClose();
+
+    console.log(tieneCambios);
+    if (tieneCambios) {
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: "Se perderán los cambios que no hayas guardado.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sí, cerrar',
+            cancelButtonText: 'Cancelar',
+            reverseButtons: true // Pone el botón de cancelar a la izquierda
+        }).then((result) => {
+            if (result.isConfirmed) {
+                finalizeClose();
+            }
+        });
+
+    }
+    else {
+        finalizeClose();
+    }
 }
 
 

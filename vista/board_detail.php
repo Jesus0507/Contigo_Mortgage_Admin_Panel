@@ -180,7 +180,7 @@
                                                 </span>
                                                 <i class="fas fa-square" style="color: <?php
                                                                                         echo ($gestion['prioridad'] == 1) ? 'green' : (($gestion['prioridad'] == 2) ? '#F5B027' : 'red');
-                                                                                        ?>"></i>
+                                                                                        ?>; pointer-events: none"></i>
                                                                                         </div>
                                                 <?php if ($_SESSION['user_role'] == 'admin') { ?>
                                                    <div> <i class="fas fa-trash-alt" style="color:#D92300; cursor:pointer;" onclick='delete_gestion(this)'></i></div>

@@ -217,6 +217,7 @@ Array.from(tasks).forEach((task) => {
         document.getElementById("property_register").classList.add("d-none");
         if (document.getElementById("property_update")) document.getElementById("property_update").classList.remove("d-none");
         var board_type = document.getElementById("hidden_board_type").innerHTML;
+        if (!ev.target.querySelector("span")) return;
         if (board_type == "gestion_clientes") load_gestion_modal_info(ev);
         if (board_type == "compras") load_compras_modal_info(ev);
     }
@@ -1119,5 +1120,38 @@ export_excel.onclick = function () {
 
 
 function delete_gestion(el) {
-    console.log(el);
+    var type_gestion = el.parentElement.parentElement.dataset.gestionType;
+    var id_gestion = el.parentElement.parentElement.dataset.gestionId;
+
+    Swal.fire({
+        title: '¿Desea eliminar este proceso?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                type: "POST",
+                url: "index.php?c=boards&a=delete_gestion_ticket",
+                data: {
+                    "id_gestion": id_gestion,
+                    "type_gestion": type_gestion
+                }
+            }).done(function (result) {
+                console.log(result);
+                if (result) {
+                    Swal.fire('Eliminado', 'El proceso ha sido.', 'success');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000)
+                }
+                else {
+                    console.log(result);
+                }
+            });
+        }
+    });
 }
