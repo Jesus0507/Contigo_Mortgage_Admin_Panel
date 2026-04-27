@@ -97,12 +97,13 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
-    <script src="vista/js/datatables-simple-demo.js"></script>
-    <script src="vista/js/scripts.js"></script>
-    <script src="vista/js/custom_modal.js"></script>
-    <script src="vista/js/modal_board.js"></script>
-    <script src="vista/js/boards.js"></script>
-    <script src="vista/js/access_modal.js"></script>
+
+    <script src="<?php echo v_asset('vista/js/datatables-simple-demo.js'); ?>"></script>
+    <script src="<?php echo v_asset('vista/js/scripts.js'); ?>"></script>
+    <script src="<?php echo v_asset('vista/js/custom_modal.js'); ?>"></script>
+    <script src="<?php echo v_asset('vista/js/modal_board.js'); ?>"></script>
+    <script src="<?php echo v_asset('vista/js/boards.js'); ?>"></script>
+    <script src="<?php echo v_asset('vista/js/access_modal.js'); ?>"></script>
 </body>
 
 </html>
