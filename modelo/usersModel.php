@@ -78,6 +78,21 @@ class users_model
 		}
 	}
 
+	public function search_user_email($email)
+	{
+
+		$query = "SELECT * FROM users WHERE email='$email'";
+		try {
+			$resultado = $this->conexion->prepare($query);
+			$resultado->execute();
+			$resultado->setFetchMode(PDO::FETCH_ASSOC);
+			$respuesta_arreglo = $resultado->fetchAll(PDO::FETCH_ASSOC);
+			return $respuesta_arreglo;
+		} catch (PDOException $e) {
+			return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
+		}
+	}
+
 	public function update_user($name, $last_name, $email, $id)
 	{
 		$query = "UPDATE users SET name = '$name', last_name = '$last_name', email = '$email'  WHERE user_id = $id";
@@ -236,6 +251,18 @@ class users_model
 		} catch (PDOException $e) {
 			$this->conexion->rollBack();
 			return "Error en la redistribución: " . $e->getMessage();
+		}
+	}
+
+	public function update_user_psw($psw, $id)
+	{
+		$query = "UPDATE users SET psw = '$psw' WHERE user_id = $id";
+		try {
+			$resultado = $this->conexion->prepare($query);
+			$resultado->execute();
+			return true;
+		} catch (PDOException $e) {
+			return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
 		}
 	}
 }

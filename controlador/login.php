@@ -26,4 +26,15 @@ class loginController
 		session_destroy();
 		$this->index();
 	}
+
+	public function forgot_psw()
+	{
+		$conexion = new base_datos();
+
+		if ($conexion->getRepConexion() == false) {
+			echo "<h2>" . $conexion->getErrorConexion() . "</h2>";
+		} else {
+			require_once "vista/forgot_psw.php";
+		}
+	}
 }

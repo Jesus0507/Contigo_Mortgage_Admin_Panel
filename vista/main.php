@@ -86,6 +86,11 @@
                                         <label class="mx-2 label-filtros" for="todos_filtro">Todos</label>
                                     </div>
                                     <div>
+                                        <input type="checkbox" name="seguimiento_clientes" value="seguimiento_clientes" checked>
+                                        <label class="mx-2 label-filtros" for="seguimiento_clientes">Seguimiento de clientes</label>
+                                    </div>
+                                    <div>
+
                                         <input type="checkbox" checked name="cartera_total" value="cartera_total">
                                         <label class="mx-2 label-filtros" for="cartera_total">Cartera Total</label>
                                     </div>
@@ -129,10 +134,10 @@
                                         <input type="checkbox" checked name="financiamientos_mes" value="financiamientos_mes">
                                         <label class="mx-2 label-filtros" for="financiamientos_mes">Financiamientos por mes</label>
                                     </div>
-                                    <!-- <div>
+                                    <div>
                                         <input type="checkbox" checked name="seguimientos_semana" value="seguimientos_semana">
                                         <label class="mx-2 label-filtros" for="seguimientos_semana">Procesos sin seguimiento</label>
-                                    </div> -->
+                                    </div>
                                 </div>
                             </div>
                             <div class="d-flex flex-row">
@@ -364,7 +369,7 @@
                                 </div>
                             </div>
 
-                            <!-- <div class="card container-grafico-card" style="width: 100%; max-width: 900px; margin: 20px auto;">
+                            <div class="card container-grafico-card" style="width: 100%; max-width: 900px; margin: 20px auto;">
                                 <div class="card-body w-100">
                                     <h5 class="card-title text-center">Clientes sin Seguimiento (> 7 días)</h5>
 
@@ -374,11 +379,7 @@
                                                 placeholder="Buscar por nombre de cliente, agente o correo..."
                                                 onkeyup="updateSeguimientoChart()">
                                         </div>
-                                        <div class="w-25 mx-3">
-                                            <button onclick="exportarExcelSeguimiento()" class="btn btn-success">
-                                                <i class="fas fa-file-excel"></i>
-                                            </button>
-                                        </div>
+                                     
                                     </div>
 
                                     <div id="container-scroll" style="width:100% !important;height:200px; overflow-y: auto; overflow-x: hidden; border: 1px solid #eee;">
@@ -387,7 +388,7 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div> -->
+                            </div>
                         </div>
                     </div>
                     <div id="reportes_container" class="mt-3 w-100 px-4 d-none">

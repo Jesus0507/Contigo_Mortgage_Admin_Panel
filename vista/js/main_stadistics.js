@@ -65,41 +65,44 @@ function filters_activation() {
                     }
 
                     break;
-                case "cartera total":
+                case "seguimiento de clientes":
                     check_input.checked == true ? all_container_graficos[0].classList.remove('d-none') : all_container_graficos[0].classList.add('d-none');
                     break;
-                case "distribucion de programas de préstamo":
+                case "cartera total":
                     check_input.checked == true ? all_container_graficos[1].classList.remove('d-none') : all_container_graficos[1].classList.add('d-none');
                     break;
-                case "valor de propiedad vs monto de préstamo":
+                case "distribucion de programas de préstamo":
                     check_input.checked == true ? all_container_graficos[2].classList.remove('d-none') : all_container_graficos[2].classList.add('d-none');
                     break;
-                case "meta de cierre mensual":
+                case "valor de propiedad vs monto de préstamo":
                     check_input.checked == true ? all_container_graficos[3].classList.remove('d-none') : all_container_graficos[3].classList.add('d-none');
                     break;
-                case "productividad por agente":
+                case "meta de cierre mensual":
                     check_input.checked == true ? all_container_graficos[4].classList.remove('d-none') : all_container_graficos[4].classList.add('d-none');
                     break;
-                case "embudo de ventas":
+                case "productividad por agente":
                     check_input.checked == true ? all_container_graficos[5].classList.remove('d-none') : all_container_graficos[5].classList.add('d-none');
                     break;
-                case "tiempo promedio de cierre":
+                case "embudo de ventas":
                     check_input.checked == true ? all_container_graficos[6].classList.remove('d-none') : all_container_graficos[6].classList.add('d-none');
                     break;
-                case "volumen por pizarra":
+                case "tiempo promedio de cierre":
                     check_input.checked == true ? all_container_graficos[7].classList.remove('d-none') : all_container_graficos[7].classList.add('d-none');
                     break;
-                case "cierres de asesor por mes":
+                case "volumen por pizarra":
                     check_input.checked == true ? all_container_graficos[8].classList.remove('d-none') : all_container_graficos[8].classList.add('d-none');
                     break;
-                case "procesos iniciados por mes":
+                case "cierres de asesor por mes":
                     check_input.checked == true ? all_container_graficos[9].classList.remove('d-none') : all_container_graficos[9].classList.add('d-none');
                     break;
-                // case "procesos sin seguimiento":
-                //     check_input.checked == true ? all_container_graficos[11].classList.remove('d-none') : all_container_graficos[11].classList.add('d-none');
-                //     break;
-                default:
+                case "procesos iniciados por mes":
                     check_input.checked == true ? all_container_graficos[10].classList.remove('d-none') : all_container_graficos[10].classList.add('d-none');
+                    break;
+                case "procesos sin seguimiento":
+                    check_input.checked == true ? all_container_graficos[12].classList.remove('d-none') : all_container_graficos[12].classList.add('d-none');
+                    break;
+                default:
+                    check_input.checked == true ? all_container_graficos[11].classList.remove('d-none') : all_container_graficos[11].classList.add('d-none');
                     break;
             }
 
@@ -236,82 +239,82 @@ function get_distribucion_prestamos() {
 // 1. Declarar la variable fuera para que el botón de Excel pueda leerla
 var chartSeguimiento = null;
 
-// function updateSeguimientoChart() {
-//     const busqueda = document.getElementById('busquedaGlobal').value;
-//     const ctx = document.getElementById('graficoSeguimiento'); // Obtenemos el elemento directamente
-//     const wrapper = document.getElementById('chart-area-wrapper');
+function updateSeguimientoChart() {
+    const busqueda = document.getElementById('busquedaGlobal').value;
+    const ctx = document.getElementById('graficoSeguimiento'); // Obtenemos el elemento directamente
+    const wrapper = document.getElementById('chart-area-wrapper');
 
-//     $.ajax({
-//         type: "POST",
-//         url: "index.php?c=main&a=get_clientes_sin_seguimiento",
-//         data: { agente_id: busqueda },
-//     }).done(function (result) {
-//         const dataParsed = JSON.parse(result);
-//         const numDataPoints = dataParsed.labels.length;
+    $.ajax({
+        type: "POST",
+        url: "index.php?c=main&a=get_clientes_sin_seguimiento",
+        data: { agente_id: busqueda },
+    }).done(function (result) {
+        const dataParsed = JSON.parse(result);
+        const numDataPoints = dataParsed.labels.length;
 
-//         // 2. CORRECCIÓN DEL SCROLL: 
-//         // Si no hay datos, ocultamos el wrapper o bajamos la altura a 0
-//         if (numDataPoints === 0) {
-//             wrapper.style.height = '0px';
-//             if (chartSeguimiento) chartSeguimiento.destroy();
-//             return; // Salimos para que el botón de exportar sepa que no hay nada
-//         }
+        // 2. CORRECCIÓN DEL SCROLL: 
+        // Si no hay datos, ocultamos el wrapper o bajamos la altura a 0
+        if (numDataPoints === 0) {
+            wrapper.style.height = '0px';
+            if (chartSeguimiento) chartSeguimiento.destroy();
+            return; // Salimos para que el botón de exportar sepa que no hay nada
+        }
 
-//         // Calculamos altura dinámica para mantener el scroll funcional
-//         const dynamicHeight = Math.max(500, numDataPoints * 55);
-//         wrapper.style.height = dynamicHeight + 'px';
+        // Calculamos altura dinámica para mantener el scroll funcional
+        const dynamicHeight = Math.max(500, numDataPoints * 55);
+        wrapper.style.height = dynamicHeight + 'px';
 
-//         // 3. Limpiar instancia previa antes de crear la nueva
-//         if (chartSeguimiento) {
-//             chartSeguimiento.destroy();
-//         }
+        // 3. Limpiar instancia previa antes de crear la nueva
+        if (chartSeguimiento) {
+            chartSeguimiento.destroy();
+        }
 
-//         // 4. Crear el nuevo gráfico y asignarlo a la variable global
-//         chartSeguimiento = new Chart(ctx, {
-//             type: 'bar',
-//             data: {
-//                 labels: dataParsed.labels,
-//                 datasets: [{
-//                     label: 'Días desde el último seguimiento',
-//                     data: dataParsed.data,
-//                     backgroundColor: 'rgba(255, 99, 132, 0.8)',
-//                     borderColor: 'rgb(255, 99, 132)',
-//                     borderWidth: 1,
-//                     barThickness: 25
-//                 }]
-//             },
-//             options: {
-//                 indexAxis: 'y',
-//                 responsive: true,
-//                 maintainAspectRatio: false, // Vital para que respete el dynamicHeight
-//                 plugins: {
-//                     legend: { display: false },
-//                     tooltip: { enabled: true }
-//                 },
-//                 scales: {
-//                     y: {
-//                         ticks: {
-//                             autoSkip: false,
-//                             padding: 15,
-//                             font: { size: 11 }
-//                         }
-//                     },
-//                     x: {
-//                         beginAtZero: true,
-//                         position: 'top',
-//                         title: {
-//                             display: true,
-//                             text: 'Días de inactividad'
-//                         }
-//                     }
-//                 },
-//                 layout: {
-//                     padding: { left: 10, right: 30, bottom: 20 }
-//                 }
-//             }
-//         });
-//     });
-// }
+        // 4. Crear el nuevo gráfico y asignarlo a la variable global
+        chartSeguimiento = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: dataParsed.labels,
+                datasets: [{
+                    label: 'Días desde el último seguimiento',
+                    data: dataParsed.data,
+                    backgroundColor: 'rgba(255, 99, 132, 0.8)',
+                    borderColor: 'rgb(255, 99, 132)',
+                    borderWidth: 1,
+                    barThickness: 25
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false, // Vital para que respete el dynamicHeight
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: true }
+                },
+                scales: {
+                    y: {
+                        ticks: {
+                            autoSkip: false,
+                            padding: 15,
+                            font: { size: 11 }
+                        }
+                    },
+                    x: {
+                        beginAtZero: true,
+                        position: 'top',
+                        title: {
+                            display: true,
+                            text: 'Días de inactividad'
+                        }
+                    }
+                },
+                layout: {
+                    padding: { left: 10, right: 30, bottom: 20 }
+                }
+            }
+        });
+    });
+}
 function exportarExcelSeguimiento() {
     // Buscamos la instancia del gráfico directamente en el canvas
     const chartInstance = Chart.getChart("graficoSeguimiento");
@@ -360,9 +363,9 @@ function exportarExcelSeguimiento() {
     XLSX.writeFile(workbook, `Reporte_Seguimiento_Contigo.xlsx`);
 }
 // Carga inicial
-// $(document).ready(function () {
-//     updateSeguimientoChart();
-// });
+$(document).ready(function () {
+    updateSeguimientoChart();
+});
 
 function get_comparativa_valores() {
 
@@ -830,14 +833,14 @@ function applyFilters() {
         var agent_exist = active_users.includes(all_clients_table[i].querySelectorAll("td")[1].innerText.trim());
         var etapa_exist = active_etapas.includes(all_clients_table[i].querySelectorAll("td")[4].innerText.trim());
         var item_date = new Date(all_clients_table[i].querySelectorAll("td")[5].innerText.trim().replace(/(\d{2})\/(\d{2})\/(\d{4})/, "$3/$2/$1")).getTime();
-        var start_date_filter = date_start.value != "" ? new Date(date_start.value.replace("-","/")).getTime() : false;
-        var end_date_filter = date_end.value != "" ? new Date(date_end.value.replace("-","/")).getTime() : false;
-        var filtering_date =(start_date_filter != false && end_date_filter != false) && (start_date_filter < end_date_filter) ? (item_date > start_date_filter && item_date < end_date_filter) : true;
+        var start_date_filter = date_start.value != "" ? new Date(date_start.value.replace("-", "/")).getTime() : false;
+        var end_date_filter = date_end.value != "" ? new Date(date_end.value.replace("-", "/")).getTime() : false;
+        var filtering_date = (start_date_filter != false && end_date_filter != false) && (start_date_filter < end_date_filter) ? (item_date > start_date_filter && item_date < end_date_filter) : true;
         //console.log(filtering_date);
         // console.log(client_exist, " - ", agent_exist, " - ", etapa_exist);
         // console.log(all_clients_table[i].querySelectorAll("td")[0].innerText);
         // console.log(active_clients);
-        client_exist && agent_exist && etapa_exist && filtering_date? all_clients_table[i].classList.remove("d-none") : all_clients_table[i].classList.add("d-none");
+        client_exist && agent_exist && etapa_exist && filtering_date ? all_clients_table[i].classList.remove("d-none") : all_clients_table[i].classList.add("d-none");
     }
 }
 

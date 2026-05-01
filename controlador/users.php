@@ -132,4 +132,27 @@ class usersController
         // Llamamos al nuevo método de redistribución
         echo $modelo->delete_user_with_redistribute($user_id, $new_agents_ids);
     }
+
+
+    public function recovery_password()
+    {
+        $modelo_conect = new base_datos();
+        $modelo = new users_model();
+        $pet = $_POST['pet'];
+        $color = $_POST['color'];
+        $character = $_POST['character'];
+        $security_questions = $modelo_conect->encoding($pet . "/" . $color . "/" . $character);
+        $email = $_POST['email'];
+        $user = $modelo -> search_user_email($email);
+        $original_custom_question = explode("/",$modelo_conect -> decoding($user[0]['custom_security_question']))[1];
+        $custom = $_POST['custom'] == $original_custom_question ? true : false;
+        $password = $modelo_conect->encoding($_POST['password']);
+        $valid_security_questions = $security_questions == $user[0]['security_questions'] ? true: false;
+        if($custom && $valid_security_questions){
+            echo $modelo -> update_user_psw($password, $user[0]['user_id']);
+        }
+        else{
+            echo false;
+        }
+    }
 }
