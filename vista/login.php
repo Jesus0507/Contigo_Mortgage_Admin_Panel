@@ -42,7 +42,7 @@
                                             <label for="inputPassword" id="pswLabel">Contraseña</label>
                                         </div>
                                         <div class="d-flex align-items-center justify-content-between mt-4 mb-0">
-                                            <a class="small text-light" href="password.php">Olvidé mi contraseña</a>
+                                            <a class="small text-light"  href="index.php?c=login&a=forgot_psw">Olvidé mi contraseña</a>
                                             <div class="btn btn-primary" id="loginBtn">Iniciar sesión</div>
                                         </div>
                                     </form>
