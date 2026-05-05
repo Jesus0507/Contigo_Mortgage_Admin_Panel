@@ -26,14 +26,23 @@ function updateTaskCounts() {
 tasks.forEach((task) => {
     task.addEventListener("dragstart", (event) => {
         if (task.dataset.status == "FINALIZADO" && task.dataset.userType != "admin") return;
+
+        // Si el ticket que arrastramos está seleccionado, marcamos que es un movimiento múltiple
+        const isSelected = task.querySelector(".task-check").checked;
+
         task.id = "dragged-task";
+        task.classList.add("dragging-now");
+
+        // Guardamos si vamos a mover muchos o solo uno
+        event.dataTransfer.setData("isMultiple", isSelected);
         event.dataTransfer.effectAllowed = "move";
         event.dataTransfer.setData("task", "");
     });
 
     task.addEventListener("dragend", (event) => {
         task.removeAttribute("id");
-        console.log(task.parentElement.parentElement.querySelector(".task-title-text").innerHTML);
+        task.classList.remove("dragging-now");
+
         if (task.parentElement.parentElement.querySelector(".task-title-text").innerHTML.toLowerCase() == "finalizado" && task.dataset.userType != "admin") {
             task.draggable = false;
             task.dataset.status = "FINALIZADO";
@@ -53,41 +62,55 @@ columns.forEach((column) => {
         event.preventDefault();
 
         const draggedTask = document.getElementById("dragged-task");
+        const isMultiple = event.dataTransfer.getData("isMultiple") === "true";
         const tasksContainer = column.querySelector(".tasks");
+        const newEtapa = column.querySelector(".task-title-text").innerText;
+        const boardType = document.getElementById("hidden_board_type").innerHTML;
 
-        if (draggedTask && tasksContainer) {
-            // --- PROTECCIÓN: Evitar movimientos visuales si ya se está procesando ---
-            if (draggedTask.dataset.processing === "true") return;
-            draggedTask.dataset.processing = "true";
-            draggedTask.style.opacity = "0.5";
+        if (!draggedTask || !tasksContainer) return;
 
-            tasksContainer.appendChild(draggedTask);
+        // Definimos qué tickets vamos a mover
+        let ticketsToMove = [];
+        if (isMultiple) {
+            // Todos los que tengan el check marcado en todo el tablero
+            ticketsToMove = Array.from(document.querySelectorAll(".task-check:checked")).map(cb => cb.closest(".task"));
+        } else {
+            // Solo el que se está arrastrando
+            ticketsToMove = [draggedTask];
+        }
 
-            const newEtapa = column.querySelector(".task-title-text").innerText;
-            const idGestion = draggedTask.querySelector(".gestion-id").innerHTML;
+        ticketsToMove.forEach(task => {
+            if (task.dataset.processing === "true") return;
 
+            task.dataset.processing = "true";
+            task.style.opacity = "0.5";
+
+            // Movimiento visual
+            tasksContainer.appendChild(task);
+
+            const idGestion = task.querySelector(".gestion-id").innerHTML;
+
+            // Actualización en BD
             $.ajax({
                 type: "POST",
                 url: "index.php?c=boards&a=update_gestion",
                 data: {
                     "new_etapa": newEtapa,
                     "id_gestion": idGestion,
-                    "tipo_gestion": document.getElementById("hidden_board_type").innerHTML
-                },
-                complete: function () {
-                    // Restaurar estado para permitir futuros movimientos
-                    draggedTask.dataset.processing = "false";
-                    draggedTask.style.opacity = "1";
+                    "tipo_gestion": boardType
                 }
-            }).done(function (result) {
-                console.log("Resultado servidor:", result);
+            }).done(function () {
+                task.dataset.processing = "false";
+                task.style.opacity = "1";
+                // Desmarcar después de mover
+                const cb = task.querySelector(".task-check");
+                if (cb) cb.checked = false;
             });
+        });
 
-            updateTaskCounts();
-        }
+        updateTaskCounts();
     });
 });
-
 // Manejo de botones de opciones
 all_options_btn.forEach((opt) => {
     opt.addEventListener("click", (event) => {
@@ -1152,6 +1175,72 @@ function delete_gestion(el) {
                     console.log(result);
                 }
             });
+        }
+    });
+}
+
+function all_check_ticket(el){
+    var all_checks_tickets = el.parentElement.parentElement.querySelectorAll(".task-check");
+    Array.from(all_checks_tickets).forEach((ticket) => {
+        ticket.checked = el.checked;
+    })
+}
+
+function pay_comision(el) {
+    const gestion_info = JSON.parse(el.dataset.gestionInfo);
+    
+    // Obtener fecha de hoy en formato YYYY-MM-DD
+    const today = new Date().toISOString().split('T')[0];
+
+    Swal.fire({
+        title: 'Detalles de Comisión',
+        html: `
+            <div class="container-fluid text-start">
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" id="swal-pay-comision" style="cursor:pointer">
+                    <label class="form-check-label" for="swal-pay-comision">Pagar comisión</label>
+                </div>
+                <div class="mb-3">
+                    <label for="swal-fecha" class="form-label">Fecha de pago:</label>
+                    <input type="date" id="swal-fecha" class="form-control" value="${today}">
+                </div>
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Guardar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        preConfirm: () => {
+            // Capturamos los valores antes de cerrar
+            return {
+                pagarComision: document.getElementById('swal-pay-comision').checked,
+                fechaPago: document.getElementById('swal-fecha').value
+            }
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const dataToSend = {
+                id_gestion: gestion_info.id_gestion ? gestion_info.id_gestion : gestion_info.id_compra, // O el campo que uses como ID
+                pago: document.getElementById('swal-pay-comision').checked,
+                fechaPago: document.getElementById('swal-fecha').value,
+                tipo_gestion: gestion_info.id_gestion ? "gestion" : "compras",
+            };
+
+            console.log("Datos a enviar:", dataToSend);
+            
+            // Aquí puedes llamar a tu $.ajax para guardar en DB 
+            // /*
+            $.ajax({
+                type: "POST",
+                url: "index.php?c=boards&a=save_comision",
+                data: dataToSend
+            }).done(function(res) {
+                console.log(res);
+                Swal.fire('¡Éxito!', 'La comisión ha sido registrada.', 'success');
+                location.reload();
+            });
+            // // */
         }
     });
 }
