@@ -14,9 +14,18 @@ body {
   border-radius: 5px;
   margin: 10px;
   padding: 10px;
-  width: 270px;
-  min-width: 270px;
+  width: 320px;
+  min-width: 320px;
   margin-bottom: 50px;
+  height: fit-content;
+  max-height: 650px;
+  overflow-y: auto;
+
+  @media(max-width: 1350px) {
+    max-height: 315px;
+  }
+
+
   /* flex: 1; */
 
   .ticket-options {
@@ -90,7 +99,7 @@ body {
   border-radius: 5px;
   height: 22px;
 
-  span{
+  span {
     position: relative;
     bottom: 11px;
   }
@@ -102,7 +111,7 @@ body {
   color: white;
 }
 
-.ticket-options-container{
+.ticket-options-container {
   width: 85%;
   margin-left: 20%;
   height: 100px;
@@ -110,11 +119,11 @@ body {
   background: #dbe1ff;
   position: relative;
   z-index: 100;
-  box-shadow: -3px 10px 10px 0px rgba(0,0,0,0.39);
+  box-shadow: -3px 10px 10px 0px rgba(0, 0, 0, 0.39);
   padding: 5px;
 
 
-  .opt-item{
+  .opt-item {
     font-size: 14px;
     height: 22px;
     cursor: pointer;
@@ -125,13 +134,13 @@ body {
 
   }
 
-  .opt-item:hover{
+  .opt-item:hover {
     background: rgb(115, 130, 180);
     color: white;
   }
 }
 
-.add-column-div{
+.add-column-div {
   min-width: 270px;
   padding: 10px;
   border: 1px solid rgb(86, 99, 141);
@@ -143,23 +152,30 @@ body {
 
 /* Ajuste para que la cabecera no sea muy alta */
 .cliente-card .card-header {
-    min-height: 38px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+  min-height: 38px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 /* Iconos de resumen más pequeños y sutiles */
 #income_cards_container i.fas {
-    opacity: 0.8;
+  opacity: 0.8;
 }
 
 /* Espaciado para el nombre que sube un poco */
 .cliente-card .fw-bold {
-    margin-bottom: -2px;
+  margin-bottom: -2px;
 }
 
-#income_cards_container .text-success, 
+#income_cards_container .text-success,
 #income_cards_container .text-danger {
-    font-weight: 500;
+  font-weight: 500;
+}
+
+.form-switch .form-check-input {
+  width: 2em;
+  margin-left: -2.5em;
+  background-image: url("data:image/svg+xml,...");
+  border-radius: 2em;
 }

@@ -30,7 +30,7 @@
                             <?php if ($_SESSION['user_role'] == "admin") { ?>
                                 <div><button class="btn btn-dark mx-2" id="access_modal_btn" onclick="open_modal(null)"><i class="fas fa-users-cog"></i> Administrar acceso</button></div>
                             <?php } ?>
-                            <div><button class="btn btn-dark mx-2" id="add_column"><i class="far fa-plus-square"></i> Nueva columna</button></div>
+                            <div><?php if ($_SESSION['user_role'] == "admin") { ?><button class="btn btn-dark mx-2" id="add_column"><i class="far fa-plus-square"></i> Nueva columna</button><?php } ?></div>
                             <div>
                                 <div class="d-flex gap-3 mb-4 flex-wrap">
                                     <?php if ($_SESSION['user_role'] == "admin") { ?>
@@ -143,7 +143,7 @@
 
                                 </div>
                                 <?php if ($ticket == 'finalizado') { ?> <div><button class="btn btn-success" style="padding-top: 0 !important; height: 25px" title="Exportar a excel" id="finished_excel"><i class="fas fa-file-excel"></i></button></div><?php } ?>
-                                <?php if ($ticket != $all_tickets[count($all_tickets) - 1]) { ?> <div class="ticket-options opt-clickeable points_clickeable"><span class="opt-clickeable">...</span></div><?php } ?>
+                                <?php if ($ticket != $all_tickets[count($all_tickets) - 1] && $_SESSION['user_role'] == "admin") { ?> <div class="ticket-options opt-clickeable points_clickeable"><span class="opt-clickeable">...</span></div><?php } ?>
                             </div>
                             <?php if ($ticket != $all_tickets[count($all_tickets) - 1]) { ?>
                                 <div class="ticket-options-container d-none opt-clickeable">
@@ -157,12 +157,16 @@
                                 </div><?php } ?>
 
                             <ul class="tasks">
+                                <div class="me-2">
+                                    <input class="mx-2" type="checkbox" onchange="all_check_ticket(this)">Todos
+                                </div>
                                 <?php
                                 if (isset($all_gestions) && is_array($all_gestions)) {
                                     foreach ($all_gestions as $gestion) {
+
                                         if ($gestion['etapa_actual'] == $ticket && ($_SESSION['user_role'] == 'admin' || $_SESSION['user_id'] == $gestion['user_id'])) {
                                 ?>
-                                            <li class="task task-container d-flex flex-row justify-content-between"
+                                            <li class="task task-container"
                                                 <?php if (strtolower($gestion['etapa_actual']) != "finalizado" || $_SESSION['user_role'] == 'admin') { ?>
                                                 draggable="true"
                                                 <?php } else { ?>
@@ -173,18 +177,42 @@
                                                 data-user-type="<?php echo $_SESSION['user_role']; ?>"
                                                 data-gestion-type="<?php echo $board_info[0]['board_type']; ?>"
                                                 data-gestion-id=" <?php echo $board_info[0]['board_type'] == "gestion_clientes" ? $gestion['id_gestion'] : $gestion['id_compra'] ?>">
-                                                <div>
-                                                    <?php echo ucfirst($gestion['name']) . " " . ucfirst($gestion['last_name']); ?>
-                                                    <span class="gestion-id d-none">
-                                                        <?php echo $board_info[0]['board_type'] == "gestion_clientes" ? $gestion['id_gestion'] : $gestion['id_compra'] ?>
-                                                    </span>
-                                                    <i class="fas fa-square" style="color: <?php
-                                                                                            echo ($gestion['prioridad'] == 1) ? 'green' : (($gestion['prioridad'] == 2) ? '#F5B027' : 'red');
-                                                                                            ?>; pointer-events: none"></i>
+                                                <div class="d-flex flex-row justify-content-between">
+                                                    <div class="me-2">
+                                                        <input type="checkbox" class="task-check" onclick="event.stopPropagation()">
+                                                    </div>
+                                                    <div>
+                                                        <?php echo ucfirst($gestion['name']) . " " . ucfirst($gestion['last_name']); ?>
+                                                        <span class="gestion-id d-none">
+                                                            <?php echo $board_info[0]['board_type'] == "gestion_clientes" ? $gestion['id_gestion'] : $gestion['id_compra'] ?>
+                                                        </span>
+                                                        <i class="fas fa-square" style="color: <?php
+                                                                                                echo ($gestion['prioridad'] == 1) ? 'green' : (($gestion['prioridad'] == 2) ? '#F5B027' : 'red');
+                                                                                                ?>; pointer-events: none"></i>
+
+                                                    </div>
+                                                    <?php if ($_SESSION['user_role'] == 'admin') { ?>
+                                                        <div> <i class="fas fa-trash-alt" style="color:#D92300; cursor:pointer;" onclick='delete_gestion(this)'></i></div>
+                                                    <?php } ?>
                                                 </div>
-                                                <?php if ($_SESSION['user_role'] == 'admin') { ?>
-                                                    <div> <i class="fas fa-trash-alt" style="color:#D92300; cursor:pointer;" onclick='delete_gestion(this)'></i></div>
-                                                <?php } ?>
+                                                <div class="w-100" style="font-size: 12px; color:#7c7c7c">
+                                                    <div class="w-100 text-center"><?php echo $gestion['user_name'] . " " . $gestion['user_last_name'];  ?></div>
+
+
+                                                    <?php if ($gestion['etapa_actual'] == "finalizado") { ?>
+                                                        <hr>
+                                                        <div class="d-flex flex-row justify-content-between">
+                                                            <div><?php if ($gestion['comision_paid'] == 0) { ?>
+                                                                    <div onclick="pay_comision(this)" data-gestion-info='<?php echo json_encode($gestion) ?>' style="color:red; cursor:pointer" title="Comisión sin pagar">Comisión sin pagar</div>
+                                                                <?php } else { ?>
+                                                                    <div style="color: green">Comisión pagada</div>
+                                                                    <div style="color: green"><?php echo date("d-m-Y", strtotime($gestion['date_comision'])); ?></div>
+                                                                <?php } ?>
+                                                            </div>
+                                                        </div>
+                                                    <?php } ?>
+                                                </div>
+
                                             </li>
                                 <?php
                                         }

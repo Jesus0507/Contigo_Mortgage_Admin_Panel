@@ -436,6 +436,14 @@ class boardsController
         echo  $model->update_board(strtolower(implode('/', $etapas)), $_POST['id_board']);
     }
 
+    public function save_comision(){
+        $modelo = new boards_model();
+        $tipo_gestion = $_POST['tipo_gestion'];
+        $pago = $_POST['pago'];
+        $fechaPago = $_POST['fechaPago'];
+        $id_gestion = $_POST['id_gestion'];
+        echo $modelo->save_comision($id_gestion,$pago,$fechaPago,$tipo_gestion);
+    }
 
     public function update_board_access()
     {

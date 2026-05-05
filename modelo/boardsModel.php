@@ -291,7 +291,7 @@ class boards_model
 
 	public function get_boards_gestions($id_board)
 	{
-		$query = "SELECT c.name, c.last_name, g.* from clients c, gestion g where g.id_board = $id_board and c.client_id = g.client_id;";
+		$query = "SELECT c.name, c.last_name, g.*, u.name as user_name, u.last_name as user_last_name from clients c, gestion g, users u where g.id_board = $id_board and c.client_id = g.client_id and g.user_id = u.user_id;";
 		try {
 			$users = [];
 			$resultado = $this->conexion->prepare($query);
@@ -306,9 +306,21 @@ class boards_model
 		}
 	}
 
+	public function save_comision($id, $pago, $fecha, $tipo){
+		$id_board = $tipo == "gestion"? "id_gestion" : "id_compra";
+			$query = "UPDATE $tipo SET comision_paid = $pago, date_comision = '$fecha'  WHERE $id_board = $id";
+		try {
+			$resultado = $this->conexion->prepare($query);
+			$resultado->execute();
+			return true;
+		} catch (PDOException $e) {
+			return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
+		}
+	}
+
 	public function get_boards_compras($id_board)
 	{
-		$query = "SELECT c.name, c.last_name, co.* from clients c, compras co where co.id_board = $id_board and c.client_id = co.client_id;";
+		$query = "SELECT c.name, c.last_name, co.*,  u.name as user_name, u.last_name as user_last_name from clients c, compras co, users u where co.id_board = $id_board and c.client_id = co.client_id and co.user_id = u.user_id;";
 		try {
 			$users = [];
 			$resultado = $this->conexion->prepare($query);
