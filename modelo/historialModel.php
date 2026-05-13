@@ -34,6 +34,7 @@ class historial_model
             $resultado->execute();
             return true;
         } catch (PDOException $e) {
+            $this->conexion->escribir_log("Error en Registro: " . $e->getMessage()." Query:".$query, 'debug_registro.txt');
             return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
         }
     }
@@ -52,6 +53,7 @@ class historial_model
             }
             return $users;
         } catch (PDOException $e) {
+            $this->conexion->escribir_log("Error en Registro: " . $e->getMessage()." Query:".$query, 'debug_registro.txt');
             return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
         }
     }

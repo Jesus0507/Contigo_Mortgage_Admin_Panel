@@ -11,7 +11,7 @@
                 <div class="container-fluid px-4">
                     <h1 class="mt-4">Para ti</h1>
                     <div class="row">
-                        <?php if ($_SESSION['user_role'] == "admin") { ?>
+                        <?php if ($_SESSION['user_role'] != "user") { ?>
                             <div class="col-xl-3 col-md-6">
                                 <div class="card contigo-blue text-white mb-4">
                                     <div class="card-body d-flex flex-row justify-content-between">
@@ -143,7 +143,7 @@
                             <div class="d-flex flex-row">
                                 <div style="color: green; font-weight: bold;">Meta Mensual <?php echo $monto_mensual[0]['mes'] . "  /  " . $monto_mensual[0]['anio'] . "  :" ?></div>
                                 <div><input disabled style="height:30px" class="form-control" id="meta_mensual_input" placeholder="Meta mensual" value="<?php echo $monto_mensual[0]['monto_meta'] ?>"></div>
-                                <div><button id="monto_max_btn" class="btn btn-primary" style="height: 30px; padding-top: 3px !important"><i class="fas fa-pencil-alt"></i></button></div>
+                                <?php if ($_SESSION['user_role'] == 'admin') { ?> <div><button id="monto_max_btn" class="btn btn-primary" style="height: 30px; padding-top: 3px !important"><i class="fas fa-pencil-alt"></i></button></div><?php } ?>
                             </div>
                         </div>
                         <div id="graficos_section_container" class="graficos-section-container" style="position: relative; bottom: 0px;">
@@ -379,7 +379,7 @@
                                                 placeholder="Buscar por nombre de cliente, agente o correo..."
                                                 onkeyup="updateSeguimientoChart()">
                                         </div>
-                                     
+
                                     </div>
 
                                     <div id="container-scroll" style="width:100% !important;height:200px; overflow-y: auto; overflow-x: hidden; border: 1px solid #eee;">
@@ -566,7 +566,7 @@
     <script src="<?php echo v_asset('vista/js/datatables-simple-demo.js'); ?>"></script>
     <script src="<?php echo v_asset('vista/js/main_stadistics.js'); ?>"></script>
 
-    <?php if ($_SESSION['user_role'] == "admin") { ?>
+    <?php if ($_SESSION['user_role'] != "user") { ?>
         <script src="<?php echo v_asset('vista/js/main_reports.js'); ?>"></script>
         <script src="<?php echo v_asset('vista/js/main_monto_max.js'); ?>"></script>
     <?php } ?>

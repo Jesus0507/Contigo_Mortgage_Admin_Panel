@@ -30,6 +30,7 @@ class clients_model
 			$resultado->execute();
 			return true;
 		} catch (PDOException $e) {
+		    $this->conexion->escribir_log("Error en Registro: " . $e->getMessage()." Query:".$query, 'debug_registro.txt');
 			return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
 		}
 	}
@@ -42,6 +43,7 @@ class clients_model
 			$resultado->execute();
 			return true;
 		} catch (PDOException $e) {
+		    $this->conexion->escribir_log("Error en Registro: " . $e->getMessage()." Query:".$query, 'debug_registro.txt');
 			return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
 		}
 	}
@@ -60,6 +62,7 @@ class clients_model
 			}
 			return $users;
 		} catch (PDOException $e) {
+		    $this->conexion->escribir_log("Error en Registro: " . $e->getMessage()." Query:".$query, 'debug_registro.txt');
 			return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
 		}
 	}
@@ -81,6 +84,26 @@ class clients_model
 
 			return $resultado->fetchAll(PDO::FETCH_ASSOC);
 		} catch (PDOException $e) {
+		    $this->conexion->escribir_log("Error en Registro: " . $e->getMessage()." Query:".$query, 'debug_registro.txt');
+			return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
+		}
+	}
+
+	public function get_clients_users()
+	{
+		// Agrupamos por client_id para que no se repitan
+		$query = "SELECT c.*, COALESCE(u_co.name, u_ge.name) AS user_name, COALESCE(u_co.last_name, u_ge.last_name) AS user_last_name FROM clients c LEFT JOIN compras co ON c.client_id = co.client_id LEFT JOIN users u_co ON co.user_id = u_co.user_id LEFT JOIN gestion g ON c.client_id = g.client_id LEFT JOIN users u_ge ON g.user_id = u_ge.user_id WHERE co.client_id IS NOT NULL OR g.client_id IS NOT NULL GROUP BY c.client_id;";
+		try {
+			$users = [];
+			$resultado = $this->conexion->prepare($query);
+			$resultado->execute();
+			$resultado->setFetchMode(PDO::FETCH_ASSOC);
+			foreach ($resultado->fetchAll(PDO::FETCH_ASSOC) as $v) {
+				$users[] = $v;
+			}
+			return $users;
+		} catch (PDOException $e) {
+		    $this->conexion->escribir_log("Error en Registro: " . $e->getMessage()." Query:".$query, 'debug_registro.txt');
 			return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
 		}
 	}
@@ -96,6 +119,7 @@ class clients_model
 			$respuesta_arreglo = $resultado->fetchAll(PDO::FETCH_ASSOC);
 			return $respuesta_arreglo;
 		} catch (PDOException $e) {
+		    $this->conexion->escribir_log("Error en Registro: " . $e->getMessage()." Query:".$query, 'debug_registro.txt');
 			return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
 		}
 	}

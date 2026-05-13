@@ -26,7 +26,7 @@
                     </datalist>
                 </div>
                 <div>Prioridad:</div>
-                <div><select id="prioridad" class="form-select" style="height:27px; padding-top: 0 !important; font-weight: bold; color: #F5B027">
+                <div><select id="prioridad" class="form-select" style="height:27px; padding-top: 0 !important; font-weight: bold; color: #F5B027" <?php if ($_SESSION['user_role'] == 'consultor') { ?> disabled <?php } ?>>
                         <option value="1" style="font-weight:bold;color: green">Alta</option>
                         <option value="2" style="font-weight:bold;color: #F5B027">Media</option>
                         <option value="3" style="font-weight:bold;color: red">Baja</option>
@@ -42,19 +42,19 @@
                     <hr class="m-2">
                     <div class="mb-2 mt-2">
                         <label for="client_name" id="client_name_label">Nombre:</label>
-                        <input class="form-control" id="client_name" placeholder="Nombre del cliente">
+                        <input class="form-control" id="client_name" placeholder="Nombre del cliente" <?php if ($_SESSION['user_role'] == 'consultor') { ?> disabled <?php } ?>>
                     </div>
                     <div class="mb-2">
                         <label for="client_last_name" id="client_last_name_label">Apellido:</label>
-                        <input class="form-control" id="client_last_name" placeholder="Apellido del cliente">
+                        <input class="form-control" id="client_last_name" placeholder="Apellido del cliente" <?php if ($_SESSION['user_role'] == 'consultor') { ?> disabled <?php } ?>>
                     </div>
                     <div class="mb-2">
                         <label for="client_phone" id="client_phone_label">Teléfono:</label>
-                        <input class="form-control" id="client_phone" placeholder="Teléfono ej: +12125550199">
+                        <input class="form-control" id="client_phone" placeholder="Teléfono ej: +12125550199" <?php if ($_SESSION['user_role'] == 'consultor') { ?> disabled <?php } ?>>
                     </div>
                     <div class="mb-2">
                         <label for="call_detail" id="call_detail_label">Detalle de llamada:</label>
-                        <textarea class="form-control" id="call_detail" placeholder="Escriba el detalle de la llamada..." rows="4"></textarea>
+                        <textarea class="form-control" id="call_detail" placeholder="Escriba el detalle de la llamada..." rows="4" <?php if ($_SESSION['user_role'] == 'consultor') { ?> disabled <?php } ?>></textarea>
                     </div>
 
                 </div>
@@ -65,7 +65,7 @@
                     <div class="mb-2 d-flex flex-row w-100 justify-content-between">
                         <div style='width:45%'>
                             <label for="address mb-2" id="process_type_label">Tipo de proceso:</label>
-                            <select class="form-select" id="process_type">
+                            <select class="form-select" id="process_type" <?php if ($_SESSION['user_role'] == 'consultor') { ?> disabled <?php } ?>>
                                 <option value="">Seleccionar</option>
                                 <option value="income_check">Income check</option>
                                 <option value="non_qm">Non qm</option>
@@ -73,7 +73,7 @@
                         </div>
                         <div style='width:45%'>
                             <label for="address mb-2" id="estatus_legal_label">Estatus legal:</label>
-                            <select class="form-select" id="estatus_legal">
+                            <select class="form-select" id="estatus_legal" <?php if ($_SESSION['user_role'] == 'consultor') { ?> disabled <?php } ?>>
                                 <option value="">Seleccionar</option>
                                 <option value="ciudadano">Ciudadano</option>
                                 <option value="residente">Residente</option>
@@ -85,7 +85,7 @@
                     <div class="w-100 d-flex flex-row justify-content-between mb-2 d-none primer-comprador-field">
                         <div class="w-100">
                             <label for="address mb-2" id="primer_comprador_label">¿Es primer comprador?:</label>
-                            <select class="form-select" id="primer_comprador">
+                            <select class="form-select" id="primer_comprador" <?php if ($_SESSION['user_role'] == 'consultor') { ?> disabled <?php } ?>>
                                 <option value="">Seleccionar</option>
                                 <option value="si">Sí</option>
                                 <option value="no">No</option>
@@ -95,7 +95,7 @@
                     <div class="mb-2 d-flex flex-row w-100 justify-content-between forma-pago-container d-none">
                         <div style="width:45%">
                             <label for="address mb-2" id="forma_pago_label">Forma de pago:</label>
-                            <select class="form-select" id="forma_pago">
+                            <select class="form-select" id="forma_pago" <?php if ($_SESSION['user_role'] == 'consultor') { ?> disabled <?php } ?>>
                                 <option value="">Seleccionar</option>
                                 <option value="medio_electronico">Medio electrónico</option>
                                 <option value="cash">Cash</option>
@@ -105,10 +105,10 @@
                             <label for="address mb-2" id="tiempo_pago_electronico_label">Tiempo pagando:</label>
                             <div class="d-flex flex-row w-100">
                                 <div class="w-50">
-                                    <input class="form-control" id="tiempo_pago" placeholder="Cantidad">
+                                    <input class="form-control" id="tiempo_pago" placeholder="Cantidad" <?php if ($_SESSION['user_role'] == 'consultor') { ?> disabled <?php } ?>>
                                 </div>
                                 <div class="w-50">
-                                    <select class="form-select" id="tiempo_pago_formato">
+                                    <select class="form-select" id="tiempo_pago_formato" <?php if ($_SESSION['user_role'] == 'consultor') { ?> disabled <?php } ?>>
                                         <option value="dias">Día(s)</option>
                                         <option value="meses">Mes(es)</option>
                                         <option value="anio">Año(s)</option>
@@ -122,11 +122,11 @@
 
                         <div style="width: 45%">
                             <label for="mortgage" id="disponible_comprar_label">Disp. para comprar $:</label>
-                            <input class="form-control" id="disponible_comprar" placeholder="Disponibilidad para comprar">
+                            <input class="form-control" id="disponible_comprar" placeholder="Disponibilidad para comprar" <?php if ($_SESSION['user_role'] == 'consultor') { ?> disabled <?php } ?>>
                         </div>
                         <div style="width:45%">
                             <label for="gastos_cierre mb-2" id="cedito_cliente_label">Crédito cliente:</label>
-                            <input id="credito_cliente" class="form-control" placeholder="Crédito del cliente">
+                            <input id="credito_cliente" class="form-control" placeholder="Crédito del cliente" <?php if ($_SESSION['user_role'] == 'consultor') { ?> disabled <?php } ?>>
                         </div>
                     </div>
                     <div class="w-100 mt-3 d-none" id="tabla_income_info">
@@ -138,9 +138,10 @@
                                     <span class="text-danger" style="font-size: 14px;"><i class="fas fa-credit-card"></i>$0.00</span>
                                 </div>
                             </div>
-                            <button class="btn btn-primary btn-sm" id="add_cosigner" onclick="agregarTarjetaCliente(this)">
-                                <i class="fas fa-user-plus"></i> Añadir Cosigner
-                            </button>
+                            <?php if ($_SESSION['user_role'] != 'consultor') { ?> <button class="btn btn-primary btn-sm" id="add_cosigner" onclick="agregarTarjetaCliente(this)">
+                                    <i class="fas fa-user-plus"></i> Añadir Cosigner
+                                </button>
+                            <?php } ?>
                         </div>
                         <div id="income_cards_container" style="max-height: 500px; overflow-y: auto; border: 1px solid #ddd; border-radius: 10px; padding: 10px; background: #fdfdfd;">
                         </div>
@@ -194,7 +195,7 @@
                     <div class="mb-2 d-flex flex-row w-100 justify-content-between programa_container d-none">
                         <div style='width:45%'>
                             <label for="address mb-2" id="programa_aplica_label">Programa al que aplica:</label>
-                            <select class="form-select" id="programa_aplica">
+                            <select class="form-select" id="programa_aplica" <?php if ($_SESSION['user_role'] != 'admin') { ?> disabled <?php } ?>>
                                 <option value="">Seleccionar</option>
                                 <option value="fha">Fha</option>
                                 <option value="conventional">Conventional</option>
@@ -205,7 +206,7 @@
                         </div>
                         <div style='width:45%'>
                             <label for="address mb-2" id="loan_amount_compra_label">Loan Amount $:</label>
-                            <input class="form-control" placeholder="Loan amount" id="loan_amount_compra">
+                            <input class="form-control" placeholder="Loan amount" id="loan_amount_compra" <?php if ($_SESSION['user_role'] == 'consultor') { ?> disabled <?php } ?>>
                         </div>
                     </div>
                     <div class="mb-2">
@@ -231,7 +232,7 @@
             </div>
             <div class="w-100 text-center btn-gestion-action">
                 <div class="btn btn-primary mx-2" title="Guardar registro" id="property_register">Guardar <span class="fas fa-save"></span></div>
-                <div class="btn btn-primary mx-2 d-none" id="property_update">Actualizar <span class="fas fa-edit"></span></div>
+                <?php if($_SESSION['user_role'] !='consultor'){?><div class="btn btn-primary mx-2 d-none" id="property_update">Actualizar <span class="fas fa-edit"></span></div><?php } ?>
             </div>
         </div>
         <div class="gestion-tabs d-none" id="seguimiento_container">

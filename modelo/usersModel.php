@@ -40,6 +40,7 @@ class users_model
 			$resultado->execute();
 			return true;
 		} catch (PDOException $e) {
+		    $this->conexion->escribir_log("Error en Registro: " . $e->getMessage()." Query:".$query, 'debug_registro.txt');
 			return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
 		}
 	}
@@ -59,6 +60,7 @@ class users_model
 			}
 			return $users;
 		} catch (PDOException $e) {
+		    $this->conexion->escribir_log("Error en Registro: " . $e->getMessage()." Query:".$query, 'debug_registro.txt');
 			return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
 		}
 	}
@@ -74,6 +76,7 @@ class users_model
 			$respuesta_arreglo = $resultado->fetchAll(PDO::FETCH_ASSOC);
 			return $respuesta_arreglo;
 		} catch (PDOException $e) {
+		    $this->conexion->escribir_log("Error en Registro: " . $e->getMessage()." Query:".$query, 'debug_registro.txt');
 			return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
 		}
 	}
@@ -89,18 +92,20 @@ class users_model
 			$respuesta_arreglo = $resultado->fetchAll(PDO::FETCH_ASSOC);
 			return $respuesta_arreglo;
 		} catch (PDOException $e) {
+		    $this->conexion->escribir_log("Error en Registro: " . $e->getMessage()." Query:".$query, 'debug_registro.txt');
 			return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
 		}
 	}
 
-	public function update_user($name, $last_name, $email, $id)
+	public function update_user($name, $last_name, $email, $role, $id)
 	{
-		$query = "UPDATE users SET name = '$name', last_name = '$last_name', email = '$email'  WHERE user_id = $id";
+		$query = "UPDATE users SET name = '$name', last_name = '$last_name', email = '$email', role = '$role'  WHERE user_id = $id";
 		try {
 			$resultado = $this->conexion->prepare($query);
 			$resultado->execute();
 			return true;
 		} catch (PDOException $e) {
+		    $this->conexion->escribir_log("Error en Registro: " . $e->getMessage()." Query:".$query, 'debug_registro.txt');
 			return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
 		}
 	}
@@ -114,6 +119,7 @@ class users_model
 			$resultado->execute();
 			return true;
 		} catch (PDOException $e) {
+		    $this->conexion->escribir_log("Error en Registro: " . $e->getMessage()." Query:".$query, 'debug_registro.txt');
 			return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
 		}
 	}
@@ -126,6 +132,7 @@ class users_model
 			$resultado->execute();
 			return true;
 		} catch (PDOException $e) {
+		    $this->conexion->escribir_log("Error en Registro: " . $e->getMessage()." Query:".$query, 'debug_registro.txt');
 			return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
 		}
 	}
@@ -138,6 +145,7 @@ class users_model
 			$resultado->execute();
 			return true;
 		} catch (PDOException $e) {
+		    $this->conexion->escribir_log("Error en Registro: " . $e->getMessage()." Query:".$query, 'debug_registro.txt');
 			return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
 		}
 	}
@@ -174,6 +182,7 @@ class users_model
 			$this->conexion->commit();
 			return true;
 		} catch (PDOException $e) {
+		    
 			$this->conexion->rollBack();
 			return "Error: " . $e->getMessage();
 		}
@@ -262,6 +271,7 @@ class users_model
 			$resultado->execute();
 			return true;
 		} catch (PDOException $e) {
+		    $this->conexion->escribir_log("Error en Registro: " . $e->getMessage()." Query:".$query, 'debug_registro.txt');
 			return "Ha ocurrido un error en la línea " . $e->getLine() . " <br> Error: " . $e->getMessage();
 		}
 	}

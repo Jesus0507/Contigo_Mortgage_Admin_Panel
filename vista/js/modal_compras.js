@@ -666,17 +666,17 @@ close_btn.onclick = function () {
         }
     }
     else {
-        console.log(tieneCambios)
+      //  console.log(tieneCambios)
         tieneCambios = camposVisibles.some(el => {
             // console.log(el);
             if (el === monto_max || el === gastos_cierre || el == document.getElementById("total_requerido") || el == loan_amount || el == document.getElementById("prioridad")) return false;
-            console.log(el);
+           // console.log(el);
             return el.value.trim() !== "" && el.value !== "Seleccionar";
         });
-        console.log(tieneCambios);
+       // console.log(tieneCambios);
     }
 
-    console.log(tieneCambios);
+  //  console.log(tieneCambios);
     if (tieneCambios) {
         Swal.fire({
             title: '¿Estás seguro?',
@@ -1560,7 +1560,7 @@ function blurMoney(input) {
  */
 function resetIncomeSection() {
     // 1. Limpiar el contenedor visual de las tarjetas
-    console.log("reseteando");
+   // console.log("reseteando");
     const container = document.getElementById('income_cards_container');
     if (container) {
         container.innerHTML = "";
