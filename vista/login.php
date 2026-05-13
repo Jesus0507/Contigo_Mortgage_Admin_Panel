@@ -47,9 +47,6 @@
                                         </div>
                                     </form>
                                 </div>
-                                <div class="card-footer text-center py-3 text-light">
-                                    <div class="small"><a href="register.php" class="text-light">Registrarse</a></div>
-                                </div>
                             </div>
                         </div>
                     </div>

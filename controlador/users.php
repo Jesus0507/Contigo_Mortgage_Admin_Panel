@@ -42,7 +42,7 @@ class usersController
     public function add_user()
     {
         $modelo = new users_model();
-        $modelo->set_user($_POST['name'], $_POST['last_name'], 'user', strtolower($_POST['email']), $_POST['psw'], 1);
+        $modelo->set_user($_POST['name'], $_POST['last_name'], $_POST['role'], strtolower($_POST['email']), $_POST['psw'], 1);
         $registros = $modelo->search_user();
 
         if (count($registros) > 0) {
@@ -61,7 +61,7 @@ class usersController
     public function update()
     {
         $modelo = new users_model();
-        echo $modelo->update_user($_POST['name'], $_POST['last_name'], strtolower($_POST['email']), $_POST['user_id']);
+        echo $modelo->update_user($_POST['name'], $_POST['last_name'], strtolower($_POST['email']), strtolower($_POST['role']), $_POST['user_id']);
     }
 
     public function update_security()

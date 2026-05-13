@@ -25,6 +25,7 @@
                                         <th>Nombre</th>
                                         <th>Apellido</th>
                                         <th>Correo</th>
+                                        <th>Tipo usuario</th>
                                         <th>Fecha de creación</th>
                                         <th>Acciones</th>
                                     </tr>
@@ -35,6 +36,7 @@
                                             <td class="cell-name"><?php echo ucfirst($user['name']) ?></td>
                                             <td class="cell-lastname"><?php echo ucfirst($user['last_name']) ?></td>
                                             <td class="cell-email"><?php echo $user['email'] ?></td>
+                                            <td class="cell-email"><?php echo $user['role'] == "user"? "agente" : "consultor"; ?></td>
                                             <td><?php echo $user['date_created'] ?></td>
                                             <td>
                                                 <div class="d-flex flex-row justify-content-around w-100">

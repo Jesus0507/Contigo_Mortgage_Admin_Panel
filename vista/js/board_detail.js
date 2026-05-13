@@ -145,48 +145,49 @@ document.body.onclick = function (ev) {
     }
 }
 
-
-add_column.onclick = function () {
-    add_column.disabled = true;
-    var container_tasks = document.querySelector(".container-tasks");
-    var all_tasks = container_tasks.querySelectorAll(".task-column");
-    var new_column_div = document.createElement('div');
-    var div_input = document.createElement("input");
-    div_input.className = "form-control w-100";
-    div_input.placeholder = "Nombre de la columna";
-    new_column_div.appendChild(div_input);
-    new_column_div.className = "add-column-div";
-    var new_col_div_opt = document.createElement("div");
-    new_col_div_opt.className = "w-50 mx-auto d-flex flex-row justify-content-between mt-4";
-    var accept_btn = document.createElement("button");
-    var deny_btn = document.createElement("button");
-    accept_btn.className = deny_btn.className = 'btn btn-light';
-    accept_btn.innerHTML = "<i class='fas fa-check'></i>"
-    deny_btn.innerHTML = "<i class='fas fa-close'></i>";
-    new_col_div_opt.appendChild(accept_btn);
-    new_col_div_opt.appendChild(deny_btn);
-    new_column_div.appendChild(new_col_div_opt);
-    container_tasks.innerHTML = "";
-    all_tasks.forEach((task) => {
-        if (task == all_tasks[all_tasks.length - 1]) {
-            container_tasks.append(new_column_div);
-            div_input.focus();
-        }
-        container_tasks.appendChild(task);
-    });
-
-    accept_btn.onclick = function () {
-        add_new_column_val(div_input);
-    }
-
-    deny_btn.onclick = function () {
-        add_column.disabled = false;
-        div_input.style.border = "none";
-        div_input.value = "";
+if (add_column) {
+    add_column.onclick = function () {
+        add_column.disabled = true;
+        var container_tasks = document.querySelector(".container-tasks");
+        var all_tasks = container_tasks.querySelectorAll(".task-column");
+        var new_column_div = document.createElement('div');
+        var div_input = document.createElement("input");
+        div_input.className = "form-control w-100";
+        div_input.placeholder = "Nombre de la columna";
+        new_column_div.appendChild(div_input);
+        new_column_div.className = "add-column-div";
+        var new_col_div_opt = document.createElement("div");
+        new_col_div_opt.className = "w-50 mx-auto d-flex flex-row justify-content-between mt-4";
+        var accept_btn = document.createElement("button");
+        var deny_btn = document.createElement("button");
+        accept_btn.className = deny_btn.className = 'btn btn-light';
+        accept_btn.innerHTML = "<i class='fas fa-check'></i>"
+        deny_btn.innerHTML = "<i class='fas fa-close'></i>";
+        new_col_div_opt.appendChild(accept_btn);
+        new_col_div_opt.appendChild(deny_btn);
+        new_column_div.appendChild(new_col_div_opt);
         container_tasks.innerHTML = "";
         all_tasks.forEach((task) => {
+            if (task == all_tasks[all_tasks.length - 1]) {
+                container_tasks.append(new_column_div);
+                div_input.focus();
+            }
             container_tasks.appendChild(task);
         });
+
+        accept_btn.onclick = function () {
+            add_new_column_val(div_input);
+        }
+
+        deny_btn.onclick = function () {
+            add_column.disabled = false;
+            div_input.style.border = "none";
+            div_input.value = "";
+            container_tasks.innerHTML = "";
+            all_tasks.forEach((task) => {
+                container_tasks.appendChild(task);
+            });
+        }
     }
 }
 
@@ -265,7 +266,7 @@ function load_compras_modal_info(ev) {
             taskElement.style.cursor = "pointer";
         }
     }).done(function (result) {
-        console.log(result);
+    //    console.log(result);
         var resParsed = JSON.parse(result);
         var resultado = resParsed["gestion_info"][0];
         var notas = resParsed['notas'];
@@ -1009,11 +1010,11 @@ function applyBoardFilters() {
         const taskName = (ticket.textContent || ticket.innerText).toLowerCase();
 
         // Lógica de coincidencia TRIPLE
-        const matchesAgent = selectedAgents.length === 0 || selectedAgents.includes(agentId);
-        const matchesStatus = selectedStatus.length === 0 || selectedStatus.includes(status);
+        const matchesAgent = selectedAgents.length != 0 && selectedAgents.includes(agentId);
+        const matchesStatus = selectedStatus.length != 0 && selectedStatus.includes(status);
         const matchesSearch = searchText === "" || taskName.includes(searchText);
 
-        // Mostrar solo si CUMPLE LAS TRES CONDICIONES
+    //    console.log(matchesAgent, matchesStatus, matchesSearch);
         if (matchesAgent && matchesStatus && matchesSearch) {
             ticket.classList.remove('d-none');
             ticket.style.display = "block";
@@ -1179,7 +1180,7 @@ function delete_gestion(el) {
     });
 }
 
-function all_check_ticket(el){
+function all_check_ticket(el) {
     var all_checks_tickets = el.parentElement.parentElement.querySelectorAll(".task-check");
     Array.from(all_checks_tickets).forEach((ticket) => {
         ticket.checked = el.checked;
@@ -1188,7 +1189,7 @@ function all_check_ticket(el){
 
 function pay_comision(el) {
     const gestion_info = JSON.parse(el.dataset.gestionInfo);
-    
+
     // Obtener fecha de hoy en formato YYYY-MM-DD
     const today = new Date().toISOString().split('T')[0];
 
@@ -1228,14 +1229,14 @@ function pay_comision(el) {
             };
 
             console.log("Datos a enviar:", dataToSend);
-            
+
             // Aquí puedes llamar a tu $.ajax para guardar en DB 
             // /*
             $.ajax({
                 type: "POST",
                 url: "index.php?c=boards&a=save_comision",
                 data: dataToSend
-            }).done(function(res) {
+            }).done(function (res) {
                 console.log(res);
                 Swal.fire('¡Éxito!', 'La comisión ha sido registrada.', 'success');
                 location.reload();
@@ -1243,4 +1244,23 @@ function pay_comision(el) {
             // // */
         }
     });
+}
+
+function cleanFilters() {
+    var all_agent_filters = Array.from(document.querySelectorAll(".filter-check-agent"));
+    var all_status_filters = Array.from(document.querySelectorAll(".filter-check-status"));
+
+    all_agent_filters.forEach((el) => el.checked = true);
+    all_status_filters.forEach((el) => el.checked = true);
+    applyBoardFilters();
+}
+
+function allFilters(type, checkElement) {
+    var all_agent_filters = Array.from(document.querySelectorAll(".filter-check-agent"));
+    var all_status_filters = Array.from(document.querySelectorAll(".filter-check-status"));
+    var filterSelected = type == 0 ? all_agent_filters : all_status_filters;
+
+    filterSelected.forEach((el) => el.checked = checkElement.checked);
+    setTimeout(()=>applyBoardFilters(), 0)
+    
 }

@@ -17,9 +17,9 @@ class clientsController
             session_destroy();
         } else {
             $modelo = new clients_model();
-            $clients = $modelo->get_clients();
+            $clients = $modelo->get_clients_users();
             $clients_by_user = $modelo->get_clients_by_user($_SESSION['user_id']);
-            if($_SESSION['user_role'] != 'admin' ) $clients = $clients_by_user;
+            if($_SESSION['user_role'] == 'user' ) $clients = $clients_by_user;
             require_once "vista/clients.php";
         }
     }

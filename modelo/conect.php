@@ -47,6 +47,24 @@ class base_datos extends PDO
 	}
 
 
+		
+	public function escribir_log($mensaje, $archivo = 'error_sistema.txt') {
+        $directorio = __DIR__ . '/logs';
+        $ruta = $directorio . '/' . $archivo;
+    
+        // 1. Si no existe la carpeta, la crea con permisos de escritura
+        if (!is_dir($directorio)) {
+            mkdir($directorio, 0775, true); 
+        }
+
+        $fecha = date("Y-m-d H:i:s");
+        $contenido = "[$fecha] " . $mensaje . PHP_EOL;
+    
+        // 2. Escribe el archivo. Si no existe, PHP lo crea automáticamente.
+        // FILE_APPEND: No borra lo que ya existe.
+        // LOCK_EX: Evita que dos procesos escriban al mismo tiempo (evita corrupción).
+        file_put_contents($ruta, $contenido, FILE_APPEND | LOCK_EX);
+    }
 
 
 	public function getRepConexion()

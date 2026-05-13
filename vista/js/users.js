@@ -7,6 +7,7 @@ function edit(btn) {
     const nameCell = cells[0];
     const lastNameCell = cells[1];
     const emailCell = cells[2];
+    const user_type = cells[3];
 
     // Obtenemos el ID del usuario desde la clase o data-id
     const userId = btn.getAttribute('data-id') || btn.classList[0];
@@ -22,10 +23,13 @@ function edit(btn) {
         const currentName = nameCell.innerText.trim();
         const currentLastName = lastNameCell.innerText.trim();
         const currentEmail = emailCell.innerText.trim();
+        const currentTypeUser = user_type.innerText.trim() == "agente" ? "selected" : "";
+        const currentTypeConsultor = user_type.innerText.trim() == "consultor" ? "selected" : "";
 
         nameCell.innerHTML = `<input type="text" class="form-control form-control-sm" value="${currentName}">`;
         lastNameCell.innerHTML = `<input type="text" class="form-control form-control-sm" value="${currentLastName}">`;
         emailCell.innerHTML = `<input type="email" class="form-control form-control-sm" value="${currentEmail}">`;
+        user_type.innerHTML =  `<select class="form-select form-select-sm"><option value="user" ${currentTypeUser}>Agente</option><option value="consultor" ${currentTypeConsultor}>Consultor</option> </select>`;
 
         // Ponemos el foco en el primer input
         nameCell.querySelector('input').focus();
@@ -35,6 +39,7 @@ function edit(btn) {
         const inputName = nameCell.querySelector('input').value;
         const inputLastName = lastNameCell.querySelector('input').value;
         const inputEmail = emailCell.querySelector('input').value;
+         const selectType = user_type.querySelector('select').value;
 
         if (inputName === "" || inputLastName === "" || inputEmail === "") {
             Swal.fire('Campos vacíos', 'Por favor completa todos los campos', 'warning');
@@ -48,6 +53,7 @@ function edit(btn) {
                 "name": inputName,
                 "last_name": inputLastName,
                 "email": inputEmail,
+                "role": selectType,
                 "user_id": userId
             }
         }).done(function (result) {
@@ -56,6 +62,7 @@ function edit(btn) {
                 nameCell.innerHTML = inputName.charAt(0).toUpperCase() + inputName.slice(1).toLowerCase();
                 lastNameCell.innerHTML = inputLastName.charAt(0).toUpperCase() + inputLastName.slice(1).toLowerCase();
                 emailCell.innerHTML = inputEmail.toLowerCase();
+                user_type.innerHTML = selectType.toLowerCase() == "user" ? "agente" : "consultor";
 
                 btn.innerHTML = "<i class='fas fa-pencil-alt'></i>";
                 btn.classList.add("edit-client");

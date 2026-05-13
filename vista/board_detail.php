@@ -33,7 +33,7 @@
                             <div><?php if ($_SESSION['user_role'] == "admin") { ?><button class="btn btn-dark mx-2" id="add_column"><i class="far fa-plus-square"></i> Nueva columna</button><?php } ?></div>
                             <div>
                                 <div class="d-flex gap-3 mb-4 flex-wrap">
-                                    <?php if ($_SESSION['user_role'] == "admin") { ?>
+                                    <?php if ($_SESSION['user_role'] != "admin") { ?>
                                         <div class="dropdown">
                                             <button class="btn btn-dark dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
                                                 <i class="fas fa-filter me-2"></i> Filtro
@@ -46,9 +46,10 @@
                                                             <button class="nav-link active text-start mb-1" data-bs-toggle="pill" data-bs-target="#tab-agentes" type="button" role="tab">
                                                                 Persona asignada
                                                             </button>
-                                                            <button class="nav-link text-start" data-bs-toggle="pill" data-bs-target="#tab-estados" type="button" role="tab">
+                                                            <button class="nav-link text-start mb-1" data-bs-toggle="pill" data-bs-target="#tab-estados" type="button" role="tab">
                                                                 Estado
                                                             </button>
+                                                            <button class="nav-link btn btn-dark text-start" onclick="cleanFilters()">Limpiar filtros</button>
                                                         </div>
                                                     </div>
 
@@ -60,18 +61,23 @@
                                                                 <input type="text" class="form-control border-start-0 filter-search" placeholder="Buscar persona asignada..." onkeyup="searchInTab(this)">
                                                             </div>
                                                             <div class="options-list" style="max-height: 250px; overflow-y: auto;">
+                                                                <div class="mx-2 form-check dropdown-item py-1">
+                                                                    <input class=" form-check-input" type="checkbox"
+                                                                    value="Todos"
+                                                                    onchange="allFilters(0, this)" checked><label class="w-100">Todos</label>
+                                                                </div>
                                                                 <?php
                                                                 $ids_con_gestion = array_column($all_gestions, 'user_id');
 
                                                                 foreach ($usuarios as $user) {
                                                                     if (in_array($user['user_id'], $ids_con_gestion)) {
                                                                 ?>
-                                                                        <div class="form-check dropdown-item py-1">
+                                                                        <div class="mx-2 form-check dropdown-item py-1">
                                                                             <input class="form-check-input filter-check-agent"
                                                                                 type="checkbox"
                                                                                 value="<?php echo $user['user_id']; ?>"
                                                                                 id="u<?php echo $user['user_id']; ?>"
-                                                                                onchange="applyBoardFilters()">
+                                                                                onchange="applyBoardFilters()" checked>
                                                                             <label class="form-check-label w-100" for="u<?php echo $user['user_id']; ?>">
                                                                                 <?php echo $user['name'] . " " . $user['last_name']; ?>
                                                                             </label>
@@ -89,18 +95,22 @@
                                                                 <input type="text" class="form-control border-start-0 filter-search" placeholder="Buscar estado..." onkeyup="searchInTab(this)">
                                                             </div>
                                                             <div class="options-list" style="max-height: 250px; overflow-y: auto;">
+                                                                <div class="mx-2 form-check dropdown-item py-1">
+                                                                    <input class=" form-check-input" type="checkbox"
+                                                                    value="Todos"
+                                                                    onchange="allFilters(1, this)" checked><label class="w-100">Todos</label>
+                                                                </div>
                                                                 <?php
                                                                 $etapas_unicas = array_unique(array_column($all_gestions, 'etapa_actual'));
-
                                                                 foreach ($etapas_unicas as $index => $etapa) {
                                                                     $etapa_label = strtoupper($etapa);
                                                                 ?>
-                                                                    <div class="form-check dropdown-item py-1">
+                                                                    <div class="mx-2 form-check dropdown-item py-1">
                                                                         <input class="form-check-input filter-check-status"
                                                                             type="checkbox"
                                                                             value="<?php echo $etapa_label ?>"
                                                                             id="status_<?php echo $index; ?>"
-                                                                            onchange="applyBoardFilters()">
+                                                                            onchange="applyBoardFilters()" checked>
                                                                         <label class="form-check-label w-100" for="status_<?php echo $index; ?>">
                                                                             <?php echo $etapa_label ?>
                                                                         </label>
@@ -118,7 +128,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div><button class="btn btn-primary mb-4 modal-btn" id="modal_btn"><i class="fas fa-ticket-alt"></i> <?php if ($board_info[0]['board_type'] == "gestion_clientes") echo "Agregar gestión" ?><?php if ($board_info[0]['board_type'] != "gestion_clientes") echo "Agregar proceso" ?></button></div>
+                        <div><button class="btn btn-primary mb-4 modal-btn <?php if($_SESSION['user_role'] == 'consultor'){echo 'd-none';}?>" id="modal_btn"><i class="fas fa-ticket-alt"></i> <?php if ($board_info[0]['board_type'] == "gestion_clientes") echo "Agregar gestión" ?><?php if ($board_info[0]['board_type'] != "gestion_clientes") echo "Agregar proceso" ?></button></div>
                     </div>
                 </div>
                 <div class="container-tasks">
@@ -164,7 +174,7 @@
                                 if (isset($all_gestions) && is_array($all_gestions)) {
                                     foreach ($all_gestions as $gestion) {
 
-                                        if ($gestion['etapa_actual'] == $ticket && ($_SESSION['user_role'] == 'admin' || $_SESSION['user_id'] == $gestion['user_id'])) {
+                                        if ($gestion['etapa_actual'] == $ticket && ($_SESSION['user_role'] != 'user' || $_SESSION['user_id'] == $gestion['user_id'])) {
                                 ?>
                                             <li class="task task-container"
                                                 <?php if (strtolower($gestion['etapa_actual']) != "finalizado" || $_SESSION['user_role'] == 'admin') { ?>
@@ -191,19 +201,19 @@
                                                                                                 ?>; pointer-events: none"></i>
 
                                                     </div>
-                                                    <?php if ($_SESSION['user_role'] == 'admin') { ?>
-                                                        <div> <i class="fas fa-trash-alt" style="color:#D92300; cursor:pointer;" onclick='delete_gestion(this)'></i></div>
-                                                    <?php } ?>
+
+                                                    <div><?php if ($_SESSION['user_role'] == 'admin') { ?> <i class="fas fa-trash-alt" style="color:#D92300; cursor:pointer;" onclick='delete_gestion(this)'></i> <?php } ?></div>
+
                                                 </div>
                                                 <div class="w-100" style="font-size: 12px; color:#7c7c7c">
                                                     <div class="w-100 text-center"><?php echo $gestion['user_name'] . " " . $gestion['user_last_name'];  ?></div>
 
 
-                                                    <?php if ($gestion['etapa_actual'] == "finalizado") { ?>
+                                                    <?php if ($gestion['etapa_actual'] == "finalizado" && $_SESSION['user_role'] != "user") { ?>
                                                         <hr>
                                                         <div class="d-flex flex-row justify-content-between">
                                                             <div><?php if ($gestion['comision_paid'] == 0) { ?>
-                                                                    <div onclick="pay_comision(this)" data-gestion-info='<?php echo json_encode($gestion) ?>' style="color:red; cursor:pointer" title="Comisión sin pagar">Comisión sin pagar</div>
+                                                                    <div <?php if ($_SESSION['user_role'] == 'admin') { ?> onclick="pay_comision(this)" data-gestion-info='<?php echo json_encode($gestion) ?>' <?php } ?> style="color:red; cursor:pointer" title="Comisión sin pagar">Comisión sin pagar</div>
                                                                 <?php } else { ?>
                                                                     <div style="color: green">Comisión pagada</div>
                                                                     <div style="color: green"><?php echo date("d-m-Y", strtotime($gestion['date_comision'])); ?></div>

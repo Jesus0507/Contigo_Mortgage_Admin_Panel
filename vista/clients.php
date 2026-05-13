@@ -22,6 +22,7 @@
                                         <th>Nombre</th>
                                         <th>Apellido</th>
                                         <th>Teléfono</th>
+                                        <?php if ($_SESSION['user_role'] != "user") { ?><th>Usuario asignado</th><?php } ?>
                                         <?php if ($_SESSION['user_role'] == "admin") { ?> <th>Acciones</th> <?php } ?>
                                     </tr>
                                 </thead>
@@ -31,6 +32,7 @@
                                             <td class="cell-name"><?php echo ucfirst($client['name']) ?></td>
                                             <td class="cell-lastname"><?php echo ucfirst($client['last_name']) ?></td>
                                             <td class="cell-phone"><?php echo $client['phone'] ?></td>
+                                              <?php if ($_SESSION['user_role'] != "user") { ?><td><?php echo $client['user_name']." ".$client['user_last_name']?></td><?php } ?>
                                             <?php if ($_SESSION['user_role'] == "admin") { ?>
                                                 <td>
                                                     <div class="d-flex flex-row justify-content-around w-100">

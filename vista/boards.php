@@ -31,7 +31,7 @@
                                     <th>Tipo de proceso</th>
                                     <th>Cantidad de procesos</th>
                                     <?php
-                                    if ($_SESSION['user_role'] == "admin") { ?>
+                                    if ($_SESSION['user_role'] != "user") { ?>
                                         <th>Estado</th>
                                     <?php } ?>
                                     <th>Creado por</th>
@@ -44,7 +44,7 @@
                             <tbody>
                                 <?php
                                 foreach ($boards as $board) {
-                                    if ((in_array($board['id_board'], $boards_users) && $board['enabled'] == 1) || $_SESSION['user_role'] == "admin") {
+                                    if ((in_array($board['id_board'], $boards_users) && $board['enabled'] == 1) || $_SESSION['user_role'] != "user") {
                                 ?>
 
                                         <tr>
@@ -52,7 +52,7 @@
                                             <td><?php echo $board['board_type'] == "gestion_clientes" ? "refinances" : "compras"; ?><span class="d-none hidden-id"><?php echo $board['id_board'] ?></span></td>
                                             <td>
                                                 <?php
-                                                if ($_SESSION['user_role'] == "admin") {
+                                                if ($_SESSION['user_role'] != "user") {
                                                     echo $board['total_gestiones'];
                                                 } else {
                                                     if (isset($users_gestions[$board['id_board']])) {
@@ -71,7 +71,7 @@
                                                 <span class="d-none hidden-id"><?php echo $board['id_board'] ?></span>
                                             </td>
                                             <?php
-                                            if ($_SESSION['user_role'] == "admin") { ?>
+                                            if ($_SESSION['user_role'] != "user") { ?>
                                                 <td><?php echo $board['enabled'] == 1 ? "Habilitado" : "Deshabilitado"; ?><span class="d-none hidden-id"><?php echo $board['id_board'] ?></span></td>
                                             <?php } ?>
                                             <td><?php echo $board['user_name'] . " " . $board['user_last_name'] ?><span class="d-none hidden-id"><?php echo $board['id_board'] ?></span></td>

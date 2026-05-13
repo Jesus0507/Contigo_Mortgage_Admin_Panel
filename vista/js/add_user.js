@@ -66,7 +66,8 @@ function registrar_usuario() {
             "name": form_inputs[0].value,
             "last_name": form_inputs[1].value,
             "email": form_inputs[2].value,
-            "psw": form_inputs[3].value
+            "psw": form_inputs[3].value,
+            "role": document.getElementById("user_role_select").value
         },
         error: function () {
             // Restaurar en caso de fallo crítico de red o error 500

@@ -25,7 +25,7 @@
                     </datalist>
                 </div>
                 <div>Prioridad:</div>
-                <div><select id="prioridad" class="form-select" style="height:27px; padding-top: 0 !important; color: #F5B027; font-weight: bold">
+                <div><select id="prioridad" class="form-select" style="height:27px; padding-top: 0 !important; color: #F5B027; font-weight: bold" <?php if ($_SESSION['user_role'] == 'consultor') { ?> disabled <?php } ?>>
                         <option value="1" style="font-weight:bold;color: green">Alta</option>
                         <option value="2" style="font-weight:bold;color: #F5B027">Media</option>
                         <option value="3" style="font-weight:bold;color: red">Baja</option>
@@ -42,19 +42,19 @@
                     <hr class="m-2">
                     <div class="mb-2 mt-2">
                         <label for="client_name" id="client_name_label">Nombre:</label>
-                        <input class="form-control" id="client_name" placeholder="Nombre del cliente">
+                        <input class="form-control" id="client_name" placeholder="Nombre del cliente" <?php if ($_SESSION['user_role'] == 'consultor') { ?> disabled <?php } ?>>
                     </div>
                     <div class="mb-2">
                         <label for="client_last_name" id="client_last_name_label">Apellido:</label>
-                        <input class="form-control" id="client_last_name" placeholder="Apellido del cliente">
+                        <input class="form-control" id="client_last_name" placeholder="Apellido del cliente" <?php if ($_SESSION['user_role'] == 'consultor') { ?> disabled <?php } ?>>
                     </div>
                     <div class="mb-2">
                         <label for="client_phone" id="client_phone_label">Teléfono:</label>
-                        <input class="form-control" id="client_phone" placeholder="Teléfono ej: +12125550199">
+                        <input class="form-control" id="client_phone" placeholder="Teléfono ej: +12125550199" <?php if ($_SESSION['user_role'] == 'consultor') { ?> disabled <?php } ?>>
                     </div>
                     <div class="mb-2">
                         <label for="call_detail" id="call_detail_label">Detalle de llamada:</label>
-                        <textarea class="form-control" id="call_detail" placeholder="Escriba el detalle de la llamada..." rows="4"></textarea>
+                        <textarea class="form-control" id="call_detail" placeholder="Escriba el detalle de la llamada..." rows="4" <?php if ($_SESSION['user_role'] == 'consultor') { ?> disabled <?php } ?>></textarea>
                     </div>
 
                 </div>
@@ -64,16 +64,16 @@
                     <hr class="m-2">
                     <div class="w-100 mb-2">
                         <label for="address mb-2" id="address_label">Dirección de la propiedad:</label>
-                        <input class="form-control" id="address" placeholder="Dirección">
+                        <input class="form-control" id="address" placeholder="Dirección" <?php if ($_SESSION['user_role'] == 'consultor') { ?> disabled <?php } ?>>
                     </div>
                     <div class="w-100 d-flex flex-row justify-content-between mb-2">
                         <div style="width:45%">
                             <label for="address mb-2" id="property_value_label">Valor de propiedad $:</label>
-                            <input class="form-control monto-input" id="property_value" placeholder="Valor $ ej: 24.500,60">
+                            <input class="form-control monto-input" id="property_value" placeholder="Valor $ ej: 24.500,60" <?php if ($_SESSION['user_role'] == 'consultor') { ?> disabled <?php } ?>>
                         </div>
                         <div style="width: 45%">
                             <label for="address" id="interes_actual_label">Interés actual:</label>
-                            <input class="form-control" id="interes_actual" placeholder="Interés actual % max 100">
+                            <input class="form-control" id="interes_actual" placeholder="Interés actual % max 100" <?php if ($_SESSION['user_role'] == 'consultor') { ?> disabled <?php } ?>>
                         </div>
                     </div>
 
@@ -81,11 +81,11 @@
 
                         <div style="width: 45%">
                             <label for="mortgage" id="mortgage_label">Mortgage actual $:</label>
-                            <input class="form-control monto-input" id="mortgage" placeholder="Mortgage">
+                            <input class="form-control monto-input" id="mortgage" placeholder="Mortgage" <?php if ($_SESSION['user_role'] == 'consultor') { ?> disabled <?php } ?>>
                         </div>
                         <div style="width:45%">
                             <label for="gastos_cierre mb-2" id="occupancy_label">Occupancy:</label>
-                            <select id="occupancy" class="form-select">
+                            <select id="occupancy" class="form-select" <?php if ($_SESSION['user_role'] == 'consultor') { ?> disabled <?php } ?>>
                                 <option value="">Seleccionar</option>
                                 <option value="primary_residence">Primary residence</option>
                                 <option value="investment_property">Invesment property</option>
@@ -98,10 +98,13 @@
                             <div>
                                 <label for="deudas_adicionales">Deudas adicionales: </label>
                             </div>
-                            <div>
-                                <button class="btn btn-primary" id="add_new_deuda"><span class="fas fa-plus"></span></button>
+                            <?php if ($_SESSION['user_role'] != "consultor") { ?>
+                                <div>
+                                    <button class="btn btn-primary" id="add_new_deuda"><span class="fas fa-plus"></span></button>
 
-                            </div>
+
+                                </div>
+                            <?php } ?>
                         </div>
                         <div class="mt-3 deudas-adicionales">
                             <div id="deudas_fields"></div>
@@ -201,8 +204,9 @@
             </div>
             <div class="w-100 text-center btn-gestion-action">
                 <div class="btn btn-primary mx-2" title="Guardar registro" id="property_register">Guardar <span class="fas fa-save"></span></div>
-
-                <div class="btn btn-primary mx-2 d-none" id="property_update">Actualizar <span class="fas fa-edit"></span></div>
+                <?php if ($_SESSION['user_role'] != 'consultor') { ?>
+                    <div class="btn btn-primary mx-2 d-none" id="property_update">Actualizar <span class="fas fa-edit"></span></div>
+                <?php } ?>
 
             </div>
         </div>

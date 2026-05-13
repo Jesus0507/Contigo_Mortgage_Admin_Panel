@@ -43,7 +43,15 @@
                                     </div>
 
                                 </div>
-                                <div class="w-100 text-center mt-5">
+                                <div class="w-75 mx-auto">
+                                     <label>Tipo de usuario:</label>
+                                    <select id="user_role_select" class="form-select">
+                                        <option value="user">Agente</option>
+                                        <option value="consultor">Consultor</option>
+                                    </select>
+                                </div>
+                                <div class="w-100 text-center mt-3">
+
                                     <div class="btn btn-primary mx-auto mt-4" id="btn_registro">Registrar</div>
                                 </div>
                             </div>

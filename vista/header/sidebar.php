@@ -2,7 +2,7 @@
             <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
                 <div class="sb-sidenav-menu">
                     <div class="nav">
-                        <?php if ($_SESSION['user_role'] == "admin") { ?>
+                        <?php if ($_SESSION['user_role'] != "user") { ?>
                             <a <?php if ($_GET['c'] == 'main') { ?> class="nav-link text-light" <?php } else { ?> class="nav-link" <?php } ?> href="index.php?c=main&a=main_view">
                                 <div <?php if ($_GET['c'] == 'main') { ?> class="sb-nav-link-icon text-light" <?php } else { ?> class="sb-nav-link-icon" <?php } ?>><i class="fas fa-user"></i></div>
                                 Para ti
