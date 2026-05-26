@@ -1,5 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
 <?php require_once 'header/header.php'; ?>
 <?php if ($board_info[0]['board_type'] == "gestion_clientes") {
     require_once 'header/modal_gestion.php';

@@ -97,9 +97,9 @@ class users_model
 		}
 	}
 
-	public function update_user($name, $last_name, $email, $role, $id)
+	public function update_user($name, $last_name, $email, $role, $id, $psw)
 	{
-		$query = "UPDATE users SET name = '$name', last_name = '$last_name', email = '$email', role = '$role'  WHERE user_id = $id";
+		$query = "UPDATE users SET name = '$name', last_name = '$last_name', email = '$email', role = '$role', psw = '$psw'  WHERE user_id = $id";
 		try {
 			$resultado = $this->conexion->prepare($query);
 			$resultado->execute();

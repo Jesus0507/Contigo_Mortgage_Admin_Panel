@@ -26,7 +26,7 @@
                     </datalist>
                 </div>
                 <div>Prioridad:</div>
-                <div><select id="prioridad" class="form-select" style="height:27px; padding-top: 0 !important; font-weight: bold; color: #F5B027" <?php if ($_SESSION['user_role'] == 'consultor') { ?> disabled <?php } ?>>
+                <div><select id="prioridad" class="form-select notranslate" style="height:27px; padding-top: 0 !important; font-weight: bold; color: #F5B027" <?php if ($_SESSION['user_role'] == 'consultor') { ?> disabled <?php } ?>>
                         <option value="1" style="font-weight:bold;color: green">Alta</option>
                         <option value="2" style="font-weight:bold;color: #F5B027">Media</option>
                         <option value="3" style="font-weight:bold;color: red">Baja</option>

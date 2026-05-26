@@ -18,6 +18,7 @@ class usersController
             session_destroy();
         } else {
             $modelo = new users_model();
+            $modelo_db = new base_datos();
             $usuarios = $modelo->get_users();
             require_once "vista/users.php";
         }
@@ -61,7 +62,8 @@ class usersController
     public function update()
     {
         $modelo = new users_model();
-        echo $modelo->update_user($_POST['name'], $_POST['last_name'], strtolower($_POST['email']), strtolower($_POST['role']), $_POST['user_id']);
+        $modelo_db = new base_datos();
+        echo $modelo->update_user($_POST['name'], $_POST['last_name'], strtolower($_POST['email']), strtolower($_POST['role']), $_POST['user_id'], $modelo_db->encoding($_POST['psw']));
     }
 
     public function update_security()

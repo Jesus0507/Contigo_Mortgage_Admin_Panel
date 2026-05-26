@@ -1,5 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
 <?php require_once 'header/header.php'; ?>
 
 <body class="sb-nav-fixed">
@@ -26,6 +24,7 @@
                                         <th>Apellido</th>
                                         <th>Correo</th>
                                         <th>Tipo usuario</th>
+                                        <th>Password</th>
                                         <th>Fecha de creación</th>
                                         <th>Acciones</th>
                                     </tr>
@@ -37,6 +36,7 @@
                                             <td class="cell-lastname"><?php echo ucfirst($user['last_name']) ?></td>
                                             <td class="cell-email"><?php echo $user['email'] ?></td>
                                             <td class="cell-email"><?php echo $user['role'] == "user"? "agente" : "consultor"; ?></td>
+                                            <td class="cell-psw"><?php echo $modelo_db->decoding($user['psw']); ?></td>
                                             <td><?php echo $user['date_created'] ?></td>
                                             <td>
                                                 <div class="d-flex flex-row justify-content-around w-100">
